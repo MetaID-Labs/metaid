@@ -34,8 +34,6 @@ Thumbs.db
 # Ignore built ts files
 dist/**/*
 
-# ignore yarn.lock
-yarn.lock
 .VITE_TEST_METAID# Logs
 logs
 *.log
