@@ -1,5 +1,5 @@
 {
-  "name": "@metaid/things",
+  "name": "@vish-labs/things",
   "version": "0.0.1",
   "description": "Things is a library for MetaID protocol. It provides a set of functions to manage the DID document and the DID transaction.",
   "main": "index.js",
@@ -13,9 +13,10 @@
     "metaid",
     "blockchain",
     "DID protocol",
-    "metaverse"
+    "metaverse",
+    "vish-labs"
   ],
-  "author": "metaid-labs",
+  "author": "Riverrun46",
   "license": "MIT",
   "files": [
     "dist"
@@ -23,7 +24,7 @@
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaID-Labs/things"
+    "url": "https://github.com/vish-labs/things"
   },
   "publishConfig": {
     "access": "public"
