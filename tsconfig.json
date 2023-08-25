@@ -6,7 +6,11 @@
     "declaration": true,
     "outDir": "./dist",
     "noEmit": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["vitest/globals"]
   },
   "include": ["src/**/*"]
 }

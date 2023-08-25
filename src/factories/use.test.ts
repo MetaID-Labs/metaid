@@ -1,6 +1,7 @@
-import { test } from 'vitest'
 import use from './use.ts'
 
 test('run', async () => {
-  await use('buzz')
+  const Buzz = await use('buzz')
+
+  expect(Buzz.name).toBe('buzz')
 })

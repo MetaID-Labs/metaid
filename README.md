@@ -35,17 +35,21 @@ const buzzes = Buzz.list({
   },
 })
 
+// auth
+await Buzz.login('0x1234567890') // metaid or address
+await Buzz.logout()
+
 // my list
 Buzz.login('0x1234567890') // metaid or address
 const myBuzzes = Buzz.myList()
 
-// has container
+// has root
 Buzz.login('0x1234567890') // metaid or address
-const hasRoot: boolean = Buzz.hasContainer()
+const hasRoot: boolean = Buzz.hasRoot()
 
 // create container
 Buzz.login('0x1234567890') // metaid or address
-await Buzz.createContainer()
+await Buzz.hasRoot()
 
 // get one
 const buzz = Buzz.one('0x1234567890') // txid
