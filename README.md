@@ -11,7 +11,7 @@ The API examples listed here are still under development.
 ### Define domain
 
 ```ts
-import { define, use } from '@vish-labs/things'
+import { define, use } from '@godeners/things'
 
 // define api returns a class represents what the domain is.
 const Buzz = define('buzz', {
