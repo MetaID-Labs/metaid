@@ -1,0 +1,37 @@
+{
+  "name": "@metaid/things",
+  "version": "0.0.1",
+  "description": "Things is a library for MetaID protocol. It provides a set of functions to manage the DID document and the DID transaction.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "hello": "tsc && node dist/index.js",
+    "test": "vitest --ui"
+  },
+  "keywords": [
+    "MetaID",
+    "metaid",
+    "blockchain",
+    "DID protocol",
+    "metaverse"
+  ],
+  "author": "metaid-labs",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MetaID-Labs/things"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^0.34.1",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.8",
+    "vitest": "^0.34.1"
+  }
+}
