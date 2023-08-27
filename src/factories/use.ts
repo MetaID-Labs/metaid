@@ -6,7 +6,7 @@ export default async function use(
 ) {
   const domainSchema = await import(`../schemas/${domainSymbol}.json`).then((module) => module.default)
 
-  const domain = new Domain(domainSchema.name)
+  const domain = new Domain(domainSchema.name, domainSchema)
 
   if (options?.credential) {
     domain.login(options.credential)
