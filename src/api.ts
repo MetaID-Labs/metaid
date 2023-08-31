@@ -13,9 +13,7 @@ type MetaidResponse = {
 export async function getRootNode({ metaid, nodeName, nodeId }: { metaid: string; nodeName: string; nodeId: string }) {
   const url = `https://api.show3.io/aggregation/v2/app/metaId/getProtocolBrfcNode/${metaid}/${nodeName}`
   try {
-    console.log({
-      url,
-    })
+    console.log({ url })
     const data = await axios
       .get(url)
       .then((res) => res.data)

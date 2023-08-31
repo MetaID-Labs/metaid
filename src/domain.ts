@@ -78,7 +78,7 @@ class Domain {
   }
 
   @needsCredential
-  public create(body) {
+  public create(body: unknown) {
     return true
   }
 }

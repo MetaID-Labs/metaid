@@ -26,4 +26,6 @@ describe('domain.create', () => {
       }),
     ).toBeTypeOf('object')
   })
+
+  test.todo('cannot create a new buzz if the root is not found')
 })
