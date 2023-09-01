@@ -19,12 +19,12 @@ describe('domain.create', () => {
     ).toThrow(errors.NOT_LOGINED)
   })
 
-  test.skip('can create a new buzz', ({ Buzz }) => {
+  test('can create a new buzz', async ({ Buzz }) => {
     expect(
-      Buzz.create({
-        content: 'Hello World',
+      await Buzz.create({
+        content: 'Hello world from things',
       }),
-    ).toBeTypeOf('object')
+    ).toBeTypeOf('boolean')
   })
 
   test.todo('cannot create a new buzz if the root is not found')

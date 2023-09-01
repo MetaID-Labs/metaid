@@ -13,7 +13,6 @@ type MetaidResponse = {
 export async function getRootNode({ metaid, nodeName, nodeId }: { metaid: string; nodeName: string; nodeId: string }) {
   const url = `https://api.show3.io/aggregation/v2/app/metaId/getProtocolBrfcNode/${metaid}/${nodeName}`
   try {
-    console.log({ url })
     const data = await axios
       .get(url)
       .then((res) => res.data)
@@ -44,4 +43,15 @@ export async function getRootNode({ metaid, nodeName, nodeId }: { metaid: string
   } catch (error) {
     console.error(error)
   }
+}
+
+export async function notify(txHex: string) {
+  const url = 'https://api.show3.io/metaid-base/v1/meta/upload/raw'
+
+  const notifyRes = await axios.post(url, {
+    raw: txHex,
+    type: 1,
+  })
+
+  console.log({ notifyRes })
 }
