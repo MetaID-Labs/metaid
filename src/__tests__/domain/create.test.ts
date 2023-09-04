@@ -8,6 +8,12 @@ describe('domain.create', () => {
         metaid: import.meta.env.VITE_TEST_METAID,
       },
     })
+
+    ctx.GM = await use('group-message', {
+      credential: {
+        metaid: import.meta.env.VITE_TEST_METAID,
+      },
+    })
   })
 
   test('cannot create a new buzz if it is not logined', ({ Buzz }) => {
@@ -19,10 +25,12 @@ describe('domain.create', () => {
     ).toThrow(errors.NOT_LOGINED)
   })
 
-  test('can create a new buzz', async ({ Buzz }) => {
+  test('can create a new buzz', async ({ GM }) => {
     expect(
-      await Buzz.create({
-        content: 'Hello world from things',
+      await GM.create({
+        groupID: '',
+        content: 'Hello World',
+        channelId: '',
       }),
     ).toBeTypeOf('boolean')
   })

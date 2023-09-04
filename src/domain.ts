@@ -84,6 +84,7 @@ class Domain {
   public async create(body: unknown) {
     const root = await this.getRoot()
     console.log({ root })
+    return
 
     const mnemonic = mvc.Mnemonic.fromString(import.meta.env.VITE_TEST_MNEMONIC)
     const hdpk = mnemonic.toHDPrivateKey(undefined, 'mainnet' as any)
