@@ -1,7 +1,7 @@
 {
-  "name": "@godeners/things",
+  "name": "@metaid/cooler-metaid",
   "version": "0.0.1",
-  "description": "Things is a library for MetaID protocol. It provides a set of functions to manage the DID document and the DID transaction.",
+  "description": "Cooler MetaID is a library for MetaID protocol. It provides a set of functions to manage the DID document and the DID transaction.",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -13,10 +13,11 @@
     "metaid",
     "blockchain",
     "DID protocol",
-    "metaverse",
-    "godeners-labs"
+    "mvc",
+    "Microvision Chain",
+    "MetaID-Labs"
   ],
-  "author": "Riverrun46",
+  "author": "MetaID-Labs",
   "license": "MIT",
   "files": [
     "dist"
@@ -24,7 +25,7 @@
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/godeners-labs/things"
+    "url": "https://github.com/MetaID-Labs/cooler-metaid"
   },
   "publishConfig": {
     "access": "public"

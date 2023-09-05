@@ -1,8 +1,8 @@
-# Things
+# Cooler MetaID
 
 ## What is this?
 
-Things is a RESTful-like domain protocol based on Microvision Chain and MetaID DID protocol. Developers can use Things to create his own domain resource.
+Cooler MetaID is a RESTful-like domain protocol based on Microvision Chain and MetaID DID protocol. Developers can use Cooler MetaID to create his own domain resource.
 
 ## How to use?
 
@@ -11,7 +11,7 @@ The API examples listed here are still under development.
 ### Define domain
 
 ```ts
-import { define, use } from '@godeners/things'
+import { define, use } from '@metaid/cooler-metaid'
 
 // define api returns a class represents what the domain is.
 const Buzz = define('buzz', {
@@ -20,6 +20,7 @@ const Buzz = define('buzz', {
 
 // use api returns a class represents what the domain is. (using existing domain)
 const Buzz = use('buzz')
+const GroupMessage = use('group-message')
 ```
 
 ### Use domain
