@@ -37,8 +37,8 @@ const buzzes = Buzz.list({
 })
 
 // auth
-await Buzz.login('0x1234567890') // metaid or address
-await Buzz.logout()
+const metaletWallet = new MetaletWallet() // or LocalWallet / DummyWallet
+Buzz.connect(metaletWallet)
 
 // my list
 Buzz.login('0x1234567890') // metaid or address
@@ -80,7 +80,7 @@ const updatedBuzz = oldBuzz.update({
   content: 'This is my first buzz',
 })
 
-// delete
+// delete TODO
 const deletedBuzz = Buzz.delete('0x1234567890')
 // or delete one existing resource
 oldBuzz.delete()

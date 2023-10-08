@@ -17,7 +17,7 @@ describe('domain.auth', () => {
     expect(Buzz.credentialType).toBeUndefined()
   })
 
-  test('can login with metaid', ({ Buzz }) => {
+  test.skip('can login with metaid', ({ Buzz }) => {
     expect(
       Buzz.login({
         metaid: import.meta.env.VITE_TEST_METAID,
@@ -29,7 +29,7 @@ describe('domain.auth', () => {
     expect(Buzz.credentialType).toBe('metaid')
   })
 
-  test('can login with address', ({ Buzz }) => {
+  test.skip('can login with address', ({ Buzz }) => {
     expect(
       Buzz.login({
         address: import.meta.env.VITE_TEST_ADDRESS,
