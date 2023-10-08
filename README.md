@@ -1,8 +1,8 @@
-# Cooler MetaID
+# MetaID
 
 ## What is this?
 
-Cooler MetaID is a RESTful-like domain protocol based on Microvision Chain and MetaID DID protocol. Developers can use Cooler MetaID to create his own domain resource.
+MetaID is a RESTful-like domain protocol based on Microvision Chain and MetaID DID protocol. Developers can use MetaID to create his own domain resource.
 
 ## How to use?
 
@@ -11,7 +11,7 @@ The API examples listed here are still under development.
 ### Define domain
 
 ```ts
-import { define, use } from '@metaid/cooler-metaid'
+import { define, use } from '@metaid/metaid'
 
 // define api returns a class represents what the domain is.
 const Buzz = define('buzz', {

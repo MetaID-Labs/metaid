@@ -1,7 +1,7 @@
 {
-  "name": "@metaid/cooler-metaid",
+  "name": "@metaid/metaid",
   "version": "0.0.1",
-  "description": "Cooler MetaID is a library for MetaID protocol. It provides a set of functions to manage the DID document and the DID transaction.",
+  "description": "MetaID is a library for MetaID protocol. It provides a set of functions to manage the DID document and the DID transaction.",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -25,7 +25,7 @@
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaID-Labs/cooler-metaid"
+    "url": "https://github.com/MetaID-Labs/metaid"
   },
   "publishConfig": {
     "access": "public"
