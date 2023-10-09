@@ -108,3 +108,45 @@ const deletedBuzz = Buzz.delete('0x1234567890')
 // or delete one existing resource
 oldBuzz.delete()
 ```
+
+## Some more complex use cases
+
+### Create a buzz with 3 photos
+
+```ts
+const Buzz = use('buzz')
+const File = use('metafile')
+// 1. create 3 metafile resources representing the photos
+const photos = await File.create([
+  {
+    name: 'photo1.jpg',
+    type: 'image/jpeg',
+    content: 'base64 string',
+  },
+  {
+    name: 'photo2.jpg',
+    type: 'image/jpeg',
+    content: 'base64 string',
+  },
+  {
+    name: 'photo3.jpg',
+    type: 'image/jpeg',
+    content: 'base64 string',
+  },
+])
+// 2. create a buzz resource with the photos. We use `with` api to create a resource with its related resources to represent a 1-to-many relationship.
+const buzz = await Buzz.with(photos).create({ content: 'Have a nice day!' })
+```
+
+### Give a like to a group message
+
+```ts
+const GroupMessage = use('group-message')
+const Like = use('like')
+
+// 1. fetch the group message we're about to like
+const theMessage = await GroupMessage.get('0x1234567890')
+
+// 2. create a like resource. We use `belongsTo` api to create a resource with its related resource to represent a 1-to-1 relationship.
+await Like.belongsTo(theMessage).create()
+```
