@@ -116,6 +116,7 @@ oldBuzz.delete()
 ```ts
 const Buzz = use('buzz')
 const File = use('metafile')
+
 // 1. create 3 metafile resources representing the photos
 const photos = await File.create([
   {
@@ -134,6 +135,7 @@ const photos = await File.create([
     content: 'base64 string',
   },
 ])
+
 // 2. create a buzz resource with the photos. We use `with` api to create a resource with its related resources to represent a 1-to-many relationship.
 const buzz = await Buzz.with(photos).create({ content: 'Have a nice day!' })
 ```
