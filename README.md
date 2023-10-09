@@ -26,7 +26,7 @@ Define your entity schema in `src/metaid-entities/*.entity.ts`.
 
 ```ts
 // src/metaid-entities/buzz.entity.ts
-export const buzzEntitySchema: EntitySchema = {
+const buzzEntitySchema: EntitySchema = {
   name: 'buzz',
   nodeName: 'SimpleMicroblog', // underlying brfc node name
   versions: [
@@ -126,12 +126,9 @@ const updatedBuzz = Buzz.update(newBuzz.id, {
 })
 // or update one existing resource
 const oldBuzz = Buzz.get('0x1234567890')
-const updatedBuzz = oldBuzz.update({
-  title: 'Hello World',
-  content: 'This is my first buzz',
-})
+const updatedBuzz = oldBuzz.update({ content: 'Good day, commander!' })
 
-// delete TODO
+// delete
 const deletedBuzz = Buzz.delete('0x1234567890')
 // or delete one existing resource
 oldBuzz.delete()
