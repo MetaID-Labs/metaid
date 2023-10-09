@@ -53,6 +53,4 @@ export async function notify(txHex: string) {
     raw: txHex,
     type: 1,
   })
-
-  console.log({ notifyRes })
 }
