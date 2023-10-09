@@ -12,7 +12,7 @@ Entity is a concept in MetaID. It is a collection of resources. For example, an 
 
 We use this concept to make it easier for developers to create their own entity resources. Developers can use MetaID to create their own entity resources, and then use the entity resources to create their own applications.
 
-Previously we used the concept of `Brfc Node` to create metadata, and build Web3 applications on top of it. But this concept is too verbose and not easy to use. So we created another abstraction layer on top of it, which is the concept of `entity`.
+Previously we used the concept of `Brfc Node` to create metadata and build Web3 applications. But this concept is too verbose， too low-level, and not easy to use. So we created another abstraction layer on top of it, which is the concept of `entity`.
 
 We call this abstraction process `EMM` (Entity-Metadata Mapping), similar to the ORM (Object-Relational Mapping) concept in the database field. By doing this, we can create and utilize amore semantic and developer-friendly way to code.
 
