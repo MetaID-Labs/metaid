@@ -152,3 +152,13 @@ const theMessage = await GroupMessage.get('0x1234567890')
 // 2. create a like resource. We use `belongsTo` api to create a resource with its related resource to represent a 1-to-1 relationship.
 await Like.belongsTo(theMessage).create()
 ```
+
+### Refer an NFT info in a buzz
+
+```ts
+const Reference = use('reference')
+
+await Reference.belongsTo(nft).create({
+  content: 'Have a look at my gorgeous NFT!',
+})
+```
