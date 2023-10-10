@@ -5,9 +5,8 @@ describe('domain.auth', () => {
     ctx.Buzz = await use('buzz')
   })
 
-  test('has test metaid and address in env', async () => {
-    expect(import.meta.env.VITE_TEST_METAID).toBeDefined()
-    expect(import.meta.env.VITE_TEST_ADDRESS).toBeDefined()
+  test('has test mnemonic in env', async () => {
+    expect(import.meta.env.VITE_TEST_MNEMONIC).toBeDefined()
   })
 
   test('can logout', ({ Buzz }) => {
