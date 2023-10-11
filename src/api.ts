@@ -72,6 +72,61 @@ export async function getRootNode({ metaid, nodeName, nodeId }: { metaid: string
   }
 }
 
+// withCount(['like'])  likeCount: 3
+export async function getBuzzes({ metaid }: { metaid: string }) {
+  const url = `https://api.show3.io/aggregation/v2/app/show/posts/buzz?metaId=${metaid}`
+  try {
+    const data = await axios
+      .get(url)
+      .then((res) => res.data)
+      .then((res: AggregationResponse) => {
+        if (res.code !== 0) throw new Error(`Error: ${res.code}`)
+
+        const { total, results } = res.data
+
+        const buzzes = results.items.map(
+          (item: {
+            txId: string
+            metaId: string
+            userName: string
+            avatarImage: string
+            timestamp: number
+            content: string
+            attachments: any[]
+          }) => {
+            // aggregate user info
+            const user = {
+              metaid: item.metaId,
+              name: item.userName,
+              avatar: item.avatarImage,
+            }
+
+            // aggregate body
+            const body = {
+              content: item.content,
+              attachments: item.attachments,
+            }
+
+            const buzz = {
+              txid: item.txId,
+              createdAt: item.timestamp,
+              user,
+              body,
+            }
+
+            return buzz
+          },
+        )
+
+        return buzzes
+      })
+
+    return data
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 export async function notify({ txHex }: { txHex: string }) {
   const url = 'https://api.show3.io/metaid-base/v1/meta/upload/raw'
 

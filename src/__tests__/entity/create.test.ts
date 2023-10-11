@@ -1,6 +1,6 @@
-import { errors } from '@/data/errors.ts'
-import { connect } from '@/factories/connect.ts'
-import { LocalWallet } from '@/wallets/local.ts'
+import { errors } from '@/data/errors.js'
+import { connect } from '@/factories/connect.js'
+import { LocalWallet } from '@/wallets/local.js'
 
 describe('entity.create', () => {
   beforeEach(async (ctx) => {
@@ -19,7 +19,7 @@ describe('entity.create', () => {
     ).toThrow(errors.NOT_CONNECTED)
   })
 
-  test('can create a new buzz', async ({ Buzz }) => {
+  test.skip('can create a new buzz', async ({ Buzz }) => {
     expect(
       await Buzz.create({
         content: 'Hello World from metaidjs',

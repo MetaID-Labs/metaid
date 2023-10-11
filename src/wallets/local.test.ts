@@ -1,4 +1,4 @@
-import { LocalWallet } from './local.ts'
+import { LocalWallet } from './local.js'
 
 describe('wallets.local', () => {
   test('has test mnemonic in env', async () => {

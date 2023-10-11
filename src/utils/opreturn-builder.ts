@@ -10,7 +10,7 @@ type MetaidOpreturn = [
   string, // content type
   string, // charset
 ]
-export default function buildOpreturn({
+export function buildOpreturn({
   publicKey,
   parentTxid,
   protocolName,

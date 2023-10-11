@@ -1,6 +1,6 @@
-import { errors } from '@/data/errors.ts'
-import { connect } from '@/factories/connect.ts'
-import { LocalWallet } from '@/wallets/local.ts'
+import { errors } from '@/data/errors.js'
+import { connect } from '@/factories/connect.js'
+import { LocalWallet } from '@/wallets/local.js'
 
 describe('entity.getRoot', () => {
   beforeEach(async (ctx) => {

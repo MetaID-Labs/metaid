@@ -1,4 +1,4 @@
-import { errors } from '@/data/errors.ts'
+import { errors } from '@/data/errors.js'
 
 export function connected(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value

@@ -1,5 +1,5 @@
-import { Connector } from '@/connector.ts'
-import { Entity } from '@/entity.ts'
+import { Connector } from '@/connector.js'
+import { Entity } from '@/entity.js'
 
 export async function use(entitySymbol: string, options?: { connector?: Connector }) {
   const entitySchema = await import(`../metaid-entities/${entitySymbol}.entity.ts`).then((module) => module.default)

@@ -1,6 +1,6 @@
-import { LocalWallet } from '@/wallets/local.ts'
-import { connect } from './connect.ts'
-import { use } from './use.ts'
+import { LocalWallet } from '@/wallets/local.js'
+import { connect } from './connect.js'
+import { use } from './use.js'
 
 async function connectToLocalWallet() {
   const mnemonic = import.meta.env.VITE_TEST_MNEMONIC

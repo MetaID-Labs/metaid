@@ -1,15 +1,10 @@
-import { TxComposer, Wallet, mvc } from 'meta-contract'
+import { TxComposer, mvc } from 'meta-contract'
 
-import { getRootNode, notify } from '@/api.ts'
-import { connected } from '@/decorators/connected.ts'
-import buildOpreturn from './utils/opreturn-builder.ts'
-import { Connector } from './connector.ts'
-import { PrivateKey } from 'meta-contract/dist/mvc/index.js'
-
-// type Credential = {
-//   metaid?: string
-//   address?: string
-// }
+import { getBuzzes, getRootNode, notify } from '@/api.js'
+import { connected } from '@/decorators/connected.js'
+import { buildOpreturn } from './utils/opreturn-builder.js'
+import { Connector } from './connector.js'
+import { errors } from './data/errors.js'
 
 type Root = {
   id: string
@@ -84,7 +79,6 @@ export class Entity {
   @connected
   public async create(body: unknown) {
     const root = await this.getRoot()
-    return
 
     const preSendRes = await this.connector.send(root.address, 2000)
     const sendTxComposer = new TxComposer()
@@ -141,5 +135,17 @@ export class Entity {
     await notify({ txHex: txComposer.getRawHex() })
 
     return true
+  }
+
+  public async list() {
+    if (this.name !== 'buzz') throw new Error(errors.NOT_SUPPORTED)
+    console.log('here')
+
+    const items = await getBuzzes({ metaid: this.metaid })
+
+    return {
+      items,
+      limit: 50,
+    }
   }
 }

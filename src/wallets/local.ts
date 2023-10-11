@@ -1,6 +1,6 @@
 import { TxComposer, mvc, Wallet } from 'meta-contract'
-import { IWallet, IWalletStatic, staticImplements } from './wallet.ts'
-import { getMetaId } from '@/api.ts'
+import { IWallet, IWalletStatic, staticImplements } from './wallet.js'
+import { getMetaId } from '@/api.js'
 
 @staticImplements<IWalletStatic>()
 export class LocalWallet implements IWallet {

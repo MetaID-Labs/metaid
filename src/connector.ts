@@ -1,5 +1,5 @@
-import { use } from '@/factories/use.ts'
-import { IWallet } from './wallets/wallet.ts'
+import { use } from '@/factories/use.js'
+import { IWallet } from './wallets/wallet.js'
 import { TxComposer } from 'meta-contract'
 
 export class Connector {
