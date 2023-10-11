@@ -1,16 +1,14 @@
-import Domain from '../domain.ts'
+import { Connector } from '@/connector.ts'
+import { Entity } from '@/entity.ts'
 
-export default async function use(
-  domainSymbol: string,
-  options?: { credential?: { metaid?: string; address?: string } },
-) {
-  const domainSchema = await import(`../schemas/${domainSymbol}.schema.ts`).then((module) => module.default)
+export async function use(entitySymbol: string, options?: { connector?: Connector }) {
+  const entitySchema = await import(`../metaid-entities/${entitySymbol}.entity.ts`).then((module) => module.default)
 
-  const domain = new Domain(domainSchema.name, domainSchema)
+  const entity = new Entity(entitySchema.name, entitySchema)
 
-  if (options?.credential) {
-    domain.login(options.credential)
+  if (options?.connector) {
+    entity.connector = options.connector
   }
 
-  return domain
+  return entity
 }

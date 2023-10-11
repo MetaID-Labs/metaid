@@ -1,5 +1,3 @@
-const errors = {
-  NOT_LOGINED: 'You need to login first.',
+export const errors = {
+  NOT_CONNECTED: 'You need to connect to a wallet first.',
 } as const
-
-export default errors

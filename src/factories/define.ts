@@ -1,3 +1,3 @@
-export default async function define() {
+export async function define() {
   console.log('define')
 }

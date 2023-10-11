@@ -9,10 +9,10 @@ interface ImportMeta {
 }
 
 import { TestContext } from 'vitest'
-import Domain from './domain.ts'
+import { Entity } from './entity.ts'
 declare module 'vitest' {
   export interface TestContext {
-    Buzz?: Domain
-    GM?: Domain
+    Buzz?: Entity
+    GM?: Entity
   }
 }

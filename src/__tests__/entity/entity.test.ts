@@ -1,11 +1,11 @@
-import use from '@/factories/use.ts'
+import { use } from '@/factories/use.ts'
 
 beforeEach(async (ctx) => {
   ctx.Buzz = await use('buzz')
 })
 
-describe('domain', () => {
-  test('use domain', ({ Buzz }) => {
+describe('entity', () => {
+  test('use entity', ({ Buzz }) => {
     expect(Buzz.name).toBe('buzz')
   })
 })

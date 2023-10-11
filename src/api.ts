@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-type MetaidResponse = {
+type AggregationResponse = {
   code: number
   data: {
     total: number
@@ -10,14 +10,40 @@ type MetaidResponse = {
   }
 }
 
-export async function getRootNode({ metaid, nodeName, nodeId }: { metaid: string; nodeName: string; nodeId: string }) {
-  const url = `https://api.show3.io/aggregation/v2/app/metaId/getProtocolBrfcNode/${metaid}/${nodeName}`
-  console.log({ url })
+type MetaidBaseResponse = {
+  code: number
+  msg: string
+  time: number
+  error: string
+  result: any
+}
+
+export async function getMetaId({ address }: { address: string }): Promise<string | null> {
+  const url = `https://api.show3.io/metaid-base/v1/meta/root/${address}`
+
   try {
     const data = await axios
       .get(url)
       .then((res) => res.data)
-      .then((res: MetaidResponse) => {
+      .then((res: MetaidBaseResponse) => {
+        if (res.code !== 200) throw new Error(`Error: ${res.code}`)
+
+        return res.result.rootTxId
+      })
+
+    return data
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export async function getRootNode({ metaid, nodeName, nodeId }: { metaid: string; nodeName: string; nodeId: string }) {
+  const url = `https://api.show3.io/aggregation/v2/app/metaId/getProtocolBrfcNode/${metaid}/${nodeName}`
+  try {
+    const data = await axios
+      .get(url)
+      .then((res) => res.data)
+      .then((res: AggregationResponse) => {
         if (res.code !== 0) throw new Error(`Error: ${res.code}`)
 
         const { total, results } = res.data
@@ -46,7 +72,7 @@ export async function getRootNode({ metaid, nodeName, nodeId }: { metaid: string
   }
 }
 
-export async function notify(txHex: string) {
+export async function notify({ txHex }: { txHex: string }) {
   const url = 'https://api.show3.io/metaid-base/v1/meta/upload/raw'
 
   const notifyRes = await axios.post(url, {
