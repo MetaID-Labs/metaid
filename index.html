@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MetaID Test Page</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        }
+      }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/130353550?s=24" />
+  </head>
+
+  <body class="min-h-screen bg-gradient-to-br from-sky-500 to-indigo-500 text-white">
+    <div id="app" class="max-w-xl mx-auto py-8">
+      <h3 class="text-center font-bold text-2xl capitalize">metaid.js test page</h3>
+
+      <!-- control -->
+      <div class="grid justify-center mt-16 text-sky-800 font-bold grid-cols-2 gap-8">
+        <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="message = 'Hello Vue!'">Get Wallet</button>
+        <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="message = 'Hello MetaID!'">Say MetaID</button>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createApp, ref } from 'vue'
+      import { LocalWallet } from './dist/metaid.js'
+      console.log(LocalWallet)
+
+      createApp({
+        setup() {
+          const message = ref('Hello Vue!')
+          return {
+            message,
+          }
+        },
+      }).mount('#app')
+    </script>
+  </body>
+</html>
