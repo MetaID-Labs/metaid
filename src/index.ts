@@ -1,10 +1,6 @@
-export * as define from './factories/define.ts'
-export * as use from './factories/use.ts'
+import { define } from '@/factories/define.js'
+import { use } from '@/factories/use.js'
+import { connect } from '@/factories/connect.js'
+import { LocalWallet } from '@/wallets/local.js'
 
-export function sum(a: number, b: number) {
-  return a + b
-}
-
-export default {
-  sum,
-}
+export { define, use, connect, LocalWallet }
