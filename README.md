@@ -208,3 +208,53 @@ await Reference.belongsTo(nft).create({
   nftId: nft.id,
 })
 ```
+
+---
+
+## API Reference
+
+### Wallet
+
+```ts
+import { LocalWallet, MetaletWallet } from '@metaid/metaid'
+
+LocalWallet.create(mnemonic: string): LocalWallet
+MetaletWallet.create(): MetaletWallet
+```
+
+### Connector
+
+```ts
+import { connect } from '@metaid/metaid'
+
+connect(wallet: Wallet): Connector
+
+// connector methods
+connector.isConnected(): boolean
+connector.use(entityName: string): Entity
+connector.hasMetaid(): boolean
+connector.createMetaid(): Promise<string>
+```
+
+### Entity
+
+```ts
+connector.use(entityName: string): Entity
+connector.define(entityName: string, schema: EntitySchema): Entity
+
+entity.hasRoot(): boolean
+entity.createRoot(): Promise<string>
+
+// Query
+entity.list(query?: Query): Promise<Resource[]>
+entity.myList(query?: Query): Promise<Resource[]>
+entity.one(query: Query | string): Promise<Resource>
+entity.first(query: Query | string): Promise<Resource>
+entity.get(query: Query | string): Promise<Resource>
+
+// Mutation
+entity.create(data: Record<string, any>): Promise<Resource>
+entity.update(id: string, data: Record<string, any>): Promise<Resource>
+entity.delete(id: string): Promise<Resource>
+
+```
