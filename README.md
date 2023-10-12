@@ -270,6 +270,10 @@ entity.delete(id: string): Promise<Resource>
 
 A resource is a data object that represents a specific entity.
 
+`entity.list()` returns an array of resources.
+
+`entity.one()` returns a single resource.
+
 ```ts
 type Resource = {
   txid: string
