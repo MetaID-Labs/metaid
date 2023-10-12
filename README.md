@@ -265,3 +265,21 @@ entity.update(id: string, data: Record<string, any>): Promise<Resource>
 entity.delete(id: string): Promise<Resource>
 
 ```
+
+### Resource
+
+A resource is a data object that represents a specific entity.
+
+```ts
+type Resource = {
+  txid: string
+  createdAt: timestamp
+  body: Record<string, any>
+  // We wrap the resource's owner info in a `user` object.
+  user: {
+    metaid: string
+    name: string
+    avatar: string
+  }
+}
+```
