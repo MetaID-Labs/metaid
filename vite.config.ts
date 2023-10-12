@@ -13,7 +13,7 @@ export default defineConfig({
 			"@": "/src",
 		},
 	},
-  plugins: [
+	plugins: [
 		dts({
 			insertTypesEntry: true,
 		}),
@@ -23,7 +23,7 @@ export default defineConfig({
 			entry: resolve(__dirname, "src/index.ts"),
 			name: "Metaid",
 			fileName: "metaid",
-			formats: ["es", "cjs", "umd", "iife"],
+			// formats: ["es", "cjs", "umd", "iife"],
 		},
 	},
 });
