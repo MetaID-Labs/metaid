@@ -23,7 +23,11 @@
       <div class="mt-16 text-sky-800 font-bold space-y-8">
         <div class="">
           <div class="flex items-center gap-4">
-            <input type="text" class="grow rounded-lg h-full text-sm p-3" placeholder="Mnemonic" v-model="mnemonic" />
+            <div class="grow flex flex-col gap-y-2">
+              <input type="text" class="grow rounded-lg h-full text-sm p-3" placeholder="Mnemonic" v-model="mnemonic" />
+              <input type="text" class="grow rounded-lg h-full text-sm p-3" placeholder="Path" v-model="path" />
+            </div>
+
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="connectWallet">Connect Wallet</button>
           </div>
           <p v-if="connected" class="text-teal-200 mt-2">Connected</p>
@@ -38,6 +42,24 @@
           />
           <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createBuzz">Create Buzz</button>
         </div>
+
+        <div class="">
+          <div class="flex gap-4 items-center">
+            <div class="font-bold text-white">Buzz List</div>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getBuzzList">Get List</button>
+          </div>
+
+          <!-- list -->
+          <div class="">
+            <div v-for="buzz in buzzes" class="bg-white rounded-md shadow-md p-4 mt-4">
+              <div class="flex items-center gap-4">
+                <div class="flex-grow">
+                  <div class="text-sm text-gray-500">{{ buzz.body.content }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -47,10 +69,12 @@
 
       createApp({
         setup() {
-          const mnemonic = ref('')
+          const mnemonic = ref('egg shrimp collect anger casino brave end hunt dash fire equip april')
+          const path = ref(`m/44'/236'/0'/0/0`)
           const Buzz = ref(null)
           const connected = computed(() => !!Buzz.value)
           const content = ref('')
+          const buzzes = ref([])
 
           const connectWallet = async () => {
             const wallet = await LocalWallet.create(mnemonic.value)
@@ -64,12 +88,23 @@
             await toRaw(Buzz.value).create({ content: content.value })
           }
 
+          const getBuzzList = async () => {
+            const { items } = await toRaw(Buzz.value).list()
+
+            console.log({ items })
+
+            buzzes.value = items
+          }
+
           return {
             connectWallet,
+            path,
             mnemonic,
             connected,
             content,
             createBuzz,
+            getBuzzList,
+            buzzes,
           }
         },
       }).mount('#app')
