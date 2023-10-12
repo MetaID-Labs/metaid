@@ -75,6 +75,7 @@ const metaletWallet = new MetaletWallet()
 
 // connect to wallet and use specific entities
 const baseEntity = connect(localWallet)
+
 const Buzz = connect(localWallet).use('buzz')
 const GroupMessage = connect(metaletWallet).use('group-message')
 ```
