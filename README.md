@@ -75,6 +75,7 @@ const metaletWallet = new MetaletWallet()
 
 // connect to wallet and use specific entities
 const baseEntity = connect(localWallet)
+
 const Buzz = connect(localWallet).use('buzz')
 const GroupMessage = connect(metaletWallet).use('group-message')
 ```
@@ -206,4 +207,61 @@ await Reference.belongsTo(nft).create({
   content: 'Have a look at my gorgeous NFT!',
   nftId: nft.id,
 })
+```
+
+---
+
+## API Reference
+
+### Wallet
+
+Can have multiple wallet implementations as long as it implements the `Wallet` interface.
+
+```ts
+import { LocalWallet, MetaletWallet } from '@metaid/metaid'
+
+// use static method `create` to create a wallet instance
+LocalWallet.create(mnemonic: string): Promise<LocalWallet>
+MetaletWallet.create(): Promise<MetaletWallet>
+```
+
+### Connector
+
+A connector is the bridge between your wallet and the entity.
+
+```ts
+import { connect } from '@metaid/metaid'
+
+connect(wallet: Wallet): Connector
+
+// connector methods
+connector.isConnected(): boolean
+connector.use(entityName: string): Entity
+connector.hasMetaid(): boolean
+connector.createMetaid(): Promise<string>
+```
+
+### Entity
+
+An entity is a controller class to operate on a specific resource.
+
+```ts
+connector.use(entityName: string): Entity
+connector.define(entityName: string, schema: EntitySchema): Entity
+
+entity.hasRoot(): boolean
+entity.createRoot(): Promise<string>
+
+// Query
+entity.list(query?: Query): Promise<Resource[]>
+entity.myList(query?: Query): Promise<Resource[]>
+entity.one(query: Query | string): Promise<Resource>
+entity.first(query: Query | string): Promise<Resource>
+entity.get(query: Query | string): Promise<Resource>
+
+// Mutation
+entity.create(data: Record<string, any>): Promise<Resource>
+entity.update(id: string, data: Record<string, any>): Promise<Resource>
+entity.delete(id: string): Promise<Resource>
+
 ```

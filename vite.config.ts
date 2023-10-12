@@ -14,16 +14,16 @@ export default defineConfig({
 		},
 	},
 	plugins: [
-		dts({
-			insertTypesEntry: true,
-		}),
+		// dts({
+		//   insertTypesEntry: true,
+		// }),
 	],
 	build: {
 		lib: {
 			entry: resolve(__dirname, "src/index.ts"),
 			name: "Metaid",
 			fileName: "metaid",
-			// formats: ["es", "cjs", "umd", "iife"],
 		},
+		minify: false,
 	},
 });

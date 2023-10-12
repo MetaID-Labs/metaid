@@ -99,7 +99,6 @@ export class Entity {
 
     const sendTx = sendTxComposer.getTx()
     const usingUtxo = sendTx.outputs[0]
-    console.log({ usingUtxo })
     const txComposer = new TxComposer()
 
     // console.log({

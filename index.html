@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MetaID Test Page</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        }
+      }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/130353550?s=24" />
+  </head>
+
+  <body class="min-h-screen bg-gradient-to-br from-sky-500 to-indigo-500 text-white">
+    <div id="app" class="max-w-2xl mx-auto py-8">
+      <h3 class="text-center font-bold text-2xl">Metaid.js Test Page</h3>
+
+      <!-- control -->
+      <div class="mt-16 text-sky-800 font-bold space-y-8">
+        <div class="">
+          <div class="flex items-center gap-4">
+            <input type="text" class="grow rounded-lg h-full text-sm p-3" placeholder="Mnemonic" v-model="mnemonic" />
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="connectWallet">Connect Wallet</button>
+          </div>
+          <p v-if="connected" class="text-teal-200 mt-2">Connected</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <input
+            type="text"
+            class="grow rounded-lg h-full text-sm p-3"
+            placeholder="You buzz content"
+            v-model="content"
+          />
+          <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createBuzz">Create Buzz</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createApp, ref, computed, toRaw } from 'vue'
+      import { LocalWallet, connect } from './dist/metaid.js'
+
+      createApp({
+        setup() {
+          const mnemonic = ref('')
+          const Buzz = ref(null)
+          const connected = computed(() => !!Buzz.value)
+          const content = ref('')
+
+          const connectWallet = async () => {
+            const wallet = await LocalWallet.create(mnemonic.value)
+
+            const baseEntity = connect(wallet)
+            const handler = await baseEntity.use('buzz')
+            Buzz.value = handler
+          }
+
+          const createBuzz = async () => {
+            await toRaw(Buzz.value).create({ content: content.value })
+          }
+
+          return {
+            connectWallet,
+            mnemonic,
+            connected,
+            content,
+            createBuzz,
+          }
+        },
+      }).mount('#app')
+    </script>
+  </body>
+</html>
