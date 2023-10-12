@@ -215,14 +215,19 @@ await Reference.belongsTo(nft).create({
 
 ### Wallet
 
+Can have multiple wallet implementations as long as it implements the `Wallet` interface.
+
 ```ts
 import { LocalWallet, MetaletWallet } from '@metaid/metaid'
 
-LocalWallet.create(mnemonic: string): LocalWallet
-MetaletWallet.create(): MetaletWallet
+// use static method `create` to create a wallet instance
+LocalWallet.create(mnemonic: string): Promise<LocalWallet>
+MetaletWallet.create(): Promise<MetaletWallet>
 ```
 
 ### Connector
+
+A connector is the bridge between your wallet and the entity.
 
 ```ts
 import { connect } from '@metaid/metaid'
@@ -237,6 +242,8 @@ connector.createMetaid(): Promise<string>
 ```
 
 ### Entity
+
+An entity is a controller class to operate on a specific resource.
 
 ```ts
 connector.use(entityName: string): Entity
