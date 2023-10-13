@@ -116,12 +116,10 @@ export class Entity {
     this.connector.signInput({
       txComposer: linkTxComposer,
       inputIndex: 0,
-      path: '/0/0',
     })
     this.connector.signInput({
       txComposer: linkTxComposer,
       inputIndex: 1,
-      path: '/0/0',
     })
     await this.connector.broadcast(linkTxComposer)
 
@@ -132,7 +130,6 @@ export class Entity {
 
   public async list() {
     if (this.name !== 'buzz') throw new Error(errors.NOT_SUPPORTED)
-    console.log('here')
 
     const items = await getBuzzes({ metaid: this.metaid })
 

@@ -16,11 +16,9 @@ export interface MetaIDConnectWallet {
   signInput({
     txComposer,
     inputIndex,
-    path,
   }: {
     txComposer: TxComposer
     inputIndex: number
-    path: string
   }): TxComposer | Promise<TxComposer>
 
   send(
