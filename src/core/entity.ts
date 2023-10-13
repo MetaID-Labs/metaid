@@ -1,10 +1,10 @@
 import { TxComposer, mvc } from 'meta-contract'
 
-import { getBuzzes, getRootNode, getUtxos, notify } from '@/api.js'
+import { getBiggestUtxo, getBuzzes, getRootNode, notify } from '@/api.js'
 import { connected } from '@/decorators/connected.js'
-import { buildOpreturn } from '../utils/opreturn-builder.ts'
+import { buildOpreturn } from '@/utils/opreturn-builder.ts'
 import { Connector } from './connector.ts'
-import { errors } from '../data/errors.ts'
+import { errors } from '@/data/errors.ts'
 import { UTXO_DUST } from '@/data/constants.ts'
 
 type Root = {
@@ -104,13 +104,9 @@ export class Entity {
       protocolName: this.schema.nodeName,
       body,
     })
-
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
-    const biggestUtxo = await getUtxos({ address: walletAddress.toString() }).then((utxos) => {
-      return utxos.reduce((prev, curr) => {
-        return prev.value > curr.value ? prev : curr
-      }, utxos[0])
-    })
+
+    const biggestUtxo = await getBiggestUtxo({ address: walletAddress.toString() })
     linkTxComposer.appendP2PKHInput({
       address: walletAddress,
       txId: biggestUtxo.txid,

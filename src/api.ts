@@ -154,3 +154,16 @@ export async function getUtxos({ address }: { address: string }): Promise<
     console.error(error)
   }
 }
+
+export async function getBiggestUtxo({ address }: { address: string }): Promise<{
+  txid: string
+  outIndex: number
+  address: string
+  value: number
+}> {
+  return await getUtxos({ address }).then((utxos) => {
+    return utxos.reduce((prev, curr) => {
+      return prev.value > curr.value ? prev : curr
+    }, utxos[0])
+  })
+}
