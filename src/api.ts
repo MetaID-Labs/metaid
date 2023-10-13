@@ -167,3 +167,13 @@ export async function getBiggestUtxo({ address }: { address: string }): Promise<
     }, utxos[0])
   })
 }
+
+export async function broadcast({ txHex }: { txHex: string }): Promise<{
+  txid: string
+}> {
+  return await axios
+    .post('https://mainnet.mvcapi.com/tx/broadcast', {
+      hex: txHex,
+    })
+    .then((res) => res.data)
+}

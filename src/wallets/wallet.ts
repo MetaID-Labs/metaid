@@ -6,18 +6,29 @@ export interface WalletStatic {
 
 export interface MetaIDConnectWallet {
   address: string
+  xpub: string
 
   hasAddress(): boolean
 
-  getAddress(path?: string): string
-  getPublicKey(path?: string): string
+  getAddress(path?: string): string | Promise<string>
+  getPublicKey(path?: string): string | Promise<string>
 
-  signP2pkh(txComposer: TxComposer, inputIndex: number): TxComposer
+  signInput({
+    txComposer,
+    inputIndex,
+    path,
+  }: {
+    txComposer: TxComposer
+    inputIndex: number
+    path: string
+  }): TxComposer | Promise<TxComposer>
+
   send(
     toAddress: string,
     amount: number,
   ): Promise<{
     txid: string
   }>
+
   broadcast(txComposer: TxComposer): Promise<{ txid: string }>
 }

@@ -20,7 +20,6 @@ type Root = {
 }
 
 export class Entity {
-  // public credential: Credential | undefined
   public connector: Connector | undefined
   private _name: string
   private _schema: any
@@ -114,8 +113,16 @@ export class Entity {
     })
     linkTxComposer.appendChangeOutput(walletAddress, 1)
 
-    this.connector.signP2pkh(linkTxComposer, 0)
-    this.connector.signP2pkh(linkTxComposer, 1)
+    this.connector.signInput({
+      txComposer: linkTxComposer,
+      inputIndex: 0,
+      path: '/0/0',
+    })
+    this.connector.signInput({
+      txComposer: linkTxComposer,
+      inputIndex: 1,
+      path: '/0/0',
+    })
     await this.connector.broadcast(linkTxComposer)
 
     await notify({ txHex: linkTxComposer.getRawHex() })

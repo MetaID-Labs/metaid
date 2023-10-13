@@ -1,20 +1,8 @@
+import { errors } from '@/data/errors.ts'
 import { MetaletWallet } from './metalet.js'
 
-describe.skip('wallets.local', () => {
-  test('can create a new wallet', async () => {
-    const mnemonic = import.meta.env.VITE_TEST_MNEMONIC
-
-    // mne => rootAddress => metaid
-    const wallet = LocalWallet.create(mnemonic)
-
-    expect(wallet).toBeInstanceOf(LocalWallet)
+describe('wallets.metalet', () => {
+  test('cannot create metalet wallet when not in browser', async () => {
+    expect(() => MetaletWallet.create()).rejects.toThrow(errors.NOT_IN_BROWSER)
   })
-
-  // test('can get address', async () => {
-  //   const mnemonic = import.meta.env.VITE_TEST_MNEMONIC
-
-  //   const wallet = LocalWallet.create(mnemonic)
-
-  //   expect(wallet.address).toBeTypeOf('string')
-  // })
 })
