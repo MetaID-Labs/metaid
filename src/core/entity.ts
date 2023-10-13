@@ -83,8 +83,7 @@ export class Entity {
     const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
 
     // 1. send dust to root address
-    const preSendRes = await this.connector.send(root.address, UTXO_DUST)
-    console.log({ preSendRes })
+    const { txid: dustTxid } = await this.connector.send(root.address, UTXO_DUST)
 
     // 2. link tx
     const randomPriv = new mvc.PrivateKey(undefined, 'mainnet')
@@ -93,7 +92,7 @@ export class Entity {
     const linkTxComposer = new TxComposer()
     linkTxComposer.appendP2PKHInput({
       address: mvc.Address.fromString(root.address, 'mainnet' as any),
-      txId: preSendRes.txid,
+      txId: dustTxid,
       outputIndex: 0,
       satoshis: UTXO_DUST,
     })

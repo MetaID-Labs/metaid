@@ -1,18 +1,18 @@
-import { TxComposer, mvc, Wallet } from 'meta-contract'
-import { IWallet, IWalletStatic, staticImplements } from './wallet.js'
-import { getMetaid } from '@/api.js'
-import { DERIVE_MAX_DEPTH } from '@/data/constants.ts'
+import { TxComposer, mvc, Wallet as InternalWallet } from 'meta-contract'
 
-@staticImplements<IWalletStatic>()
-export class LocalWallet implements IWallet {
+import { MetaIDConnectWallet, WalletStatic } from './wallet.js'
+import { DERIVE_MAX_DEPTH } from '@/data/constants.ts'
+import { staticImplements } from '@/utils/index.ts'
+
+@staticImplements<WalletStatic>()
+export class LocalWallet implements MetaIDConnectWallet {
   private mnemonic: string
   private derivePath: string
-  private internal: Wallet | undefined
-  public metaid: string | undefined
+  private internal: InternalWallet | undefined
   public address: string | undefined
 
   private get basePath() {
-    return this.derivePath.split('/').slice(0, -1).join('/')
+    return this.derivePath.split('/').slice(0, -2).join('/')
   }
 
   private constructor(mnemonic: string, derivePath: string = `m/44'/10001'/0'/0/0`) {
@@ -20,28 +20,39 @@ export class LocalWallet implements IWallet {
     this.derivePath = derivePath
   }
 
-  public static async create(mnemonic: string, derivePath: string = `m/44'/10001'/0'/0/0`) {
+  public static create(mnemonic: string, derivePath: string = `m/44'/10001'/0'/0/0`): MetaIDConnectWallet {
     // create a new wallet
     const wallet = new LocalWallet(mnemonic, derivePath)
 
-    // derive metaid and address from mnemonic
+    // derive address from mnemonic
     const privateKey = mvc.Mnemonic.fromString(mnemonic)
       .toHDPrivateKey(undefined, 'mainnet' as any)
       .deriveChild(derivePath).privateKey
     wallet.address = privateKey.publicKey.toAddress().toString()
 
-    // ask api for metaid
-    wallet.metaid = await getMetaid({
-      address: wallet.address,
-    })
-
-    wallet.internal = new Wallet(privateKey.toWIF(), 'mainnet' as any, 1)
+    wallet.internal = new InternalWallet(privateKey.toWIF(), 'mainnet' as any, 1)
 
     return wallet
   }
 
-  public hasMetaId() {
-    return !!this.metaid
+  public getAddress(path?: string) {
+    if (!path) return this.address
+
+    const fullPath = this.basePath + path
+    let basePk = mvc.Mnemonic.fromString(this.mnemonic)
+      .toHDPrivateKey(undefined, 'mainnet' as any)
+      .deriveChild(fullPath)
+
+    return basePk.publicKey.toAddress('mainnet' as any).toString()
+  }
+
+  public getPublicKey(path: string = '/0/0') {
+    const fullPath = this.basePath + path
+    const basePk = mvc.Mnemonic.fromString(this.mnemonic)
+      .toHDPrivateKey(undefined, 'mainnet' as any)
+      .deriveChild(fullPath)
+
+    return basePk.publicKey.toString()
   }
 
   public hasAddress() {
@@ -59,7 +70,7 @@ export class LocalWallet implements IWallet {
     let deriver = 0
     let toUsePrivateKey: mvc.PrivateKey
     while (deriver < DERIVE_MAX_DEPTH) {
-      const childPk = basePk.deriveChild(deriver)
+      const childPk = basePk.deriveChild('0/' + deriver)
       const childAddress = childPk.publicKey.toAddress('mainnet' as any).toString()
 
       if (childAddress === toSignAddress) {

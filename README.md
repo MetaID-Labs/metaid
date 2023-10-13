@@ -221,7 +221,7 @@ Can have multiple wallet implementations as long as it implements the `Wallet` i
 import { LocalWallet, MetaletWallet } from '@metaid/metaid'
 
 // use static method `create` to create a wallet instance
-LocalWallet.create(mnemonic: string): Promise<LocalWallet>
+LocalWallet.create(mnemonic: string): LocalWallet
 MetaletWallet.create(): Promise<MetaletWallet>
 ```
 
@@ -232,7 +232,7 @@ A connector is the bridge between your wallet and the entity.
 ```ts
 import { connect } from '@metaid/metaid'
 
-connect(wallet: Wallet): Connector
+connect(wallet: Wallet): Promise<Connector>
 
 // connector methods
 connector.isConnected(): boolean

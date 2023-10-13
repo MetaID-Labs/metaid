@@ -1,19 +1,36 @@
 import { use } from '@/factories/use.js'
-import { IWallet } from '../wallets/wallet.ts'
+import { MetaIDConnectWallet } from '../wallets/wallet.ts'
 import { TxComposer } from 'meta-contract'
+import { getMetaid } from '@/api.ts'
 
 export class Connector {
   private _isConnected: boolean
-  private wallet: IWallet
+  private wallet: MetaIDConnectWallet
   public metaid: string | undefined
   public address: string | undefined
 
-  constructor(wallet: IWallet) {
+  private constructor(wallet: MetaIDConnectWallet) {
     this._isConnected = true
 
     this.wallet = wallet
-    this.metaid = wallet.metaid
     this.address = wallet.address
+  }
+
+  public static async create(wallet: MetaIDConnectWallet) {
+    const connector = new Connector(wallet)
+
+    // ask api for metaid
+    connector.metaid =
+      (await getMetaid({
+        address: wallet.address,
+      })) || undefined
+
+    return connector
+  }
+
+  // metaid
+  hasMetaid() {
+    return !!this.metaid
   }
 
   use(entitySymbol: string) {
