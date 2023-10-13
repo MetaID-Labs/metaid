@@ -69,15 +69,15 @@
 
       createApp({
         setup() {
-          const mnemonic = ref('')
-          const path = ref(`m/44'/236'/0'/0/0`)
+          const mnemonic = ref('asset mistake hunt high because winter code extend sudden pitch indoor crystal')
+          const path = ref(`m/44'/10001'/0'/0/0`)
           const Buzz = ref(null)
           const connected = computed(() => !!Buzz.value)
           const content = ref('')
           const buzzes = ref([])
 
           const connectWallet = async () => {
-            const wallet = await LocalWallet.create(mnemonic.value)
+            const wallet = await LocalWallet.create(mnemonic.value, path.value)
 
             const baseEntity = connect(wallet)
             const handler = await baseEntity.use('buzz')

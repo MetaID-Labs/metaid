@@ -10,7 +10,7 @@ describe('entity.create', () => {
     ctx.Buzz = await connect(wallet).use('buzz')
   })
 
-  test('cannot create a new buzz if it is not logined', ({ Buzz }) => {
+  test('cannot create a new buzz if it is not connected', ({ Buzz }) => {
     Buzz.disconnect()
     expect(() =>
       Buzz.create({
@@ -19,10 +19,10 @@ describe('entity.create', () => {
     ).toThrow(errors.NOT_CONNECTED)
   })
 
-  test.skip('can create a new buzz', async ({ Buzz }) => {
+  test('can create a new buzz', async ({ Buzz }) => {
     expect(
       await Buzz.create({
-        content: 'Hello World from metaidjs',
+        content: '2 step create',
       }),
     ).toBeTypeOf('boolean')
   })

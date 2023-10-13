@@ -1,10 +1,11 @@
 import { TxComposer, mvc } from 'meta-contract'
 
-import { getBuzzes, getRootNode, notify } from '@/api.js'
+import { getBuzzes, getRootNode, getUtxos, notify } from '@/api.js'
 import { connected } from '@/decorators/connected.js'
-import { buildOpreturn } from './utils/opreturn-builder.js'
-import { Connector } from './connector.js'
-import { errors } from './data/errors.js'
+import { buildOpreturn } from '../utils/opreturn-builder.ts'
+import { Connector } from './connector.ts'
+import { errors } from '../data/errors.ts'
+import { UTXO_DUST } from '@/data/constants.ts'
 
 type Root = {
   id: string
@@ -79,44 +80,24 @@ export class Entity {
   @connected
   public async create(body: unknown) {
     const root = await this.getRoot()
+    const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
 
-    const preSendRes = await this.connector.send(root.address, 2000)
-    const sendTxComposer = new TxComposer()
-    sendTxComposer.appendP2PKHInput({
+    // 1. send dust to root address
+    const preSendRes = await this.connector.send(root.address, UTXO_DUST)
+    console.log({ preSendRes })
+
+    // 2. link tx
+    const randomPriv = new mvc.PrivateKey(undefined, 'mainnet')
+    const randomPub = randomPriv.toPublicKey()
+
+    const linkTxComposer = new TxComposer()
+    linkTxComposer.appendP2PKHInput({
       address: mvc.Address.fromString(root.address, 'mainnet' as any),
       txId: preSendRes.txid,
       outputIndex: 0,
-      satoshis: 2000,
-    })
-    sendTxComposer.appendP2PKHOutput({
-      address: mvc.Address.fromString(root.address, 'mainnet' as any),
-      satoshis: 1200,
-    })
-    const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
-    sendTxComposer.appendChangeOutput(walletAddress, 1)
-    this.connector.signP2pkh(sendTxComposer, 0)
-    const sendRes = await this.connector.broadcast(sendTxComposer)
-
-    const sendTx = sendTxComposer.getTx()
-    const usingUtxo = sendTx.outputs[0]
-    const txComposer = new TxComposer()
-
-    // console.log({
-    //   address: mvc.Address.fromString(root.address, 'mainnet' as any),
-    //   txId: sendRes,
-    //   outputIndex: 0,
-    //   satoshis: usingUtxo.satoshis,
-    // })
-
-    txComposer.appendP2PKHInput({
-      address: mvc.Address.fromString(root.address, 'mainnet' as any),
-      txId: sendRes.txid,
-      outputIndex: 0,
-      satoshis: usingUtxo.satoshis,
+      satoshis: UTXO_DUST,
     })
 
-    const randomPriv = new mvc.PrivateKey(undefined, 'mainnet')
-    const randomPub = randomPriv.toPublicKey()
     const metaidOpreturn = buildOpreturn({
       publicKey: randomPub.toString(),
       parentTxid: root.txid,
@@ -124,14 +105,25 @@ export class Entity {
       body,
     })
 
-    txComposer.appendOpReturnOutput(metaidOpreturn)
-    txComposer.appendChangeOutput(walletAddress, 1)
-    this.connector.signP2pkh(txComposer, 0)
+    linkTxComposer.appendOpReturnOutput(metaidOpreturn)
+    const biggestUtxo = await getUtxos({ address: walletAddress.toString() }).then((utxos) => {
+      return utxos.reduce((prev, curr) => {
+        return prev.value > curr.value ? prev : curr
+      }, utxos[0])
+    })
+    linkTxComposer.appendP2PKHInput({
+      address: walletAddress,
+      txId: biggestUtxo.txid,
+      outputIndex: biggestUtxo.outIndex,
+      satoshis: biggestUtxo.value,
+    })
+    linkTxComposer.appendChangeOutput(walletAddress, 1)
 
-    const broadcastRes = await this.connector.broadcast(txComposer)
-    console.log({ broadcastRes })
+    this.connector.signP2pkh(linkTxComposer, 0)
+    this.connector.signP2pkh(linkTxComposer, 1)
+    await this.connector.broadcast(linkTxComposer)
 
-    await notify({ txHex: txComposer.getRawHex() })
+    await notify({ txHex: linkTxComposer.getRawHex() })
 
     return true
   }

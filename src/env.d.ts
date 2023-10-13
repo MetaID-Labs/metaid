@@ -9,7 +9,7 @@ interface ImportMeta {
 }
 
 import { TestContext } from 'vitest'
-import { Entity } from './entity.ts'
+import { Entity } from './core/entity.ts'
 declare module 'vitest' {
   export interface TestContext {
     Buzz?: Entity
