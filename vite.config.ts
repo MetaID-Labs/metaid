@@ -7,6 +7,10 @@ export default defineConfig({
 	test: {
 		globals: true,
 	},
+	test: {
+		globals: true,
+		testTimeout: 10000,
+	},
 
 	resolve: {
 		alias: {

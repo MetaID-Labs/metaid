@@ -18,7 +18,7 @@ type MetaidBaseResponse = {
   result: any
 }
 
-export async function getMetaId({ address }: { address: string }): Promise<string | null> {
+export async function getMetaid({ address }: { address: string }): Promise<string | null> {
   const url = `https://api.show3.io/metaid-base/v1/meta/root/${address}`
 
   try {
@@ -134,4 +134,46 @@ export async function notify({ txHex }: { txHex: string }) {
     raw: txHex,
     type: 1,
   })
+}
+
+export async function getUtxos({ address }: { address: string }): Promise<
+  {
+    txid: string
+    outIndex: number
+    address: string
+    value: number
+  }[]
+> {
+  const url = `https://mainnet.mvcapi.com/address/${address}/utxo`
+
+  try {
+    const data = await axios.get(url).then((res) => res.data)
+
+    return data
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export async function getBiggestUtxo({ address }: { address: string }): Promise<{
+  txid: string
+  outIndex: number
+  address: string
+  value: number
+}> {
+  return await getUtxos({ address }).then((utxos) => {
+    return utxos.reduce((prev, curr) => {
+      return prev.value > curr.value ? prev : curr
+    }, utxos[0])
+  })
+}
+
+export async function broadcast({ txHex }: { txHex: string }): Promise<{
+  txid: string
+}> {
+  return await axios
+    .post('https://mainnet.mvcapi.com/tx/broadcast', {
+      hex: txHex,
+    })
+    .then((res) => res.data)
 }

@@ -5,9 +5,9 @@ import { LocalWallet } from "@/wallets/local.js";
 describe("entity.list", () => {
 	beforeEach(async (ctx) => {
 		const mnemonic = import.meta.env.VITE_TEST_MNEMONIC;
-		const wallet = await LocalWallet.create(mnemonic);
+		const wallet = LocalWallet.create(mnemonic);
 
-		ctx.Buzz = await connect(wallet).use("buzz");
+		ctx.Buzz = await (await connect(wallet)).use("buzz");
 	});
 
 	test("can list buzzes", async ({ Buzz }) => {
@@ -31,9 +31,9 @@ describe("entity.list", () => {
 	});
 	test("do not support entity other than buzz right now", async () => {
 		const mnemonic = import.meta.env.VITE_TEST_MNEMONIC;
-		const wallet = await LocalWallet.create(mnemonic);
+		const wallet = LocalWallet.create(mnemonic);
 
-		const GM = await connect(wallet).use("group-message");
+		const GM = await (await connect(wallet)).use("group-message");
 		await expect(() => GM.list()).rejects.toThrow(errors.NOT_SUPPORTED);
 	});
 });

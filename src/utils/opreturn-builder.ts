@@ -24,7 +24,7 @@ export function buildOpreturn({
   const opreturn: MetaidOpreturn = [
     'mvc',
     publicKey,
-    'meta:' + parentTxid,
+    'mvc:' + parentTxid,
     'metaid',
     [protocolName, publicKey.slice(0, 11)].join('-'),
     JSON.stringify(body),

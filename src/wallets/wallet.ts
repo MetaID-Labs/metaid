@@ -1,29 +1,32 @@
 import { TxComposer } from 'meta-contract'
 
-/* class decorator */
-export function staticImplements<T>() {
-  return <U extends T>(constructor: U) => {
-    constructor
-  }
+export interface WalletStatic {
+  create: ((mnemonic: string, derivePath?: string) => MetaIDConnectWallet) | (() => Promise<MetaIDConnectWallet>)
 }
 
-export interface IWalletStatic {
-  create(mnemonic: string, derivePath?: string): Promise<IWallet>
-}
-
-export interface IWallet {
-  metaid: string
+export interface MetaIDConnectWallet {
   address: string
+  xpub: string
 
   hasAddress(): boolean
-  hasMetaId(): boolean
 
-  signP2pkh(txComposer: TxComposer, inputIndex: number): TxComposer
+  getAddress(path?: string): string | Promise<string>
+  getPublicKey(path?: string): string | Promise<string>
+
+  signInput({
+    txComposer,
+    inputIndex,
+  }: {
+    txComposer: TxComposer
+    inputIndex: number
+  }): TxComposer | Promise<TxComposer>
+
   send(
     toAddress: string,
     amount: number,
   ): Promise<{
     txid: string
   }>
+
   broadcast(txComposer: TxComposer): Promise<{ txid: string }>
 }

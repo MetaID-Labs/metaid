@@ -5,9 +5,9 @@ import { LocalWallet } from '@/wallets/local.ts'
 describe('entity.hasRoot', () => {
   beforeEach(async (ctx) => {
     const mnemonic = import.meta.env.VITE_TEST_MNEMONIC
-    const wallet = await LocalWallet.create(mnemonic)
+    const wallet = LocalWallet.create(mnemonic)
 
-    ctx.Buzz = await connect(wallet).use('buzz')
+    ctx.Buzz = await (await connect(wallet)).use('buzz')
   })
 
   test('can check whether the entity has root if it is connected', ({ Buzz }) => {

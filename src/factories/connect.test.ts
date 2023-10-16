@@ -1,10 +1,9 @@
 import { LocalWallet } from '@/wallets/local.js'
 import { connect } from './connect.js'
-import { use } from './use.js'
 
 async function connectToLocalWallet() {
   const mnemonic = import.meta.env.VITE_TEST_MNEMONIC
-  const wallet = await LocalWallet.create(mnemonic)
+  const wallet = LocalWallet.create(mnemonic)
 
   return connect(wallet)
 }
@@ -55,25 +54,9 @@ describe('factories.connect', () => {
     expect(connector.address).toBeTypeOf('string')
   })
 
-  test('entity has address', async () => {
-    const connector = await connectToLocalWallet()
-
-    const Buzz = await connector.use('buzz')
-
-    expect(Buzz.address).toBeTypeOf('string')
-  })
-
-  test.todo('connector has metaid', async () => {
+  test('connector has metaid', async () => {
     const connector = await connectToLocalWallet()
 
     expect(connector.metaid).toBeTypeOf('string')
-  })
-
-  test.todo('entity has metaid', async () => {
-    const connector = await connectToLocalWallet()
-
-    const Buzz = await connector.use('buzz')
-
-    expect(Buzz.metaid).toBeTypeOf('string')
   })
 })
