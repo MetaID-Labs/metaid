@@ -67,17 +67,28 @@ export class Entity {
   public async getRoot() {
     if (this._root) return this._root
 
-    this._root = await getRootNode({
+    const root = await getRootNode({
       metaid: this.metaid,
       nodeName: this.schema.nodeName,
       nodeId: this.schema.versions[0].id,
     })
 
+    if (!root) {
+      await this.createRoot()
+    }
+
+    this._root = root
+
     return this._root
   }
 
   @connected
-  public async create(body: unknown) {
+  public async create(
+    body: unknown,
+    options?: {
+      invisible: boolean
+    },
+  ) {
     const root = await this.getRoot()
     const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
 
@@ -88,7 +99,7 @@ export class Entity {
     const randomPriv = new mvc.PrivateKey(undefined, 'mainnet')
     const randomPub = randomPriv.toPublicKey()
 
-    const linkTxComposer = new TxComposer()
+    let linkTxComposer = new TxComposer()
     linkTxComposer.appendP2PKHInput({
       address: mvc.Address.fromString(root.address, 'mainnet' as any),
       txId: dustTxid,
@@ -113,11 +124,14 @@ export class Entity {
     })
     linkTxComposer.appendChangeOutput(walletAddress, 1)
 
-    this.connector.signInput({
+    const input1Output = linkTxComposer.getInput(1).output
+
+    linkTxComposer = await this.connector.signInput({
       txComposer: linkTxComposer,
       inputIndex: 0,
     })
-    this.connector.signInput({
+    linkTxComposer.getInput(1).output = input1Output
+    linkTxComposer = await this.connector.signInput({
       txComposer: linkTxComposer,
       inputIndex: 1,
     })
@@ -126,6 +140,20 @@ export class Entity {
     await notify({ txHex: linkTxComposer.getRawHex() })
 
     return true
+  }
+
+  @connected
+  public async createRoot() {
+    const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
+
+    const randomPriv = new mvc.PrivateKey(undefined, 'mainnet')
+    const randomPub = randomPriv.toPublicKey()
+
+    const rootTxComposer = new TxComposer()
+    // rootTxComposer.appendP2PKHInput({
+    //   address: walletAddress,
+    //   // txId: '00000
+    // })
   }
 
   public async list() {

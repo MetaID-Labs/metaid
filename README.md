@@ -132,16 +132,22 @@ const buzz = Buzz.one({
 })
 
 // create
-const newBuzz = Buzz.create({
-  title: 'Hello World',
-  content: 'This is my first buzz',
-})
-
-// update
-const updatedBuzz = Buzz.update(newBuzz.id, {
-  title: 'Hello World Again',
-  content: 'Here we go..',
-})
+const newBuzz = Buzz.create(
+  {
+    title: 'Hello World',
+    content: 'This is my first buzz',
+  },
+  {
+    visible: true, // set this to true if you want to create an invisible resource
+    // undefined = true
+  },
+)
+if (visible)
+  // update
+  const updatedBuzz = Buzz.update(newBuzz.id, {
+    title: 'Hello World Again',
+    content: 'Here we go..',
+  })
 // or update one existing resource
 const oldBuzz = Buzz.get('0x1234567890')
 const updatedBuzz = oldBuzz.update({ content: 'Good day, commander!' })
