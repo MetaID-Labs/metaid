@@ -215,3 +215,13 @@ export async function getNewBrfcNodeInfo(params: {
     console.error(error);
   }
 }
+
+export async function broadcast({ txHex }: { txHex: string }): Promise<{
+  txid: string
+}> {
+  return await axios
+    .post('https://mainnet.mvcapi.com/tx/broadcast', {
+      hex: txHex,
+    })
+    .then((res) => res.data)
+}

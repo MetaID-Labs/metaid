@@ -16,6 +16,10 @@ export class Connector {
     this.address = wallet.address
   }
 
+  get xpub() {
+    return this.wallet.xpub
+  }
+
   public static async create(wallet: MetaIDConnectWallet) {
     const connector = new Connector(wallet)
 
@@ -47,10 +51,10 @@ export class Connector {
 
   /**
    * wallet delegation
-   * signP2pkh / send / broadcast
+   * signInput / send / broadcast
    */
-  signP2pkh(txComposer: TxComposer, inputIndex: number) {
-    return this.wallet.signP2pkh(txComposer, inputIndex)
+  signInput({ txComposer, inputIndex, path }: { txComposer: TxComposer; inputIndex: number; path: string }) {
+    return this.wallet.signInput({ txComposer, inputIndex, path })
   }
 
   send(toAddress: string, amount: number) {

@@ -6,9 +6,13 @@ import {
   getRootNode,
   notify,
   getNewBrfcNodeInfo,
+  getAccountInfo,
 } from "@/api.js";
 import { connected } from "@/decorators/connected.js";
-import { buildOpreturn } from "@/utils/opreturn-builder.ts";
+import {
+  buildOpreturn,
+  buildBrfcRootOpreturn,
+} from "@/utils/opreturn-builder.ts";
 import { Connector } from "./connector.ts";
 import { errors } from "@/data/errors.ts";
 import { UTXO_DUST } from "@/data/constants.ts";
@@ -23,10 +27,10 @@ type Root = {
   parentPublicKey: string;
   version: string;
   createdAt: number;
+  path?: string;
 };
 
 export class Entity {
-  // public credential: Credential | undefined
   public connector: Connector | undefined;
   private _name: string;
   private _schema: any;
@@ -66,7 +70,7 @@ export class Entity {
   }
 
   @connected
-  public async getRoot() {
+  public async getRoot(): Promise<Partial<Root>> {
     if (this._root) return this._root;
 
     this._root = await getRootNode({
@@ -74,19 +78,126 @@ export class Entity {
       nodeName: this.schema.nodeName,
       nodeId: this.schema.versions[0].id,
     });
+
+    let metaidInfo;
+
     if (!this._root) {
-      // const parentAddress = this.connector?.wallet.getAddress("0/0/2");
-      // await getNewBrfcNodeInfo({
-      //   xpub: this.connector?.wallet.xpub,
-      //   parentTxId: "",
-      // });
+      metaidInfo = await getAccountInfo(this.metaid);
+      if (metaidInfo.metaId) {
+        const address = await this.connector.getAddress("/0/2");
+        const newBrfcNode = await getNewBrfcNodeInfo({
+          xpub: this.connector.xpub,
+          parentTxId: metaidInfo.protocolTxId,
+        });
+        console.log("newBrfcNode123", newBrfcNode);
+        const { txid } = await this.createRootNode({
+          address,
+          txid: metaidInfo.protocolTxId,
+          path: newBrfcNode.path,
+          publicKey: newBrfcNode.publicKey,
+        });
+
+        return {
+          address: newBrfcNode.address,
+          txid,
+          path: newBrfcNode.path,
+        };
+
+        // return {
+        //   address,
+        //   txid:.createRootNodeTxId,
+        // };
+      }
     }
+
     return this._root;
+  }
+
+  @connected
+  private async createRootNode(parent: {
+    address: string;
+    txid: string;
+    path: string;
+    publicKey: string;
+  }) {
+    const walletAddress = mvc.Address.fromString(
+      this.connector.address,
+      "mainnet" as any
+    );
+    // 1. send dust to root address
+    const { txid: dustTxid } = await this.connector.send(
+      parent.address,
+      UTXO_DUST
+    );
+    const linkTxComposer = new TxComposer();
+    linkTxComposer.appendP2PKHInput({
+      address: mvc.Address.fromString(parent.address, "mainnet" as any),
+      txId: dustTxid,
+      outputIndex: 0,
+      satoshis: UTXO_DUST,
+    });
+
+    const metaidOpreturn = buildBrfcRootOpreturn({
+      publicKey: parent.publicKey,
+      parentTxid: parent.txid,
+      protocolName: this.schema.nodeName,
+      body: undefined,
+    });
+    linkTxComposer.appendOpReturnOutput(metaidOpreturn);
+
+    const biggestUtxo = await getBiggestUtxo({
+      address: walletAddress.toString(),
+    });
+    linkTxComposer.appendP2PKHInput({
+      address: walletAddress,
+      txId: biggestUtxo.txid,
+      outputIndex: biggestUtxo.outIndex,
+      satoshis: biggestUtxo.value,
+    });
+    linkTxComposer.appendChangeOutput(walletAddress, 1);
+    this.connector.signInput({
+      txComposer: linkTxComposer,
+      inputIndex: 0,
+      path: parent.path, //"/0/0",
+    });
+    this.connector.signInput({
+      txComposer: linkTxComposer,
+      inputIndex: 1,
+      path: "/0/0",
+    });
+    const txid = await this.connector.broadcast(linkTxComposer);
+    console.log("txid", txid);
+    await notify({ txHex: linkTxComposer.getRawHex() });
+
+    return txid;
+  }
+
+  @connected
+  private getPathByAddress(address: string) {
+    let i = 0;
+    let path;
+    while (i < 1000) {
+      const pathAddress = this.connector.getAddress(`/0/${i}`);
+      if (pathAddress == address) {
+        path = `/0/${i}`;
+        break;
+      }
+      i++;
+    }
+    if (!path) {
+      throw new Error(`path not found:${address}`);
+    }
+    return path;
   }
 
   @connected
   public async create(body: unknown) {
     const root = await this.getRoot();
+    console.log("root132456", root);
+
+    if (!root.path) {
+      root.path = this.getPathByAddress(root.address);
+    }
     const walletAddress = mvc.Address.fromString(
       this.connector.address,
       "mainnet" as any
@@ -129,10 +240,17 @@ export class Entity {
     });
     linkTxComposer.appendChangeOutput(walletAddress, 1);
 
-    this.connector.signP2pkh(linkTxComposer, 0);
-    this.connector.signP2pkh(linkTxComposer, 1);
+    this.connector.signInput({
+      txComposer: linkTxComposer,
+      inputIndex: 0,
+      path: root.path,
+    });
+    this.connector.signInput({
+      txComposer: linkTxComposer,
+      inputIndex: 1,
+      path: "/0/0",
+    });
     await this.connector.broadcast(linkTxComposer);
-
     await notify({ txHex: linkTxComposer.getRawHex() });
 
     return true;

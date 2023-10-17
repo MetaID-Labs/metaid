@@ -10,6 +10,7 @@ export class LocalWallet implements MetaIDConnectWallet {
   private derivePath: string;
   private internal: InternalWallet | undefined;
   public address: string | undefined;
+  public xpub: string | undefined;
 
   private get basePath() {
     return this.derivePath.split("/").slice(0, -2).join("/");
@@ -35,7 +36,17 @@ export class LocalWallet implements MetaIDConnectWallet {
       .toHDPrivateKey(undefined, "mainnet" as any)
       .deriveChild(derivePath).privateKey;
 
+    // derive xpub from mnemonic from base path
+    wallet.xpub = mvc.Mnemonic.fromString(mnemonic)
+      .toHDPrivateKey(undefined, "mainnet" as any)
+      .deriveChild(wallet.basePath)
+      .xpubkey.toString();
     wallet.address = privateKey.publicKey.toAddress().toString();
+    wallet.internal = new InternalWallet(
+      privateKey.toWIF(),
+      "mainnet" as any,
+      1
+    );
 
     wallet.internal = new InternalWallet(
       privateKey.toWIF(),
@@ -70,7 +81,13 @@ export class LocalWallet implements MetaIDConnectWallet {
     return !!this.address;
   }
 
-  public signP2pkh(txComposer: TxComposer, inputIndex: number) {
+  public signInput({
+    txComposer,
+    inputIndex,
+  }: {
+    txComposer: TxComposer;
+    inputIndex: number;
+  }) {
     // look at the input's address and find out if it can be derived from the mnemonic
     const input = txComposer.tx.inputs[inputIndex];
     const toSignAddress = input.output.script.toAddress().toString();
@@ -81,7 +98,7 @@ export class LocalWallet implements MetaIDConnectWallet {
     let deriver = 0;
     let toUsePrivateKey: mvc.PrivateKey;
     while (deriver < DERIVE_MAX_DEPTH) {
-      const childPk = basePk.deriveChild("0/" + deriver);
+      const childPk = basePk.deriveChild(0).deriveChild(deriver);
       const childAddress = childPk.publicKey
         .toAddress("mainnet" as any)
         .toString();
