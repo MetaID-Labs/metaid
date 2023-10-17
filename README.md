@@ -162,7 +162,7 @@ const photos = await File.create([
 ])
 
 // 2. create a buzz resource with the photos.
-// We use `with` api to create a resource with its related resources to represent a 1-to-many relationship.
+// use `with` api to create a resource with its related resources to represent a 1-to-many relationship.
 const buzz = await Buzz.with(photos).create({ content: 'Have a nice day!' })
 ```
 
@@ -176,7 +176,7 @@ const Like = use('like')
 const theMessage = await GroupMessage.get('0x1234567890')
 
 // 2. create a like resource.
-// We use `belongsTo` api to create a resource with its related resource to represent a 1-to-1 relationship.
+// use `belongsTo` api to create a resource with its related resource to represent a 1-to-1 relationship.
 await Like.belongsTo(theMessage).create()
 ```
 
