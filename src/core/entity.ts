@@ -79,6 +79,7 @@ export class Entity {
 	@connected
 	public async create(body: unknown) {
 		const root = await this.getRoot();
+		if (!root) throw new Error(errors.NO_ROOT_DETECTED);
 		const walletAddress = mvc.Address.fromString(this.connector.address, "mainnet" as any);
 
 		// 1. send dust to root address

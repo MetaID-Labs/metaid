@@ -6,9 +6,6 @@ import dts from "vite-plugin-dts";
 export default defineConfig({
 	test: {
 		globals: true,
-	},
-	test: {
-		globals: true,
 		testTimeout: 10000,
 	},
 
