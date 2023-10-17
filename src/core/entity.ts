@@ -73,12 +73,12 @@ export class Entity {
   public async getRoot(): Promise<Partial<Root>> {
     if (this._root) return this._root;
 
-    this._root = await getRootNode({
+    const root = await getRootNode({
       metaid: this.metaid,
       nodeName: this.schema.nodeName,
       nodeId: this.schema.versions[0].id,
     });
-
+    this._root = root;
     let metaidInfo;
 
     if (!this._root) {
@@ -158,12 +158,12 @@ export class Entity {
     this.connector.signInput({
       txComposer: linkTxComposer,
       inputIndex: 0,
-      path: parent.path, //"/0/0",
+      // path: parent.path, //"/0/0",
     });
     this.connector.signInput({
       txComposer: linkTxComposer,
       inputIndex: 1,
-      path: "/0/0",
+      // path: "/0/0",
     });
     const txid = await this.connector.broadcast(linkTxComposer);
     console.log("txid", txid);
@@ -172,32 +172,32 @@ export class Entity {
     return txid;
   }
 
-  @connected
-  private getPathByAddress(address: string) {
-    let i = 0;
-    let path;
-    while (i < 1000) {
-      const pathAddress = this.connector.getAddress(`/0/${i}`);
-      if (pathAddress == address) {
-        path = `/0/${i}`;
-        break;
-      }
-      i++;
-    }
-    if (!path) {
-      throw new Error(`path not found:${address}`);
-    }
-    return path;
-  }
+  // @connected
+  // private getPathByAddress(address: string) {
+  //   let i = 0;
+  //   let path;
+  //   while (i < 1000) {
+  //     const pathAddress = this.connector.getAddress(`/0/${i}`);
+  //     if (pathAddress == address) {
+  //       path = `/0/${i}`;
+  //       break;
+  //     }
+  //     i++;
+  //   }
+  //   if (!path) {
+  //     throw new Error(`path not found:${address}`);
+  //   }
+  //   return path;
+  // }
 
   @connected
   public async create(body: unknown) {
     const root = await this.getRoot();
     console.log("root132456", root);
 
-    if (!root.path) {
-      root.path = this.getPathByAddress(root.address);
-    }
+    // if (!root.path) {
+    //   root.path = this.getPathByAddress(root.address);
+    // }
     const walletAddress = mvc.Address.fromString(
       this.connector.address,
       "mainnet" as any
@@ -213,7 +213,7 @@ export class Entity {
     const randomPriv = new mvc.PrivateKey(undefined, "mainnet");
     const randomPub = randomPriv.toPublicKey();
 
-    const linkTxComposer = new TxComposer();
+    let linkTxComposer = new TxComposer();
     linkTxComposer.appendP2PKHInput({
       address: mvc.Address.fromString(root.address, "mainnet" as any),
       txId: dustTxid,
@@ -240,25 +240,41 @@ export class Entity {
     });
     linkTxComposer.appendChangeOutput(walletAddress, 1);
 
-    this.connector.signInput({
+    const input1Output = linkTxComposer.getInput(1).output;
+
+    linkTxComposer = await this.connector.signInput({
       txComposer: linkTxComposer,
       inputIndex: 0,
-      path: root.path,
     });
-    this.connector.signInput({
+    linkTxComposer.getInput(1).output = input1Output;
+    linkTxComposer = await this.connector.signInput({
       txComposer: linkTxComposer,
       inputIndex: 1,
-      path: "/0/0",
     });
     await this.connector.broadcast(linkTxComposer);
     await notify({ txHex: linkTxComposer.getRawHex() });
-
     return true;
+  }
+
+  @connected
+  public async createRoot() {
+    const walletAddress = mvc.Address.fromString(
+      this.connector.address,
+      "mainnet" as any
+    );
+
+    const randomPriv = new mvc.PrivateKey(undefined, "mainnet");
+    const randomPub = randomPriv.toPublicKey();
+
+    const rootTxComposer = new TxComposer();
+    // rootTxComposer.appendP2PKHInput({
+    //   address: walletAddress,
+    //   // txId: '00000
+    // })
   }
 
   public async list() {
     if (this.name !== "buzz") throw new Error(errors.NOT_SUPPORTED);
-    console.log("here");
 
     const items = await getBuzzes({ metaid: this.metaid });
 

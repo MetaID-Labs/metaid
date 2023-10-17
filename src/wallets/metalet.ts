@@ -8,6 +8,7 @@ import { DERIVE_MAX_DEPTH } from '@/data/constants.ts'
 @staticImplements<WalletStatic>()
 export class MetaletWallet implements MetaIDConnectWallet {
   public address: string | undefined
+  public xpub: string | undefined
   private internal: any
 
   private constructor() {}
@@ -20,8 +21,12 @@ export class MetaletWallet implements MetaIDConnectWallet {
 
     const { address } = await window.metaidwallet.connect()
 
+    // get xpub from metalet
+    const xpub: string = await window.metaidwallet.getXPublicKey()
+
     const wallet = new MetaletWallet()
     wallet.address = address
+    wallet.xpub = xpub
     wallet.internal = window.metaidwallet
 
     return wallet
@@ -45,17 +50,21 @@ export class MetaletWallet implements MetaIDConnectWallet {
 
   public async signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }) {
     // get input's address
+    console.log({
+      inputIndex,
+      output0: txComposer.getInput(0).output,
+      output1: txComposer.getInput(1).output,
+    })
     const outputScript = txComposer.getInput(inputIndex).output.script
     const address = outputScript.toAddress().toString()
 
     // get xpub from metalet
-    const xpubBase58: string = await this.internal.getXPublicKey()
-    const xpub = mvc.HDPublicKey.fromString(xpubBase58)
+    const xpubObj = mvc.HDPublicKey.fromString(this.xpub)
     // loop through the path and derive the private key
     let deriver = 0
     let toUsePath: string
     while (deriver < DERIVE_MAX_DEPTH) {
-      const childAddress = xpub
+      const childAddress = xpubObj
         .deriveChild(0)
         .deriveChild(deriver)
         .publicKey.toAddress('mainnet' as any)
@@ -63,10 +72,12 @@ export class MetaletWallet implements MetaIDConnectWallet {
 
       if (childAddress === address) {
         toUsePath = `0/${deriver}`
+        break
       }
+
+      deriver++
     }
     if (!toUsePath) throw new Error(errors.CANNOT_DERIVE_PATH)
-    console.log({ toUsePath })
 
     // cut the first slash for compatibility
     const { signedTransactions } = await this.internal.signTransactions({
@@ -77,12 +88,14 @@ export class MetaletWallet implements MetaIDConnectWallet {
           address,
           scriptHex: outputScript.toHex(),
           path: toUsePath,
+          sigtype: 0xc1,
         },
       ],
     })
 
     // update the txComposer
     const signedTx = new mvc.Transaction(signedTransactions[0].txHex)
+    console.log({ signedTx })
 
     return new TxComposer(signedTx)
   }

@@ -18,7 +18,6 @@ export interface MetaIDConnectWallet {
   signInput({
     txComposer,
     inputIndex,
-    path,
   }: {
     txComposer: TxComposer;
     inputIndex: number;
@@ -33,4 +32,6 @@ export interface MetaIDConnectWallet {
   }>;
 
   broadcast(txComposer: TxComposer): Promise<{ txid: string }>;
+
+  encrypt(message: string, publicKey: string): Promise<string>;
 }

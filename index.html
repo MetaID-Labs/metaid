@@ -22,7 +22,9 @@
       <!-- control -->
       <div class="mt-16 text-sky-800 font-bold space-y-8">
         <div class="">
-          <div class="flex items-center gap-4">
+          <!-- local wallet -->
+          <h3 class="text-white">Local Wallet</h3>
+          <div class="flex items-center gap-4 mt-2">
             <div class="grow flex flex-col gap-y-2">
               <input type="text" class="grow rounded-lg h-full text-sm p-3" placeholder="Mnemonic" v-model="mnemonic" />
               <input type="text" class="grow rounded-lg h-full text-sm p-3" placeholder="Path" v-model="path" />
@@ -32,7 +34,8 @@
           </div>
 
           <!-- metalet wallet -->
-          <div class="mt-4 space-x-4">
+          <h3 class="mt-4 text-white">Metalet Wallet</h3>
+          <div class="mt-2 space-x-4">
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="connectMetalet">Connect Metalet</button>
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getAddress">Get Address</button>
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getPublicKey">Get Public Key</button>
@@ -78,7 +81,7 @@
 
       createApp({
         setup() {
-          const mnemonic = ref('asset mistake hunt high because winter code extend sudden pitch indoor crystal')
+          const mnemonic = ref('')
           const path = ref(`m/44'/10001'/0'/0/0`)
           const Buzz = ref(null)
           const connected = computed(() => !!Buzz.value)

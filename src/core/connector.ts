@@ -7,13 +7,15 @@ export class Connector {
   private _isConnected: boolean;
   private wallet: MetaIDConnectWallet;
   public metaid: string | undefined;
-  public address: string | undefined;
 
   private constructor(wallet: MetaIDConnectWallet) {
     this._isConnected = true;
 
     this.wallet = wallet;
-    this.address = wallet.address;
+  }
+
+  get address() {
+    return this.wallet.address;
   }
 
   get xpub() {
@@ -57,13 +59,11 @@ export class Connector {
   signInput({
     txComposer,
     inputIndex,
-    path,
   }: {
     txComposer: TxComposer;
     inputIndex: number;
-    path: string;
   }) {
-    return this.wallet.signInput({ txComposer, inputIndex, path });
+    return this.wallet.signInput({ txComposer, inputIndex });
   }
 
   send(toAddress: string, amount: number) {

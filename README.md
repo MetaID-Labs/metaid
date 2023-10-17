@@ -132,16 +132,22 @@ const buzz = Buzz.one({
 })
 
 // create
-const newBuzz = Buzz.create({
-  title: 'Hello World',
-  content: 'This is my first buzz',
-})
-
-// update
-const updatedBuzz = Buzz.update(newBuzz.id, {
-  title: 'Hello World Again',
-  content: 'Here we go..',
-})
+const newBuzz = Buzz.create(
+  {
+    title: 'Hello World',
+    content: 'This is my first buzz',
+  },
+  {
+    visible: true, // set this to true if you want to create an invisible resource
+    // undefined = true
+  },
+)
+if (visible)
+  // update
+  const updatedBuzz = Buzz.update(newBuzz.id, {
+    title: 'Hello World Again',
+    content: 'Here we go..',
+  })
 // or update one existing resource
 const oldBuzz = Buzz.get('0x1234567890')
 const updatedBuzz = oldBuzz.update({ content: 'Good day, commander!' })
@@ -180,8 +186,8 @@ const photos = await File.create([
 ])
 
 // 2. create a buzz resource with the photos.
-// We use `with` api to create a resource with its related resources to represent a 1-to-many relationship.
-const buzz = await Buzz.with(photos).create({ content: 'Have a nice day!', attachmentsIds: photos.map((p) => p.id) })
+// use `with` api to create a resource with its related resources to represent a 1-to-many relationship.
+const buzz = await Buzz.with(photos).create({ content: 'Have a nice day!' })
 ```
 
 ### Give a like to a group message
@@ -194,20 +200,19 @@ const Like = use('like')
 const theMessage = await GroupMessage.get('0x1234567890')
 
 // 2. create a like resource.
-// We use `belongsTo` api to create a resource with its related resource to represent a n-to-1 relationship.
+// use `belongsTo` api to create a resource with its related resource to represent a 1-to-1 relationship.
 await Like.belongsTo(theMessage).create()
 ```
 
 ### Refer an NFT info in a buzz
 
-```ts
+````ts
 const Reference = use('reference')
 
 await Reference.belongsTo(nft).create({
   content: 'Have a look at my gorgeous NFT!',
   nftId: nft.id,
-})
-```
+})```
 
 ---
 
@@ -223,7 +228,7 @@ import { LocalWallet, MetaletWallet } from '@metaid/metaid'
 // use static method `create` to create a wallet instance
 LocalWallet.create(mnemonic: string): LocalWallet
 MetaletWallet.create(): Promise<MetaletWallet>
-```
+````
 
 ### Connector
 
