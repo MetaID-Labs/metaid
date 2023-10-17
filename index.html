@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MetaID Test Page</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        }
+      }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/130353550?s=24" />
+  </head>
+
+  <body class="min-h-screen bg-gradient-to-br from-sky-500 to-indigo-500 text-white">
+    <div id="app" class="max-w-3xl mx-auto py-8">
+      <h3 class="text-center font-bold text-2xl">Metaid.js Test Page</h3>
+
+      <!-- control -->
+      <div class="mt-16 text-sky-800 font-bold space-y-8">
+        <div class="">
+          <div class="flex items-center gap-4">
+            <div class="grow flex flex-col gap-y-2">
+              <input type="text" class="grow rounded-lg h-full text-sm p-3" placeholder="Mnemonic" v-model="mnemonic" />
+              <input type="text" class="grow rounded-lg h-full text-sm p-3" placeholder="Path" v-model="path" />
+            </div>
+
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="connectWallet">Connect Local Wallet</button>
+          </div>
+
+          <!-- metalet wallet -->
+          <div class="mt-4 space-x-4">
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="connectMetalet">Connect Metalet</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getAddress">Get Address</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getPublicKey">Get Public Key</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="send2k">Send 2k</button>
+          </div>
+
+          <p v-if="connected" class="text-teal-200 mt-2">Connected</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <input
+            type="text"
+            class="grow rounded-lg h-full text-sm p-3"
+            placeholder="You buzz content"
+            v-model="content"
+          />
+          <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createBuzz">Create Buzz</button>
+        </div>
+
+        <div class="">
+          <div class="flex gap-4 items-center">
+            <div class="font-bold text-white">Buzz List</div>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getBuzzList">Get List</button>
+          </div>
+
+          <!-- list -->
+          <div class="">
+            <div v-for="buzz in buzzes" class="bg-white rounded-md shadow-md p-4 mt-4">
+              <div class="flex items-center gap-4">
+                <div class="flex-grow">
+                  <div class="text-sm text-gray-500">{{ buzz.body.content }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createApp, ref, computed, toRaw } from 'vue'
+      import { LocalWallet, MetaletWallet, connect } from './dist/metaid.js'
+
+      createApp({
+        setup() {
+          const mnemonic = ref('')
+          const path = ref(`m/44'/10001'/0'/0/0`)
+          const Buzz = ref(null)
+          const connected = computed(() => !!Buzz.value)
+          const content = ref('')
+          const buzzes = ref([])
+          const wallet = ref(null)
+
+          const connectWallet = async () => {
+            const _wallet = await LocalWallet.create(mnemonic.value, path.value)
+            wallet.value = _wallet
+
+            const baseEntity = await connect(_wallet)
+            const handler = await baseEntity.use('buzz')
+            Buzz.value = handler
+          }
+
+          const connectMetalet = async () => {
+            console.log('connectMetalet')
+
+            const _wallet = await MetaletWallet.create()
+            wallet.value = _wallet
+            Buzz.value = await (await connect(_wallet)).use('buzz')
+          }
+
+          const getAddress = async () => {
+            const address = await toRaw(wallet.value).getAddress()
+
+            console.log({ address })
+          }
+
+          const getPublicKey = async () => {
+            const publicKey = await toRaw(wallet.value).getPublicKey('/0/2')
+
+            console.log({ publicKey })
+          }
+
+          const send2k = async () => {
+            const toAddress = '1F7uWqyb7mJxvPKG8HzsQJWLkP8DqAdHkW'
+            const res = await toRaw(wallet.value).send(toAddress, 2000)
+
+            console.log({ res })
+          }
+
+          const createBuzz = async () => {
+            await toRaw(Buzz.value).create({ content: content.value })
+          }
+
+          const getBuzzList = async () => {
+            const { items } = await toRaw(Buzz.value).list()
+
+            console.log({ items })
+
+            buzzes.value = items
+          }
+
+          return {
+            connectWallet,
+            connectMetalet,
+            path,
+            wallet,
+            mnemonic,
+            connected,
+            content,
+            createBuzz,
+            getBuzzList,
+            buzzes,
+            getAddress,
+            getPublicKey,
+            send2k,
+          }
+        },
+      }).mount('#app')
+    </script>
+  </body>
+</html>

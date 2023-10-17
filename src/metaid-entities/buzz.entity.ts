@@ -10,6 +10,10 @@ const buzzSchema = {
           name: 'content',
           type: 'string',
         },
+        {
+          name: 'attachmentIds',
+          type: 'array',
+        },
       ],
     },
   ],

@@ -10,7 +10,7 @@ type MetaidOpreturn = [
   string, // content type
   string, // charset
 ]
-export default function buildOpreturn({
+export function buildOpreturn({
   publicKey,
   parentTxid,
   protocolName,
@@ -24,7 +24,7 @@ export default function buildOpreturn({
   const opreturn: MetaidOpreturn = [
     'mvc',
     publicKey,
-    'meta:' + parentTxid,
+    'mvc:' + parentTxid,
     'metaid',
     [protocolName, publicKey.slice(0, 11)].join('-'),
     JSON.stringify(body),

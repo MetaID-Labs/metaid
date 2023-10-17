@@ -14,7 +14,7 @@ We use this concept to make it easier for developers to create their own entity 
 
 Previously we used the concept of `Brfc Node` to create metadata and build Web3 applications. But this concept is too verbose， too low-level, and not easy to use. So we created another abstraction layer on top of it, which is the concept of `entity`.
 
-We call this abstraction process `EMM` (Entity-Metadata Mapping), similar to the ORM (Object-Relational Mapping) concept in the database field. By doing this, we can create and utilize amore semantic and developer-friendly way to code.
+We call this abstraction process `EMM` (Entity-Metadata Mapping), similar to the ORM (Object-Relational Mapping) concept in the database field. By doing this, we can create and utilize a more semantic and developer-friendly way to code.
 
 ## How to use?
 
@@ -74,33 +74,51 @@ const localWallet = new LocalWallet('abchereisyourmnenonicstring')
 const metaletWallet = new MetaletWallet()
 
 // connect to wallet and use specific entities
+const baseEntity = connect(localWallet)
+
 const Buzz = connect(localWallet).use('buzz')
 const GroupMessage = connect(metaletWallet).use('group-message')
+```
+
+### Create MetaID
+
+```ts
+const baseEntity = connect(localWallet)
+if (!baseEntity.hasMetaid()) {
+  await baseEntity.createMetaid()
+}
+
+const Buzz = baseEntity.use('buzz')
 ```
 
 ### Use entity
 
 ```ts
-// list
-const buzzes = Buzz.list()
-
-// list filtered by query
-const buzzes = Buzz.list({
-  where: {
-    title: 'Hello World',
-  },
-})
-
-// my list
-const myBuzzes = Buzz.myList()
-
 // has root
+// 1. hasRoot(), createRoot()
 const hasRoot: boolean = Buzz.hasRoot()
 
 // create root
 if (!hasRoot) {
   await Buzz.createRoot()
 }
+
+// list
+const buzzes = await Buzz.list()
+
+// list filtered by query
+const buzzes = await Buzz.list({
+  where: {
+    title: 'Hello World',
+  },
+  orderBy,
+  orderByDesc,
+  limit,
+  metaid: '0x1234567890', // filter by metaid
+})
+
+// my list
+const myBuzzes = Buzz.myList()
 
 // get one buzz
 const buzz = Buzz.one('0x1234567890') // txid
@@ -182,10 +200,89 @@ await Like.belongsTo(theMessage).create()
 
 ### Refer an NFT info in a buzz
 
-```ts
+````ts
 const Reference = use('reference')
 
 await Reference.belongsTo(nft).create({
   content: 'Have a look at my gorgeous NFT!',
-})
+  nftId: nft.id,
+})```
+
+---
+
+## API Reference
+
+### Wallet
+
+Can have multiple wallet implementations as long as it implements the `Wallet` interface.
+
+```ts
+import { LocalWallet, MetaletWallet } from '@metaid/metaid'
+
+// use static method `create` to create a wallet instance
+LocalWallet.create(mnemonic: string): LocalWallet
+MetaletWallet.create(): Promise<MetaletWallet>
+````
+
+### Connector
+
+A connector is the bridge between your wallet and the entity.
+
+```ts
+import { connect } from '@metaid/metaid'
+
+connect(wallet: Wallet): Promise<Connector>
+
+// connector methods
+connector.isConnected(): boolean
+connector.use(entityName: string): Entity
+connector.hasMetaid(): boolean
+connector.createMetaid(): Promise<string>
+```
+
+### Entity
+
+An entity is a controller class to operate on a specific resource.
+
+```ts
+connector.use(entityName: string): Entity
+connector.define(entityName: string, schema: EntitySchema): Entity
+
+entity.hasRoot(): boolean
+entity.createRoot(): Promise<string>
+
+// Query
+entity.list(query?: Query): Promise<Resource[]>
+entity.myList(query?: Query): Promise<Resource[]>
+entity.one(query: Query | string): Promise<Resource>
+entity.first(query: Query | string): Promise<Resource>
+entity.get(query: Query | string): Promise<Resource>
+
+// Mutation
+entity.create(data: Record<string, any>): Promise<Resource>
+entity.update(id: string, data: Record<string, any>): Promise<Resource>
+entity.delete(id: string): Promise<Resource>
+
+```
+
+### Resource
+
+A resource is a data object that represents a specific entity.
+
+`entity.list()` returns an array of resources.
+
+`entity.one()` returns a single resource.
+
+```ts
+type Resource = {
+  txid: string
+  createdAt: timestamp
+  body: Record<string, any>
+  // We wrap the resource's owner info in a `user` object.
+  user: {
+    metaid: string
+    name: string
+    avatar: string
+  }
+}
 ```

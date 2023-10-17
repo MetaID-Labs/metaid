@@ -1,4 +1,4 @@
-import use from '../use.ts'
+import { use } from './use.js'
 
 test('run', async () => {
   const Buzz = await use('buzz')
