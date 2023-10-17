@@ -1,5 +1,31 @@
 import axios from "axios";
 
+interface UserAllInfo {
+  metaId: string;
+  metaIdTag: string;
+  address: string;
+  pubKey: string;
+  infoTxId: string;
+  infoPublicKey: string;
+  protocolTxId: string;
+  protocolPublicKey: string;
+  name: string;
+  nameEncrypt: string;
+  phone: string;
+  phoneEncrypt: string;
+  email: string;
+  emailEncrypt: string;
+  avatarTxId: string;
+  avatarImage: string;
+  avatarEncrypt: string;
+  coverUrl: string;
+  coverType: string;
+  coverPublicKey: string;
+  timestamp: number;
+  metaName: string;
+  nameType: string;
+}
+
 type AggregationResponse = {
   code: number;
   data: {
@@ -23,6 +49,7 @@ export async function getMetaid({
 }: {
   address: string;
 }): Promise<string | null> {
+  console.log({ address });
   const url = `https://api.show3.io/metaid-base/v1/meta/root/${address}`;
 
   try {
@@ -30,6 +57,7 @@ export async function getMetaid({
       .get(url)
       .then((res) => res.data)
       .then((res: MetaidBaseResponse) => {
+        console.log({ res });
         if (res.code !== 200) throw new Error(`Error: ${res.code}`);
 
         return res.result.rootTxId;
@@ -187,41 +215,61 @@ export async function getBiggestUtxo({
 export async function getNewBrfcNodeInfo(params: {
   xpub: string;
   parentTxId: string;
-}): Promise<{
-  address: string;
-  path: string;
-  publicKey: string;
-}> {
-  const url = `https://api.show3.io/serviceapi/api/v1/showService/getPublicKeyForNewNode`;
-  const { xpub, parentTxId } = params;
-  try {
-    const data = await axios
-      .post(url, {
-        data: JSON.stringify({
-          xpub,
-          parentTxId,
-          count: 30,
-        }),
-      })
-      .then((res) => {
-        const node = res.data.result.data.find(
-          (item) => item.parentTxId == parentTxId
-        );
-        return node;
-      });
+}) {
+  return new Promise<{
+    address: string;
+    path: string;
+    publicKey: string;
+  }>(async (resolve, reject) => {
+    let node;
+    const url = `https://api.show3.io/serviceapi/api/v1/showService/getPublicKeyForNewNode`;
+    const { xpub, parentTxId } = params;
+    const res = await axios.post(url, {
+      data: JSON.stringify({
+        xpub,
+        parentTxId,
+        count: 30,
+      }),
+    });
 
-    return data;
-  } catch (error) {
-    console.error(error);
-  }
+    if (res.data.code == 200) {
+      const newBrfcNodeBaseInfoList = [];
+      for (let item of res.data.result.data) {
+        newBrfcNodeBaseInfoList.push({
+          ...item,
+          txid: parentTxId,
+        });
+      }
+      node = newBrfcNodeBaseInfoList.find((item) => item.txid == parentTxId);
+    } else {
+      reject({
+        code: res.data.code,
+        message: res.data.error,
+      });
+    }
+    resolve(node);
+  });
 }
 
 export async function broadcast({ txHex }: { txHex: string }): Promise<{
-  txid: string
+  txid: string;
 }> {
   return await axios
-    .post('https://mainnet.mvcapi.com/tx/broadcast', {
+    .post("https://mainnet.mvcapi.com/tx/broadcast", {
       hex: txHex,
     })
-    .then((res) => res.data)
+    .then((res) => res.data);
+}
+
+export async function getAccountInfo(metaid: string): Promise<{
+  data: UserAllInfo;
+}> {
+  const url = `https://api.show3.io/aggregation/v2/app/user/getUserAllInfo/${metaid}`;
+  return await axios.get(url).then((res) => {
+    if (res.data.code == 0) {
+      return res.data.data;
+    } else {
+      return null;
+    }
+  });
 }
