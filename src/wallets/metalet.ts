@@ -49,14 +49,12 @@ export class MetaletWallet implements MetaIDConnectWallet {
   }
 
   public async signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }) {
-    // get input's address
-    console.log({
-      inputIndex,
-      output0: txComposer.getInput(0).output,
-      output1: txComposer.getInput(1).output,
-    })
-    const outputScript = txComposer.getInput(inputIndex).output.script
+    const prevOutput = txComposer.getInput(inputIndex).output
+    if (!prevOutput) throw new Error(errors.NO_OUTPUT)
+
+    const outputScript = prevOutput.script
     const address = outputScript.toAddress().toString()
+    const satoshis = prevOutput.satoshis
 
     // get xpub from metalet
     const xpubObj = mvc.HDPublicKey.fromString(this.xpub)
@@ -85,17 +83,16 @@ export class MetaletWallet implements MetaIDConnectWallet {
         {
           txHex: txComposer.getTx().toString(),
           inputIndex,
-          address,
           scriptHex: outputScript.toHex(),
           path: toUsePath,
-          sigtype: 0xc1,
+          satoshis,
+          // sigtype: 0xc1,
         },
       ],
     })
 
     // update the txComposer
     const signedTx = new mvc.Transaction(signedTransactions[0].txHex)
-    console.log({ signedTx })
 
     return new TxComposer(signedTx)
   }

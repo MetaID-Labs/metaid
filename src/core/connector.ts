@@ -1,6 +1,6 @@
 import { use } from '@/factories/use.js'
 import { MetaIDConnectWallet } from '../wallets/wallet.ts'
-import { TxComposer } from 'meta-contract'
+import { TxComposer, mvc } from 'meta-contract'
 import { getMetaid } from '@/api.ts'
 
 export class Connector {

@@ -1,4 +1,4 @@
-import { TxComposer } from 'meta-contract'
+import { TxComposer, mvc } from 'meta-contract'
 
 export interface WalletStatic {
   create: ((mnemonic: string, derivePath?: string) => MetaIDConnectWallet) | (() => Promise<MetaIDConnectWallet>)

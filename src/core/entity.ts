@@ -1,6 +1,6 @@
 import { TxComposer, mvc } from 'meta-contract'
 
-import { getBiggestUtxo, getBuzzes, getRootNode, notify } from '@/api.js'
+import { getBiggestUtxo, getBuzzes, getRootNode, getUtxos, notify } from '@/api.js'
 import { connected } from '@/decorators/connected.js'
 import { buildOpreturn } from '@/utils/opreturn-builder.ts'
 import { Connector } from './connector.ts'
@@ -92,8 +92,20 @@ export class Entity {
     const root = await this.getRoot()
     const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
 
-    // 1. send dust to root address
-    const { txid: dustTxid } = await this.connector.send(root.address, UTXO_DUST)
+    let dustTxid = ''
+    let dustValue = 0
+    // 1.1 first, check if root address already has dust utxos;
+    // if so, use it directly;
+    const dusts = await getUtxos({ address: root.address })
+    if (dusts.length > 0) {
+      dustTxid = dusts[0].txid
+      dustValue = dusts[0].value
+    } else {
+      // 1.2 otherwise, send dust to root address
+      const { txid } = await this.connector.send(root.address, UTXO_DUST)
+      dustTxid = txid
+      dustValue = UTXO_DUST
+    }
 
     // 2. link tx
     const randomPriv = new mvc.PrivateKey(undefined, 'mainnet')
@@ -104,7 +116,7 @@ export class Entity {
       address: mvc.Address.fromString(root.address, 'mainnet' as any),
       txId: dustTxid,
       outputIndex: 0,
-      satoshis: UTXO_DUST,
+      satoshis: dustValue,
     })
 
     const metaidOpreturn = buildOpreturn({
@@ -124,12 +136,15 @@ export class Entity {
     })
     linkTxComposer.appendChangeOutput(walletAddress, 1)
 
+    // save input-1's output for later use
     const input1Output = linkTxComposer.getInput(1).output
 
     linkTxComposer = await this.connector.signInput({
       txComposer: linkTxComposer,
       inputIndex: 0,
     })
+
+    // reassign input-1's output
     linkTxComposer.getInput(1).output = input1Output
     linkTxComposer = await this.connector.signInput({
       txComposer: linkTxComposer,
