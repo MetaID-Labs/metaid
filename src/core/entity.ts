@@ -190,7 +190,7 @@ export class Entity {
     body: unknown,
     options?: {
       invisible: boolean
-    },
+    }
   ) {
     const root = await this.getRoot()
     const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
