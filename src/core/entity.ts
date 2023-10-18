@@ -1,8 +1,15 @@
 import { TxComposer, mvc } from "meta-contract";
 
-import { getBiggestUtxo, getBuzzes, getRootNode, notify } from "@/api.js";
+import {
+	getBiggestUtxo,
+	getBuzzes,
+	getRootNode,
+	notify,
+	getNewBrfcNodeInfo,
+	getAccountInfo,
+} from "@/api.js";
 import { connected } from "@/decorators/connected.js";
-import { buildOpreturn } from "@/utils/opreturn-builder.ts";
+import { buildOpreturn, buildBrfcRootOpreturn } from "@/utils/opreturn-builder.ts";
 import { Connector } from "./connector.ts";
 import { errors } from "@/data/errors.ts";
 import { UTXO_DUST } from "@/data/constants.ts";
@@ -79,7 +86,6 @@ export class Entity {
 	@connected
 	public async create(body: unknown) {
 		const root = await this.getRoot();
-		if (!root) throw new Error(errors.NO_ROOT_DETECTED);
 		const walletAddress = mvc.Address.fromString(this.connector.address, "mainnet" as any);
 
 		// 1. send dust to root address

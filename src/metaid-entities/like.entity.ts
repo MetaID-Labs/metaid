@@ -1,4 +1,4 @@
-const buzzSchema = {
+const likeSchema = {
 	name: "like",
 	nodeName: "PayLike",
 	versions: [
@@ -19,4 +19,4 @@ const buzzSchema = {
 	],
 };
 
-export default buzzSchema;
+export default likeSchema;

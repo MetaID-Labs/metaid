@@ -3,7 +3,6 @@ import { TxComposer, mvc, Wallet as InternalWallet } from "meta-contract";
 import { MetaIDConnectWallet, WalletStatic } from "./wallet.js";
 import { DERIVE_MAX_DEPTH } from "@/data/constants.ts";
 import { staticImplements } from "@/utils/index.ts";
-import { errors } from "@/data/errors.ts";
 
 @staticImplements<WalletStatic>()
 export class LocalWallet implements MetaIDConnectWallet {
@@ -91,7 +90,7 @@ export class LocalWallet implements MetaIDConnectWallet {
 
 			deriver++;
 		}
-		if (!toUsePrivateKey) throw new Error(errors.CANNOT_DERIVE_PATH);
+
 		// sign the input
 		txComposer.unlockP2PKHInput(toUsePrivateKey, inputIndex);
 
