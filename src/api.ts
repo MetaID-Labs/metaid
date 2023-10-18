@@ -1,6 +1,6 @@
 import axios from "axios";
 
-interface UserAllInfo {
+export interface UserAllInfo {
 	metaId: string;
 	metaIdTag: string;
 	address: string;
@@ -260,9 +260,7 @@ export async function broadcast({ txHex }: { txHex: string }): Promise<{
 		.then((res) => res.data);
 }
 
-export async function getAccountInfo(metaid: string): Promise<{
-	data: UserAllInfo;
-}> {
+export async function getAccountInfo(metaid: string): Promise<UserAllInfo> {
 	const url = `https://api.show3.io/aggregation/v2/app/user/getUserAllInfo/${metaid}`;
 	return await axios.get(url).then((res) => {
 		if (res.data.code == 0) {
