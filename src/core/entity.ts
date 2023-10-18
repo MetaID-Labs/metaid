@@ -2,11 +2,11 @@ import { TxComposer, mvc } from 'meta-contract'
 
 import { getUser, getBiggestUtxo, getBuzzes, getRootCandidate, getRootNode, getUtxos, notify } from '@/api.js'
 import { connected } from '@/decorators/connected.js'
-import { buildRootOpreturn, buildOpreturn } from '@/utils/opreturn-builder.ts'
-import { Connector } from './connector.ts'
-import { errors } from '@/data/errors.ts'
-import { UTXO_DUST } from '@/data/constants.ts'
-import { sleep } from '@/utils/index.ts'
+import { buildRootOpreturn, buildOpreturn } from '@/utils/opreturn-builder.js'
+import { Connector } from './connector.js'
+import { errors } from '@/data/errors.js'
+import { UTXO_DUST } from '@/data/constants.js'
+import { sleep } from '@/utils/index.js'
 
 type Root = {
   id: string

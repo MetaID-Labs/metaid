@@ -1,9 +1,9 @@
-import { staticImplements } from '@/utils/index.ts'
-import { MetaIDConnectWallet, WalletStatic } from './wallet.ts'
+import { staticImplements } from '@/utils/index.js'
+import { type MetaIDConnectWallet, type WalletStatic } from './wallet.js'
 import { TxComposer, mvc } from 'meta-contract'
-import { errors } from '@/data/errors.ts'
-import { broadcast as broadcastToApi } from '@/api.ts'
-import { DERIVE_MAX_DEPTH } from '@/data/constants.ts'
+import { errors } from '@/data/errors.js'
+import { broadcast as broadcastToApi } from '@/api.js'
+import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
 
 @staticImplements<WalletStatic>()
 export class MetaletWallet implements MetaIDConnectWallet {
@@ -99,7 +99,7 @@ export class MetaletWallet implements MetaIDConnectWallet {
 
   public async send(
     toAddress: string,
-    amount: number,
+    amount: number
   ): Promise<{
     txid: string
   }> {

@@ -1,4 +1,4 @@
-import { BrfcRootName, ProtocolName } from '@/data/protocols.ts'
+import { BrfcRootName, ProtocolName } from '@/data/protocols.js'
 
 type MetaidOpreturn = [
   'mvc', // chain flag
