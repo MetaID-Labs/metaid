@@ -157,6 +157,7 @@ export async function getBuzzes({ metaid }: { metaid: string }) {
 							createdAt: item.timestamp,
 							user,
 							body,
+							likes: item.like,
 						};
 
 						return buzz;
