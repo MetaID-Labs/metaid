@@ -253,7 +253,7 @@ export class Entity {
       txComposer: linkTxComposer,
       inputIndex: 1,
     })
-    const txid = await this.connector.broadcast(linkTxComposer)
+    const { txid } = await this.connector.broadcast(linkTxComposer)
 
     await notify({ txHex: linkTxComposer.getRawHex() })
 
