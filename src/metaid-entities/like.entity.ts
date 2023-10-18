@@ -1,23 +1,22 @@
-const buzzSchema = {
-  name: 'like',
-  nodeName: 'PayLike',
-  versions: [
-    {
-      version: 1,
-      id: 'b17e9e277bd7',
-      body: [
-        {
-          name: 'content',
-          type: 'string',
-        },
-        {
-          name: 'attachmentIds',
-          type: 'array',
-        },
-      ],
-    },
-    // {}
-  ],
-}
+const likeSchema = {
+	name: "like",
+	nodeName: "PayLike",
+	versions: [
+		{
+			version: 1,
+			id: "2ae43eeb26d9",
+			body: [
+				{
+					name: "likeTo",
+					type: "string",
+				},
+				{
+					name: "isLike",
+					type: "string",
+				},
+			],
+		},
+	],
+};
 
-export default buzzSchema
+export default likeSchema;
