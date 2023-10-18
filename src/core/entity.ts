@@ -1,11 +1,12 @@
 import { TxComposer, mvc } from 'meta-contract'
 
-import { getBiggestUtxo, getBuzzes, getRootNode, getUtxos, notify } from '@/api.js'
+import { getUser, getBiggestUtxo, getBuzzes, getRootCandidate, getRootNode, getUtxos, notify } from '@/api.js'
 import { connected } from '@/decorators/connected.js'
-import { buildOpreturn } from '@/utils/opreturn-builder.ts'
+import { buildRootOpreturn, buildOpreturn } from '@/utils/opreturn-builder.ts'
 import { Connector } from './connector.ts'
 import { errors } from '@/data/errors.ts'
 import { UTXO_DUST } from '@/data/constants.ts'
+import { sleep } from '@/utils/index.ts'
 
 type Root = {
   id: string
@@ -64,7 +65,7 @@ export class Entity {
   }
 
   @connected
-  public async getRoot() {
+  public async getRoot(): Promise<Partial<Root>> {
     if (this._root) return this._root
 
     const root = await getRootNode({
@@ -72,14 +73,116 @@ export class Entity {
       nodeName: this.schema.nodeName,
       nodeId: this.schema.versions[0].id,
     })
-
-    if (!root) {
-      await this.createRoot()
-    }
-
     this._root = root
 
+    if (!this._root) {
+      const user = await getUser(this.metaid)
+
+      if (user.metaId) {
+        const protocolAddress = await this.connector.getAddress('/0/2')
+        const rootCandidate = await getRootCandidate({
+          xpub: this.connector.xpub,
+          parentTxId: user.protocolTxId,
+        })
+
+        const { txid } = await this.createRoot({
+          protocolAddress,
+          protocolTxid: user.protocolTxId,
+
+          candidatePublicKey: rootCandidate.publicKey,
+        })
+
+        await sleep(1000)
+
+        // re fetch
+        const root = await getRootNode({
+          metaid: this.metaid,
+          nodeName: this.schema.nodeName,
+          nodeId: this.schema.versions[0].id,
+        })
+        if (!root) throw new Error(errors.FAILED_TO_CREATE_ROOT)
+
+        this._root = root
+      }
+    }
+
     return this._root
+  }
+
+  @connected
+  private async createRoot({
+    protocolAddress,
+    protocolTxid,
+    candidatePublicKey,
+  }: {
+    protocolAddress: string
+    protocolTxid: string
+    candidatePublicKey: string
+  }) {
+    const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
+
+    let dustTxid = ''
+    let dustValue = 0
+    // 1.1 first, check if protocol address already has dust utxos;
+    // if so, use it directly;
+    const dusts = await getUtxos({ address: protocolAddress })
+    if (dusts.length > 0) {
+      dustTxid = dusts[0].txid
+      dustValue = dusts[0].value
+    } else {
+      // 1.2 otherwise, send dust to root address
+      const { txid } = await this.connector.send(protocolAddress, UTXO_DUST)
+      dustTxid = txid
+      dustValue = UTXO_DUST
+    }
+
+    // 2. link tx
+    let linkTxComposer = new TxComposer()
+    linkTxComposer.appendP2PKHInput({
+      address: mvc.Address.fromString(protocolAddress, 'mainnet' as any),
+      txId: dustTxid,
+      outputIndex: 0,
+      satoshis: dustValue,
+    })
+
+    const metaidOpreturn = buildRootOpreturn({
+      publicKey: candidatePublicKey,
+      parentTxid: protocolTxid,
+      protocolName: this.schema.nodeName,
+      body: undefined,
+    })
+    linkTxComposer.appendOpReturnOutput(metaidOpreturn)
+
+    const biggestUtxo = await getBiggestUtxo({
+      address: walletAddress.toString(),
+    })
+    linkTxComposer.appendP2PKHInput({
+      address: walletAddress,
+      txId: biggestUtxo.txid,
+      outputIndex: biggestUtxo.outIndex,
+      satoshis: biggestUtxo.value,
+    })
+    linkTxComposer.appendChangeOutput(walletAddress, 1)
+
+    // save input-1's output for later use
+    const input1Output = linkTxComposer.getInput(1).output
+
+    linkTxComposer = await this.connector.signInput({
+      txComposer: linkTxComposer,
+      inputIndex: 0,
+    })
+
+    // reassign input-1's output
+    linkTxComposer.getInput(1).output = input1Output
+    linkTxComposer = await this.connector.signInput({
+      txComposer: linkTxComposer,
+      inputIndex: 1,
+    })
+    const { txid } = await this.connector.broadcast(linkTxComposer)
+
+    await notify({ txHex: linkTxComposer.getRawHex() })
+
+    return { txid }
   }
 
   @connected
@@ -150,25 +253,11 @@ export class Entity {
       txComposer: linkTxComposer,
       inputIndex: 1,
     })
-    await this.connector.broadcast(linkTxComposer)
+    const txid = await this.connector.broadcast(linkTxComposer)
 
     await notify({ txHex: linkTxComposer.getRawHex() })
 
-    return true
-  }
-
-  @connected
-  public async createRoot() {
-    const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
-
-    const randomPriv = new mvc.PrivateKey(undefined, 'mainnet')
-    const randomPub = randomPriv.toPublicKey()
-
-    const rootTxComposer = new TxComposer()
-    // rootTxComposer.appendP2PKHInput({
-    //   address: walletAddress,
-    //   // txId: '00000
-    // })
+    return { txid }
   }
 
   public async list() {

@@ -1,6 +1,6 @@
 import { use } from '@/factories/use.js'
 import { MetaIDConnectWallet } from '../wallets/wallet.ts'
-import { TxComposer, mvc } from 'meta-contract'
+import { TxComposer } from 'meta-contract'
 import { getMetaid } from '@/api.ts'
 
 export class Connector {
@@ -24,6 +24,7 @@ export class Connector {
 
   public static async create(wallet: MetaIDConnectWallet) {
     const connector = new Connector(wallet)
+    console.log({ wallet })
 
     // ask api for metaid
     connector.metaid =
@@ -65,5 +66,13 @@ export class Connector {
 
   broadcast(txComposer: TxComposer) {
     return this.wallet.broadcast(txComposer)
+  }
+
+  getPublicKey(path?: string) {
+    return this.wallet.getPublicKey(path)
+  }
+
+  getAddress(path?: string) {
+    return this.wallet.getAddress(path)
   }
 }

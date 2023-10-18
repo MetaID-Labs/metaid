@@ -1,4 +1,4 @@
-import { TxComposer, mvc } from 'meta-contract'
+import { TxComposer } from 'meta-contract'
 
 export interface WalletStatic {
   create: ((mnemonic: string, derivePath?: string) => MetaIDConnectWallet) | (() => Promise<MetaIDConnectWallet>)
@@ -30,5 +30,5 @@ export interface MetaIDConnectWallet {
 
   broadcast(txComposer: TxComposer): Promise<{ txid: string }>
 
-  encrypt(message: string, publicKey: string): Promise<string>
+  // encrypt(message: string, publicKey: string): Promise<string>
 }
