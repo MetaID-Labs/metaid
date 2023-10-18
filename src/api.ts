@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export interface UserAllInfo {
+export type User = {
 	metaId: string;
 	metaIdTag: string;
 	address: string;
@@ -24,7 +24,7 @@ export interface UserAllInfo {
 	timestamp: number;
 	metaName: string;
 	nameType: string;
-}
+};
 
 type AggregationResponse = {
 	code: number;
@@ -214,7 +214,18 @@ export async function getBiggestUtxo({ address }: { address: string }): Promise<
 	});
 }
 
-export async function getNewBrfcNodeInfo(params: { xpub: string; parentTxId: string }) {
+export async function getUser(metaid: string): Promise<User> {
+	const url = `https://api.show3.io/aggregation/v2/app/user/getUserAllInfo/${metaid}`;
+	return await axios.get(url).then((res) => {
+		if (res.data.code == 0) {
+			return res.data.data;
+		} else {
+			return null;
+		}
+	});
+}
+
+export async function getRootCandidate(params: { xpub: string; parentTxId: string }) {
 	return new Promise<{
 		address: string;
 		path: string;
@@ -258,15 +269,4 @@ export async function broadcast({ txHex }: { txHex: string }): Promise<{
 			hex: txHex,
 		})
 		.then((res) => res.data);
-}
-
-export async function getAccountInfo(metaid: string): Promise<UserAllInfo> {
-	const url = `https://api.show3.io/aggregation/v2/app/user/getUserAllInfo/${metaid}`;
-	return await axios.get(url).then((res) => {
-		if (res.data.code == 0) {
-			return res.data.data;
-		} else {
-			return null;
-		}
-	});
 }

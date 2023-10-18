@@ -28,3 +28,22 @@ export default defineConfig({
 		minify: false,
 	},
 });
+  resolve: {
+    alias: {
+      '@': '/src',
+    },
+  },
+  plugins: [
+    dts({
+      insertTypesEntry: true,
+    }),
+  ],
+  build: {
+    lib: {
+      entry: resolve(__dirname, 'src/index.ts'),
+      name: 'Metaid',
+      fileName: 'metaid',
+    },
+    minify: false,
+  },
+})

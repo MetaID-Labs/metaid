@@ -1,14 +1,13 @@
 import { use } from "@/factories/use.js";
 import { MetaIDConnectWallet } from "../wallets/wallet.ts";
 import { TxComposer } from "meta-contract";
-import { UserAllInfo, getAccountInfo, getMetaid } from "@/api.ts";
+import { User, getUser, getMetaid } from "@/api.ts";
 
 export class Connector {
 	private _isConnected: boolean;
 	private wallet: MetaIDConnectWallet;
 	public metaid: string | undefined;
-	public user: UserAllInfo;
-
+	public user: User;
 	private constructor(wallet: MetaIDConnectWallet) {
 		this._isConnected = true;
 
@@ -25,16 +24,17 @@ export class Connector {
 
 	public static async create(wallet: MetaIDConnectWallet) {
 		const connector = new Connector(wallet);
+		console.log({ wallet });
 
+		// ask api for metaid
 		const metaid =
 			(await getMetaid({
 				address: wallet.address,
 			})) || undefined;
-
-		// ask api for metaid
 		connector.metaid = metaid;
+
 		if (!!metaid) {
-			connector.user = await getAccountInfo(metaid);
+			connector.user = await getUser(metaid);
 		}
 		return connector;
 	}
