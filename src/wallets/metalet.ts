@@ -1,9 +1,9 @@
-import { staticImplements } from "@/utils/index.ts";
-import { MetaIDConnectWallet, WalletStatic } from "./wallet.ts";
-import { TxComposer, mvc } from "meta-contract";
-import { errors } from "@/data/errors.ts";
-import { broadcast as broadcastToApi } from "@/api.ts";
-import { DERIVE_MAX_DEPTH } from "@/data/constants.ts";
+import { staticImplements } from '@/utils/index.js'
+import { type MetaIDConnectWallet, type WalletStatic } from './wallet.js'
+import { TxComposer, mvc } from 'meta-contract'
+import { errors } from '@/data/errors.js'
+import { broadcast as broadcastToApi } from '@/api.js'
+import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
 
 @staticImplements<WalletStatic>()
 export class MetaletWallet implements MetaIDConnectWallet {
@@ -99,17 +99,16 @@ export class MetaletWallet implements MetaIDConnectWallet {
         {
           txHex: txComposer.getTx().toString(),
           inputIndex,
-          address,
           scriptHex: outputScript.toHex(),
           path: toUsePath,
-          sigtype: 0xc1,
+          satoshis,
+          // sigtype: 0xc1,
         },
       ],
     });
 
     // update the txComposer
-    const signedTx = new mvc.Transaction(signedTransactions[0].txHex);
-    console.log({ signedTx });
+    const signedTx = new mvc.Transaction(signedTransactions[0].txHex)
 
     return new TxComposer(signedTx);
   }

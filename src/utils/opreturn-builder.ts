@@ -1,31 +1,31 @@
-import { BrfcRootName, ProtocolName } from "@/data/protocols.ts";
+import { BrfcRootName, ProtocolName } from '@/data/protocols.js'
 
 type MetaidOpreturn = [
-  "mvc", // chain flag
+  'mvc', // chain flag
   string, // public key of node
   string, // `${parentChainFlag(optional)}:${parentTxid}`
-  "metaid",
+  'metaid',
   string, // protocol name
   string, // stringify json body
-  "0", // isEncrypted
+  '0', // isEncrypted
   string, // version
   string, // content type
-  string // charset
-];
+  string, // charset
+]
 
 type BrfcRootOpreturn = [
-  "mvc", // chain flag
+  'mvc', // chain flag
   string, // public key of node
   string, // `${parentChainFlag(optional)}:${parentTxid}`
-  "metaid",
+  'metaid',
   string, // protocol name
   string, //brfcid
   string, // stringify json body
-  "0", // isEncrypted
+  '0', // isEncrypted
   string, // version
   string, // content type
-  string // charset
-];
+  string, // charset
+]
 
 type MetaIDRootOpreturn = [
   "mvc", // chain flag
@@ -47,20 +47,20 @@ export function buildBrfcRootOpreturn({
   body,
 }) {
   const opreturn: BrfcRootOpreturn = [
-    "mvc",
+    'mvc',
     publicKey,
-    "mvc:" + parentTxid,
-    "metaid",
+    'mvc:' + parentTxid,
+    'metaid',
     protocolName,
     BrfcRootName[protocolName].brfcId,
     body,
-    "0",
+    '0',
     BrfcRootName[protocolName].version,
-    "text/plain",
-    "UTF-8",
-  ];
+    'text/plain',
+    'UTF-8',
+  ]
 
-  return opreturn;
+  return opreturn
 }
 
 export function buildOpreturn({
@@ -69,25 +69,25 @@ export function buildOpreturn({
   protocolName,
   body,
 }: {
-  publicKey: string;
-  parentTxid: string;
-  protocolName: string;
-  body: any;
+  publicKey: string
+  parentTxid: string
+  protocolName: string
+  body: any
 }) {
   const opreturn: MetaidOpreturn = [
-    "mvc",
+    'mvc',
     publicKey,
-    "mvc:" + parentTxid,
-    "metaid",
-    protocolName + "-" + publicKey.slice(0, 11),
-    body == "NULL" ? undefined : JSON.stringify(body),
-    "0",
-    "1.0.0",
-    "application/json",
-    "UTF-8",
-  ];
+    'mvc:' + parentTxid,
+    'metaid',
+    protocolName + '-' + publicKey.slice(0, 11),
+    body == 'NULL' ? undefined : JSON.stringify(body),
+    '0',
+    '1.0.0',
+    'application/json',
+    'UTF-8',
+  ]
 
-  return opreturn;
+  return opreturn
 }
 
 export function buildMetaidRootOpreturn({

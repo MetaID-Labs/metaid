@@ -1,4 +1,4 @@
-import { errors } from '@/data/errors.ts'
+import { errors } from '@/data/errors.js'
 import { MetaletWallet } from './metalet.js'
 
 describe('wallets.metalet', () => {

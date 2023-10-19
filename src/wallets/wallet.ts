@@ -1,37 +1,34 @@
-import { TxComposer, mvc } from "meta-contract";
+import { TxComposer } from "meta-contract";
 
 export interface WalletStatic {
-  create:
-    | ((mnemonic: string, derivePath?: string) => MetaIDConnectWallet)
-    | (() => Promise<MetaIDConnectWallet>);
+  create: ((mnemonic: string, derivePath?: string) => MetaIDConnectWallet) | (() => Promise<MetaIDConnectWallet>)
 }
 
 export interface MetaIDConnectWallet {
-  address: string;
-  xpub: string;
+  address: string
+  xpub: string
 
-  hasAddress(): boolean;
+  hasAddress(): boolean
 
-  getAddress(path?: string): string | Promise<string>;
-  getPublicKey(path?: string): string | Promise<string>;
+  getAddress(path?: string): string | Promise<string>
+  getPublicKey(path?: string): string | Promise<string>
 
   signInput({
     txComposer,
     inputIndex,
   }: {
-    txComposer: TxComposer;
-    inputIndex: number;
-    path: string;
-  }): TxComposer | Promise<TxComposer>;
+    txComposer: TxComposer
+    inputIndex: number
+  }): TxComposer | Promise<TxComposer>
 
   send(
     toAddress: string,
-    amount: number
+    amount: number,
   ): Promise<{
-    txid: string;
-  }>;
+    txid: string
+  }>
 
-  broadcast(txComposer: TxComposer): Promise<{ txid: string }>;
+  broadcast(txComposer: TxComposer): Promise<{ txid: string }>
 
   encrypt(message: string, publicKey: string): Promise<string>;
 
