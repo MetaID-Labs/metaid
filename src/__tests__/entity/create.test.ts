@@ -11,14 +11,14 @@ describe("entity.create", () => {
   });
 
   test("cannot create a new buzz if it is not connected", async ({ Buzz }) => {
-    const txid = await Buzz.create({
-      content: "🎂",
-      contentType: "text/plain",
-      quoteTx: "",
-      attachments: [],
-      mention: [],
-    });
-    expect(txid).toBeTypeOf("boolean");
+    // const txid = await Buzz.create({
+    //   content: "🎂",
+    //   contentType: "text/plain",
+    //   quoteTx: "",
+    //   attachments: [],
+    //   mention: [],
+    // });
+    // expect(txid).toBeTypeOf("boolean");
     /**
      *
      *

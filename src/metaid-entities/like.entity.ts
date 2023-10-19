@@ -1,23 +1,23 @@
 const buzzSchema = {
-  name: 'like',
-  nodeName: 'PayLike',
+  name: "like",
+  nodeName: "PayLike",
   versions: [
     {
       version: 1,
-      id: 'b17e9e277bd7',
+      id: "2ae43eeb26d9",
       body: [
         {
-          name: 'content',
-          type: 'string',
+          name: "content",
+          type: "string",
         },
         {
-          name: 'attachmentIds',
-          type: 'array',
+          name: "attachmentIds",
+          type: "array",
         },
       ],
     },
     // {}
   ],
-}
+};
 
-export default buzzSchema
+export default buzzSchema;

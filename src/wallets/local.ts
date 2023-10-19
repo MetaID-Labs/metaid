@@ -81,6 +81,12 @@ export class LocalWallet implements MetaIDConnectWallet {
     return !!this.address;
   }
 
+  private getPrivatekey() {
+    return mvc.Mnemonic.fromString(this.mnemonic)
+      .toHDPrivateKey(undefined, "mainnet" as any)
+      .deriveChild(this.derivePath).privateKey;
+  }
+
   public signInput({
     txComposer,
     inputIndex,
@@ -130,5 +136,34 @@ export class LocalWallet implements MetaIDConnectWallet {
     const txid = await this.internal.api.broadcast(txComposer.getRawHex());
 
     return { txid };
+  }
+
+  public async signMessage(
+    message: string,
+    encoding: "utf-8" | "base64" | "hex" | "utf8" = "hex"
+  ): Promise<string> {
+    const messageHash = mvc.crypto.Hash.sha256(Buffer.from(message));
+
+    let sigBuf = mvc.crypto.ECDSA.sign(
+      messageHash,
+      this.getPrivatekey()
+    ).toBuffer();
+
+    let signature: string;
+    switch (encoding) {
+      case "utf-8":
+      case "utf8":
+        signature = sigBuf.toString("utf-8");
+        break;
+      case "base64":
+        signature = sigBuf.toString("base64");
+        break;
+      case "hex":
+      default:
+        signature = sigBuf.toString("hex");
+        break;
+    }
+
+    return signature;
   }
 }

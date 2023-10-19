@@ -1,13 +1,13 @@
 import { use } from "@/factories/use.js";
 import { MetaIDConnectWallet } from "../wallets/wallet.ts";
-import { TxComposer } from "meta-contract";
-import { getMetaid } from "@/api.ts";
-
+import { TxComposer, mvc } from "meta-contract";
+import { getMetaid, UserAllInfo } from "@/api.ts";
+import { Entity } from "./entity.ts";
 export class Connector {
   private _isConnected: boolean;
   private wallet: MetaIDConnectWallet;
   public metaid: string | undefined;
-
+  //public entity: Entity;
   private constructor(wallet: MetaIDConnectWallet) {
     this._isConnected = true;
 
@@ -81,4 +81,23 @@ export class Connector {
   getAddress(path?: string) {
     return this.wallet.getAddress(path);
   }
+
+  signMessage(
+    message: string
+    // privateKey: mvc.PrivateKey,
+    // encoding?: "utf-8" | "base64" | "hex" | "utf8"
+  ) {
+    return this.wallet.signMessage(message, "hex");
+  }
+
+  // public getMetaID() {
+  //   return new Promise<any>(async (resovle, reject) => {
+  //     try {
+  //       const userInfo = await this.entity.getMetaidBaseRoot();
+  //       resovle(userInfo);
+  //     } catch (error) {
+  //       reject(error);
+  //     }
+  //   });
+  // }
 }

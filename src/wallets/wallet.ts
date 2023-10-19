@@ -1,4 +1,4 @@
-import { TxComposer } from "meta-contract";
+import { TxComposer, mvc } from "meta-contract";
 
 export interface WalletStatic {
   create:
@@ -34,4 +34,9 @@ export interface MetaIDConnectWallet {
   broadcast(txComposer: TxComposer): Promise<{ txid: string }>;
 
   encrypt(message: string, publicKey: string): Promise<string>;
+
+  signMessage(
+    message: string,
+    encoding?: "utf-8" | "base64" | "hex" | "utf8"
+  ): Promise<string>;
 }
