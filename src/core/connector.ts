@@ -1,7 +1,7 @@
 import { use } from '@/factories/use.js'
-import { MetaIDConnectWallet } from '../wallets/wallet.ts'
+import { type MetaIDConnectWallet } from '../wallets/wallet.js'
 import { TxComposer } from 'meta-contract'
-import { User, fetchUser, fetchMetaid } from '@/api.ts'
+import { type User, fetchUser, fetchMetaid } from '@/api.js'
 
 export class Connector {
   private _isConnected: boolean

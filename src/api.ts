@@ -262,3 +262,53 @@ export async function broadcast({ txHex }: { txHex: string }): Promise<{
     })
     .then((res) => res.data)
 }
+
+export async function getMetaidInitFee(params: {
+  address: string;
+  xpub: string;
+  sigInfo: {
+    xSignature: string;
+    xPublickey: string;
+  };
+}) {
+  const url = `https://api.show3.io/nodemvc/api/v1/pri/wallet/sendInitSatsForMetalet`;
+  return await axios
+    .post(
+      url,
+      {
+        address: params.address,
+        xpub: params.xpub,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          accessKey: "",
+          timestamp: new Date().getTime() + "",
+          userName: "",
+          ...params.sigInfo,
+        },
+      }
+    )
+    .then((res) => {
+      console.log("getutxo123", res);
+      if (res.data.code == 0) {
+        const utxo = res.data.result || {};
+        return {
+          ...utxo,
+          outputIndex: +utxo.index,
+          satoshis: +utxo.amount,
+          value: +utxo.amount,
+          amount: +utxo.amount * 1e-8,
+          address: utxo.toAddress,
+          script: utxo.scriptPubkey,
+          addressType: 0,
+          addressIndex: 0,
+        };
+      } else {
+        throw new Error(res.data.msg);
+      }
+    })
+    .catch((e) => {
+      throw new Error(e.msg);
+    });
+}

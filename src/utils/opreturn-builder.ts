@@ -1,4 +1,4 @@
-import { BrfcRootName, ProtocolName } from '@/data/protocols.ts'
+import { BrfcRootName, ProtocolName } from '@/data/protocols.js'
 
 type MetaidOpreturn = [
   'mvc', // chain flag
@@ -27,8 +27,20 @@ type BrfcRootOpreturn = [
   string, // charset
 ]
 
-export function buildRootOpreturn({ publicKey, parentTxid, protocolName, body }) {
-  // console.log('sssss', BrfcRootName, publicKey, parentTxid, protocolName, body)
+type MetaIDRootOpreturn = [
+  'mvc', // chain flag
+  string, // public key of node
+  string, // `${parentChainFlag(optional)}:${parentTxid}`
+  'metaid',
+  string, // protocol name
+  string, // stringify json body
+  '0', // isEncrypted
+  string, // version
+  string, // content type
+  string, // charset
+]
+
+export function buildBrfcRootOpreturn({ publicKey, parentTxid, protocolName, body }) {
   const opreturn: BrfcRootOpreturn = [
     'mvc',
     publicKey,
@@ -68,6 +80,33 @@ export function buildOpreturn({
     '1.0.0',
     'application/json',
     'UTF-8',
+  ]
+
+  return opreturn
+}
+
+export function buildMetaidRootOpreturn({
+  publicKey,
+  parentTxid,
+  protocolName,
+  body,
+}: {
+  publicKey: string
+  parentTxid: string
+  protocolName: string
+  body: any
+}) {
+  const opreturn: MetaIDRootOpreturn = [
+    'mvc',
+    publicKey,
+    parentTxid ? 'mvc:' + parentTxid : 'mvc:' + 'NULL',
+    'metaid',
+    protocolName,
+    body === 'NULL' ? 'NULL' : body,
+    '0',
+    protocolName === 'Root' ? '1.0.1' : 'NULL',
+    protocolName === 'Root' ? 'NULL' : 'text/plain',
+    protocolName === 'Root' ? 'NULL' : 'UTF-8',
   ]
 
   return opreturn
