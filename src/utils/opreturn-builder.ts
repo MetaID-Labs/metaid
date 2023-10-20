@@ -28,6 +28,7 @@ type BrfcRootOpreturn = [
 ]
 
 export function buildRootOpreturn({ publicKey, parentTxid, protocolName, body }) {
+  // console.log('sssss', BrfcRootName, publicKey, parentTxid, protocolName, body)
   const opreturn: BrfcRootOpreturn = [
     'mvc',
     publicKey,
