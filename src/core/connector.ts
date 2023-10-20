@@ -1,13 +1,13 @@
 import { use } from '@/factories/use.js'
 import { type MetaIDConnectWallet } from '../wallets/wallet.js'
 import { TxComposer } from 'meta-contract'
-import { type User, getUser, getMetaid } from '@/api.js'
+import { type User, getUser, fetchMetaid } from '@/api.js'
 
 export class Connector {
   private _isConnected: boolean
   private wallet: MetaIDConnectWallet
   public metaid: string | undefined
-  public user: User
+  private user: User
   private constructor(wallet: MetaIDConnectWallet) {
     this._isConnected = true
 
@@ -24,11 +24,10 @@ export class Connector {
 
   public static async create(wallet: MetaIDConnectWallet) {
     const connector = new Connector(wallet)
-    console.log({ wallet })
 
     // ask api for metaid
     const metaid =
-      (await getMetaid({
+      (await fetchMetaid({
         address: wallet.address,
       })) || undefined
     connector.metaid = metaid
@@ -37,6 +36,19 @@ export class Connector {
       connector.user = await getUser(metaid)
     }
     return connector
+  }
+
+  // user
+  hasUser() {
+    return !!this.user
+  }
+
+  getUser() {
+    return this.user
+  }
+
+  createUser() {
+    throw new Error('not implemented')
   }
 
   // metaid
@@ -58,7 +70,7 @@ export class Connector {
 
   /**
    * wallet delegation
-   * signInput / send / broadcast
+   * signInput / send / broadcast / getPublicKey / getAddress / signMessage
    */
   signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }) {
     return this.wallet.signInput({ txComposer, inputIndex })
@@ -85,7 +97,7 @@ export class Connector {
     // privateKey: mvc.PrivateKey,
     // encoding?: "utf-8" | "base64" | "hex" | "utf8"
   ) {
-    return this.wallet.signMessage(message, "hex");
+    return this.wallet.signMessage(message, 'hex')
   }
 
   // public getMetaID() {
