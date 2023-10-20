@@ -11,7 +11,7 @@ import {
   type User,
 } from '@/api.js'
 import { connected } from '@/decorators/connected.js'
-import { buildBrfcRootOpreturn, buildOpreturn, buildMetaidRootOpreturn } from '@/utils/opreturn-builder.js'
+import { buildRootOpreturn, buildOpreturn, buildUserOpreturn } from '@/utils/opreturn-builder.js'
 import { Connector } from './connector.js'
 import { errors } from '@/data/errors.js'
 import { UTXO_DUST } from '@/data/constants.js'
@@ -75,104 +75,6 @@ export class Entity {
   }
 
   @connected
-  public async getMetaidBaseRoot(body?: { name: string }): Promise<User> {
-    let metaidBaseNodeInfo: Partial<User> = {
-      metaId: '',
-      protocolTxId: '',
-      infoTxId: '',
-      name: '',
-    }
-    try {
-      if (this.metaid) {
-        const accountInfo = await fetchUser(this.metaid)
-        metaidBaseNodeInfo = accountInfo
-        if (
-          metaidBaseNodeInfo.metaId &&
-          metaidBaseNodeInfo.protocolTxId &&
-          (metaidBaseNodeInfo.infoTxId && metaidBaseNodeInfo).name
-        ) {
-          this.userInfo = metaidBaseNodeInfo
-        }
-      } else {
-        const signature = await this.connector.signMessage(import.meta.env.VITE_SIGN_MSG)
-        try {
-          await getMetaidInitFee({
-            address: this.address,
-            xpub: this.connector.xpub,
-            sigInfo: {
-              xSignature: signature,
-              xPublickey: await this.connector.getPublicKey('/0/0'),
-            },
-          })
-        } catch (error) {
-          console.log(error)
-        }
-      }
-      if (
-        !metaidBaseNodeInfo?.metaId ||
-        !metaidBaseNodeInfo?.protocolTxId ||
-        !metaidBaseNodeInfo?.infoTxId ||
-        (!metaidBaseNodeInfo?.name && Array.isArray(this.schema))
-      ) {
-        let address, publicKey
-        for (let i of this.schema) {
-          if (i.nodeName === 'Root' && !metaidBaseNodeInfo.metaId) {
-            publicKey = await this.connector.getPublicKey('/0/0')
-            const { txid } = await this.createMetaidRoot(
-              {
-                publicKey,
-              },
-              i.nodeName
-            )
-            metaidBaseNodeInfo.metaId = txid
-          }
-          if (i.nodeName === 'Protocols' && !metaidBaseNodeInfo.protocolTxId) {
-            publicKey = await this.connector.getPublicKey('/0/2')
-            const { txid } = await this.createMetaidRoot(
-              {
-                publicKey,
-                txid: metaidBaseNodeInfo.metaId,
-              },
-              i.nodeName
-            )
-            metaidBaseNodeInfo.protocolTxId = txid
-          }
-          if (i.nodeName === 'Info' && !metaidBaseNodeInfo.infoTxId) {
-            publicKey = await this.connector.getPublicKey('/0/1')
-            const { txid } = await this.createMetaidRoot(
-              {
-                publicKey,
-                txid: metaidBaseNodeInfo.metaId,
-              },
-              i.nodeName
-            )
-            metaidBaseNodeInfo.infoTxId = txid
-          }
-          if (i.nodeName === 'name' && !metaidBaseNodeInfo.name) {
-            address = await this.connector.getAddress('/0/1')
-            publicKey = await this.connector.getPublicKey('/0/1')
-            await this.createMetaidRoot(
-              {
-                address,
-                publicKey,
-                txid: metaidBaseNodeInfo.infoTxId,
-                body: body.name ? body.name : import.meta.env.VITE_DefaultName,
-              },
-              i.nodeName
-            )
-            metaidBaseNodeInfo.name = body.name
-          }
-          this.userInfo = metaidBaseNodeInfo
-          console.log('register metaid', this.userInfo)
-        }
-      }
-      return this.userInfo
-    } catch (error) {
-      throw new Error(error)
-    }
-  }
-
-  @connected
   public async getRoot(): Promise<Partial<Root>> {
     if (this._root) return this._root
 
@@ -186,16 +88,16 @@ export class Entity {
     if (!this._root) {
       const user = await fetchUser(this.metaid)
 
-      if (user.metaId) {
+      if (user.metaid) {
         const protocolAddress = await this.connector.getAddress('/0/2')
         const rootCandidate = await fetchRootCandidate({
           xpub: this.connector.xpub,
-          parentTxId: user.protocolTxId,
+          parentTxId: user.protocolTxid,
         })
 
         const { txid } = await this.createRoot({
           protocolAddress,
-          protocolTxid: user.protocolTxId,
+          protocolTxid: user.protocolTxid,
 
           candidatePublicKey: rootCandidate.publicKey,
         })
@@ -253,7 +155,7 @@ export class Entity {
       satoshis: dustValue,
     })
 
-    const metaidOpreturn = buildBrfcRootOpreturn({
+    const metaidOpreturn = buildRootOpreturn({
       publicKey: candidatePublicKey,
       parentTxid: protocolTxid,
       protocolName: this.schema.nodeName,
@@ -294,7 +196,7 @@ export class Entity {
   }
 
   @connected
-  private async createMetaidRoot(
+  async createMetaidRoot(
     parent: Partial<{
       address: string
       publicKey: string
@@ -316,7 +218,7 @@ export class Entity {
       })
     }
 
-    const metaidOpreturn = buildMetaidRootOpreturn({
+    const metaidOpreturn = buildUserOpreturn({
       publicKey: parent.publicKey,
       parentTxid: parent?.txid,
       protocolName: nodeName,
@@ -324,7 +226,7 @@ export class Entity {
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
-    const biggestUtxo = await getBiggestUtxo({
+    const biggestUtxo = await fetchBiggestUtxo({
       address: walletAddress.toString(),
     })
     linkTxComposer.appendP2PKHInput({

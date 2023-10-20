@@ -5,9 +5,9 @@ export type User = {
   metaIdTag: string
   address: string
   pubKey: string
-  infoTxId: string
+  infoTxid: string
   infoPublicKey: string
-  protocolTxId: string
+  protocolTxid: string
   protocolPublicKey: string
   name: string
   nameEncrypt: string
@@ -15,7 +15,7 @@ export type User = {
   phoneEncrypt: string
   email: string
   emailEncrypt: string
-  avatarTxId: string
+  avatarTxid: string
   avatarImage: string
   avatarEncrypt: string
   coverUrl: string
@@ -204,6 +204,10 @@ export async function fetchBiggestUtxo({ address }: { address: string }): Promis
   value: number
 }> {
   return await fetchUtxos({ address }).then((utxos) => {
+    if (utxos.length === 0) {
+      console.log({ address })
+      throw new Error('No UTXO')
+    }
     return utxos.reduce((prev, curr) => {
       return prev.value > curr.value ? prev : curr
     }, utxos[0])
@@ -218,7 +222,13 @@ export async function fetchUser(metaid: string): Promise<User> {
 
       // rename
       user.metaid = user.metaId
+      user.protocolTxid = user.protocolTxId
+      user.infoTxid = user.infoTxId
+      user.avatarTxid = user.avatarTxId
       delete user.metaId
+      delete user.protocolTxId
+      delete user.infoTxId
+      delete user.avatarTxId
 
       return user
     } else {
@@ -300,9 +310,9 @@ export async function getMetaidInitFee(params: {
       }
     )
     .then((res) => {
-      console.log('getutxo123', res)
       if (res.data.code == 0) {
         const utxo = res.data.result || {}
+        console.log({ utxo })
         return {
           ...utxo,
           outputIndex: +utxo.index,
