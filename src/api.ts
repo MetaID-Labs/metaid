@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { errors } from './data/errors.js'
 
 export type User = {
   metaid: string
@@ -78,7 +77,7 @@ export async function fetchMetaid({ address }: { address: string }): Promise<str
   }
 }
 
-export async function getRootNode({ metaid, nodeName, nodeId }: { metaid: string; nodeName: string; nodeId: string }) {
+export async function fetchRoot({ metaid, nodeName, nodeId }: { metaid: string; nodeName: string; nodeId: string }) {
   const url = `https://api.show3.io/aggregation/v2/app/metaId/getProtocolBrfcNode/${metaid}/${nodeName}`
   try {
     const data = await axios
@@ -114,7 +113,7 @@ export async function getRootNode({ metaid, nodeName, nodeId }: { metaid: string
 }
 
 // withCount(['like'])  likeCount: 3
-export async function getBuzzes({ metaid }: { metaid: string }) {
+export async function fetchBuzzes({ metaid }: { metaid: string }) {
   const url = `https://api.show3.io/aggregation/v2/app/show/posts/buzz?metaId=${metaid}`
   try {
     const data = await axios
@@ -179,7 +178,7 @@ export async function notify({ txHex }: { txHex: string }) {
   })
 }
 
-export async function getUtxos({ address }: { address: string }): Promise<
+export async function fetchUtxos({ address }: { address: string }): Promise<
   {
     txid: string
     outIndex: number
@@ -198,20 +197,20 @@ export async function getUtxos({ address }: { address: string }): Promise<
   }
 }
 
-export async function getBiggestUtxo({ address }: { address: string }): Promise<{
+export async function fetchBiggestUtxo({ address }: { address: string }): Promise<{
   txid: string
   outIndex: number
   address: string
   value: number
 }> {
-  return await getUtxos({ address }).then((utxos) => {
+  return await fetchUtxos({ address }).then((utxos) => {
     return utxos.reduce((prev, curr) => {
       return prev.value > curr.value ? prev : curr
     }, utxos[0])
   })
 }
 
-export async function getUser(metaid: string): Promise<User> {
+export async function fetchUser(metaid: string): Promise<User> {
   const url = `https://api.show3.io/aggregation/v2/app/user/getUserAllInfo/${metaid}`
   return await axios.get(url).then((res) => {
     if (res.data.code == 0) {
@@ -228,7 +227,7 @@ export async function getUser(metaid: string): Promise<User> {
   })
 }
 
-export async function getRootCandidate(params: { xpub: string; parentTxId: string }) {
+export async function fetchRootCandidate(params: { xpub: string; parentTxId: string }) {
   return new Promise<{
     address: string
     path: string

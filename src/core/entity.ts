@@ -1,13 +1,12 @@
 import { TxComposer, mvc } from 'meta-contract'
 
 import {
-  getUser,
-  getMetaidInitFee,
-  getBiggestUtxo,
-  getBuzzes,
-  getRootCandidate,
-  getRootNode,
-  getUtxos,
+  fetchUser,
+  fetchBiggestUtxo,
+  fetchBuzzes,
+  fetchRootCandidate,
+  fetchRoot,
+  fetchUtxos,
   notify,
   type User,
 } from '@/api.js'
@@ -85,7 +84,7 @@ export class Entity {
     }
     try {
       if (this.metaid) {
-        const accountInfo = await getUser(this.metaid)
+        const accountInfo = await fetchUser(this.metaid)
         metaidBaseNodeInfo = accountInfo
         if (
           metaidBaseNodeInfo.metaId &&
@@ -177,7 +176,7 @@ export class Entity {
   public async getRoot(): Promise<Partial<Root>> {
     if (this._root) return this._root
 
-    const root = await getRootNode({
+    const root = await fetchRoot({
       metaid: this.metaid,
       nodeName: this.schema.nodeName,
       nodeId: this.schema.versions[0].id,
@@ -185,11 +184,11 @@ export class Entity {
     this._root = root
 
     if (!this._root) {
-      const user = await getUser(this.metaid)
+      const user = await fetchUser(this.metaid)
 
       if (user.metaId) {
         const protocolAddress = await this.connector.getAddress('/0/2')
-        const rootCandidate = await getRootCandidate({
+        const rootCandidate = await fetchRootCandidate({
           xpub: this.connector.xpub,
           parentTxId: user.protocolTxId,
         })
@@ -204,7 +203,7 @@ export class Entity {
         await sleep(1000)
 
         // re fetch
-        const root = await getRootNode({
+        const root = await fetchRoot({
           metaid: this.metaid,
           nodeName: this.schema.nodeName,
           nodeId: this.schema.versions[0].id,
@@ -234,7 +233,7 @@ export class Entity {
     let dustValue = 0
     // 1.1 first, check if protocol address already has dust utxos;
     // if so, use it directly;
-    const dusts = await getUtxos({ address: protocolAddress })
+    const dusts = await fetchUtxos({ address: protocolAddress })
     if (dusts.length > 0) {
       dustTxid = dusts[0].txid
       dustValue = dusts[0].value
@@ -262,7 +261,7 @@ export class Entity {
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
-    const biggestUtxo = await getBiggestUtxo({
+    const biggestUtxo = await fetchBiggestUtxo({
       address: walletAddress.toString(),
     })
     linkTxComposer.appendP2PKHInput({
@@ -387,7 +386,7 @@ export class Entity {
     let dustValue = 0
     // 1.1 first, check if root address already has dust utxos;
     // if so, use it directly;
-    const dusts = await getUtxos({ address: root.address })
+    const dusts = await fetchUtxos({ address: root.address })
     if (dusts.length > 0) {
       dustTxid = dusts[0].txid
       dustValue = dusts[0].value
@@ -418,7 +417,7 @@ export class Entity {
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
-    const biggestUtxo = await getBiggestUtxo({ address: walletAddress.toString() })
+    const biggestUtxo = await fetchBiggestUtxo({ address: walletAddress.toString() })
     linkTxComposer.appendP2PKHInput({
       address: walletAddress,
       txId: biggestUtxo.txid,
@@ -451,7 +450,7 @@ export class Entity {
   public async list() {
     if (this.name !== 'buzz') throw new Error(errors.NOT_SUPPORTED)
 
-    const items = await getBuzzes({ metaid: this.metaid })
+    const items = await fetchBuzzes({ metaid: this.metaid })
 
     return {
       items,

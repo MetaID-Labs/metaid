@@ -1,7 +1,7 @@
 import { use } from '@/factories/use.js'
 import { type MetaIDConnectWallet } from '../wallets/wallet.js'
 import { TxComposer } from 'meta-contract'
-import { type User, getUser, fetchMetaid } from '@/api.js'
+import { type User, fetchUser, fetchMetaid } from '@/api.js'
 
 export class Connector {
   private _isConnected: boolean
@@ -33,7 +33,7 @@ export class Connector {
     connector.metaid = metaid
 
     if (!!metaid) {
-      connector.user = await getUser(metaid)
+      connector.user = await fetchUser(metaid)
     }
     return connector
   }
