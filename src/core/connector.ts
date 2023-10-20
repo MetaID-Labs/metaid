@@ -47,8 +47,101 @@ export class Connector {
     return this.user
   }
 
-  createUser() {
-    throw new Error('not implemented')
+  async createUser(body?: { name: string }): Promise<User> {
+    let metaidBaseNodeInfo: Partial<User> = {
+      metaid: '',
+      protocolTxId: '',
+      infoTxId: '',
+      name: '',
+    }
+    try {
+      if (this.metaid) {
+        const accountInfo = await getUser(this.metaid)
+        metaidBaseNodeInfo = accountInfo
+        if (
+          metaidBaseNodeInfo.metaId &&
+          metaidBaseNodeInfo.protocolTxId &&
+          (metaidBaseNodeInfo.infoTxId && metaidBaseNodeInfo).name
+        ) {
+          this.userInfo = metaidBaseNodeInfo
+        }
+      } else {
+        const signature = await this.connector.signMessage(import.meta.env.VITE_SIGN_MSG)
+        try {
+          await getMetaidInitFee({
+            address: this.address,
+            xpub: this.connector.xpub,
+            sigInfo: {
+              xSignature: signature,
+              xPublickey: await this.connector.getPublicKey('/0/0'),
+            },
+          })
+        } catch (error) {
+          console.log(error)
+        }
+      }
+      if (
+        !metaidBaseNodeInfo?.metaId ||
+        !metaidBaseNodeInfo?.protocolTxId ||
+        !metaidBaseNodeInfo?.infoTxId ||
+        (!metaidBaseNodeInfo?.name && Array.isArray(this.schema))
+      ) {
+        let address, publicKey
+        for (let i of this.schema) {
+          if (i.nodeName === 'Root' && !metaidBaseNodeInfo.metaId) {
+            publicKey = await this.connector.getPublicKey('/0/0')
+            const { txid } = await this.createMetaidRoot(
+              {
+                publicKey,
+              },
+              i.nodeName
+            )
+            metaidBaseNodeInfo.metaId = txid
+          }
+          if (i.nodeName === 'Protocols' && !metaidBaseNodeInfo.protocolTxId) {
+            publicKey = await this.connector.getPublicKey('/0/2')
+            const { txid } = await this.createMetaidRoot(
+              {
+                publicKey,
+                txid: metaidBaseNodeInfo.metaId,
+              },
+              i.nodeName
+            )
+            metaidBaseNodeInfo.protocolTxId = txid
+          }
+          if (i.nodeName === 'Info' && !metaidBaseNodeInfo.infoTxId) {
+            publicKey = await this.connector.getPublicKey('/0/1')
+            const { txid } = await this.createMetaidRoot(
+              {
+                publicKey,
+                txid: metaidBaseNodeInfo.metaId,
+              },
+              i.nodeName
+            )
+            metaidBaseNodeInfo.infoTxId = txid
+          }
+          if (i.nodeName === 'name' && !metaidBaseNodeInfo.name) {
+            address = await this.connector.getAddress('/0/1')
+            publicKey = await this.connector.getPublicKey('/0/1')
+            await this.createMetaidRoot(
+              {
+                address,
+                publicKey,
+                txid: metaidBaseNodeInfo.infoTxId,
+                body: body.name ? body.name : import.meta.env.VITE_DefaultName,
+              },
+              i.nodeName
+            )
+            metaidBaseNodeInfo.name = body.name
+          }
+          this.userInfo = metaidBaseNodeInfo
+          console.log('register metaid', this.userInfo)
+        }
+      }
+      return this.userInfo
+    } catch (error) {
+      throw new Error(error)
+    }
   }
 
   // metaid
