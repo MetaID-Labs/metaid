@@ -277,9 +277,13 @@ export class Entity {
   @connected
   public async create(
     body: unknown,
-    options?: {
+    options?: Partial<{
       invisible: boolean
-    }
+      encrypt: string
+      version: string
+      dataType: string
+      encoding: 'UTF-8' | 'binary'
+    }>
   ) {
     const root = await this.getRoot()
     const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
@@ -316,6 +320,7 @@ export class Entity {
       parentTxid: root.txid,
       protocolName: this.schema.nodeName,
       body,
+      options,
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
