@@ -207,14 +207,34 @@ export class Entity {
   ) {
     const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
     // 1. send dust to root address
-    const linkTxComposer = new TxComposer()
+
+    let dustTxid = ''
+    let dustValue = 0
     if (parent?.address) {
-      const { txid: dustTxid } = await this.connector.send(parent.address, UTXO_DUST)
+      // 1.1 first, check if root address already has dust utxos;
+      // if so, use it directly;
+      const dusts = await fetchUtxos({ address: parent.address })
+      if (dusts.length > 0) {
+        dustTxid = dusts[0].txid
+        dustValue = dusts[0].value
+      } else {
+        // 1.2 otherwise, send dust to root address
+        const { txid } = await this.connector.send(parent.address, UTXO_DUST)
+        dustTxid = txid
+        dustValue = UTXO_DUST
+      }
+
+      // const { txid } = await this.connector.send(parent.address, UTXO_DUST)
+    }
+
+    // 2. link tx
+    let linkTxComposer = new TxComposer()
+    if (dustTxid) {
       linkTxComposer.appendP2PKHInput({
         address: mvc.Address.fromString(parent.address, 'mainnet' as any),
         txId: dustTxid,
         outputIndex: 0,
-        satoshis: UTXO_DUST,
+        satoshis: dustValue,
       })
     }
 
@@ -226,9 +246,7 @@ export class Entity {
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
-    const biggestUtxo = await fetchBiggestUtxo({
-      address: walletAddress.toString(),
-    })
+    const biggestUtxo = await fetchBiggestUtxo({ address: walletAddress.toString() })
     linkTxComposer.appendP2PKHInput({
       address: walletAddress,
       txId: biggestUtxo.txid,
@@ -236,24 +254,32 @@ export class Entity {
       satoshis: biggestUtxo.value,
     })
     linkTxComposer.appendChangeOutput(walletAddress, 1)
-    this.connector.signInput({
+
+    let input1Output: any
+    if (parent?.address) {
+      // save input-1's output for later use
+      input1Output = linkTxComposer.getInput(1).output
+    }
+
+    linkTxComposer = await this.connector.signInput({
       txComposer: linkTxComposer,
       inputIndex: 0,
       // path: parent.path, //"/0/0",
     })
     if (parent?.address) {
-      this.connector.signInput({
+      linkTxComposer.getInput(1).output = input1Output
+      linkTxComposer = await this.connector.signInput({
         txComposer: linkTxComposer,
         inputIndex: 1,
         // path: "/0/0",
       })
     }
 
-    const txid = await this.connector.broadcast(linkTxComposer)
+    const { txid } = await this.connector.broadcast(linkTxComposer)
     console.log('txid', txid)
     await notify({ txHex: linkTxComposer.getRawHex() })
 
-    return txid
+    return { txid }
   }
 
   // @connected

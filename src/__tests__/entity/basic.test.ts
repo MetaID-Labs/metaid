@@ -1,5 +1,5 @@
 import { use } from '@/factories/use.js'
-import { LocalWallet, connect } from '@/index.ts'
+import { LocalWallet, connect } from '@/index.js'
 
 async function connectToLocalWallet() {
   const mnemonic = import.meta.env.VITE_TEST_MNEMONIC

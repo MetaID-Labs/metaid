@@ -54,8 +54,9 @@ export class Connector {
   }
 
   async createMetaid(body?: { name: string }): Promise<User> {
+    let user: any = {}
     if (this.metaid) {
-      const user = await fetchUser(this.metaid)
+      user = await fetchUser(this.metaid)
 
       if (user && user.metaid && user.protocolTxid && (user.infoTxid && user).name) {
         this.user = user
@@ -64,7 +65,6 @@ export class Connector {
       }
     }
 
-    const user: any = {}
     const signature = await this.signMessage(API_AUTH_MESSAGE)
     try {
       await getMetaidInitFee({
