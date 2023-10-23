@@ -5,7 +5,9 @@ test('run', async () => {
   expect(Buzz.name).toBe('buzz')
 })
 
-test('can load entity schema from nested folders', async () => {
-  const Metaid = await use('user/metaid')
+test('can load entity with multi-word name', async () => {
+  const Metaid = await use('metaid-root')
   expect(Metaid.name).toBe('metaid')
 })
+
+test.todo('can load entity schema from nested folders')

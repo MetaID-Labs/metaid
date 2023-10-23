@@ -85,9 +85,9 @@ describe('factories.connect', () => {
     console.log({ newMnemonic })
     const connector = await connectToLocalWallet(newMnemonic)
 
-    expect(connector.isUserValid()).toBe(false)
+    expect(connector.isMetaidValid()).toBe(false)
 
-    await connector.createUser()
+    await connector.createMetaid()
 
     expect(connector.hasUser()).toBe(true)
   })

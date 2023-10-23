@@ -40,12 +40,12 @@ export class Connector {
     return connector
   }
 
-  // user
+  // metaid related
   hasUser() {
     return !!this.user
   }
 
-  isUserValid() {
+  isMetaidValid() {
     return this.hasUser() && !!this.user.metaid && !!this.user.protocolTxid && !!this.user.infoTxid && !!this.user.name
   }
 
@@ -53,13 +53,7 @@ export class Connector {
     return this.user
   }
 
-  async createUser(body?: { name: string }): Promise<User> {
-    // let user = {
-    //   metaid: '',
-    //   protocolTxid: '',
-    //   infoTxid: '',
-    //   name: '',
-    // }
+  async createMetaid(body?: { name: string }): Promise<User> {
     if (this.metaid) {
       const user = await fetchUser(this.metaid)
 
@@ -84,10 +78,9 @@ export class Connector {
     } catch (error) {
       console.log(error)
     }
-    if (!this.isUserValid()) {
-      console.log('here')
+    if (!this.isMetaidValid()) {
       if (!user?.metaid) {
-        const Metaid = await this.use('user/metaid')
+        const Metaid = await this.use('metaid-root')
         const publicKey = await this.getPublicKey('/0/0')
         const { txid } = await Metaid.createMetaidRoot(
           {
@@ -100,7 +93,7 @@ export class Connector {
       }
       await sleep(1000)
       if (!user?.protocolTxid) {
-        const Protocols = await this.use('user/protocol')
+        const Protocols = await this.use('metaid-protocol')
         const publicKey = await this.getPublicKey('/0/2')
         const { txid } = await Protocols.createMetaidRoot(
           {
@@ -112,7 +105,7 @@ export class Connector {
         user.protocolTxid = txid
       }
       if (!user?.infoTxid) {
-        const Info = await this.use('user/info')
+        const Info = await this.use('metaid-info')
         const publicKey = await this.getPublicKey('/0/1')
         const { txid } = await Info.createMetaidRoot(
           {
@@ -124,7 +117,7 @@ export class Connector {
         user.infoTxid = txid
       }
       if (!user?.name) {
-        const Name = await this.use('user/name')
+        const Name = await this.use('metaid-name')
         const address = await this.getAddress('/0/1')
         const publicKey = await this.getPublicKey('/0/1')
         const useName = body?.name ? body.name : DEFAULT_USERNAME
@@ -141,7 +134,6 @@ export class Connector {
       }
 
       this.user = user
-      console.log({ user })
     }
 
     await sleep(1000)
