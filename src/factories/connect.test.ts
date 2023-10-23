@@ -1,8 +1,11 @@
 import { LocalWallet } from '@/wallets/local.js'
 import { connect } from './connect.js'
+import { mvc } from 'meta-contract'
 
-async function connectToLocalWallet() {
-  const mnemonic = import.meta.env.VITE_TEST_MNEMONIC
+async function connectToLocalWallet(mnemonic?: string) {
+  if (!mnemonic) {
+    mnemonic = import.meta.env.VITE_TEST_MNEMONIC
+  }
   const wallet = LocalWallet.create(mnemonic)
 
   return connect(wallet)
@@ -48,15 +51,44 @@ describe('factories.connect', () => {
     expect(GM.isConnected()).toBe(false)
   })
 
-  test('connector has address', async () => {
+  test('has address', async () => {
     const connector = await connectToLocalWallet()
 
     expect(connector.address).toBeTypeOf('string')
   })
 
-  test('connector has metaid', async () => {
+  test('has metaid', async () => {
     const connector = await connectToLocalWallet()
 
     expect(connector.metaid).toBeTypeOf('string')
+  })
+
+  test('can get user', async () => {
+    const connector = await connectToLocalWallet()
+
+    const user = connector.getUser()
+
+    expect(user).toBeTypeOf('object')
+    expect(user.metaid).toBeTypeOf('string')
+  })
+
+  test('cannot get user if it is not created yet', async () => {
+    const newMnemonic = mvc.Mnemonic.fromRandom().toString()
+    const connector = await connectToLocalWallet(newMnemonic)
+
+    expect(connector.hasUser()).toBe(false)
+    expect(connector.getUser()).toBe(undefined)
+  })
+
+  test('can create user if it is not created yet', async () => {
+    const newMnemonic = mvc.Mnemonic.fromRandom().toString()
+    console.log({ newMnemonic })
+    const connector = await connectToLocalWallet(newMnemonic)
+
+    expect(connector.isMetaidValid()).toBe(false)
+
+    await connector.createMetaid()
+
+    expect(connector.hasUser()).toBe(true)
   })
 })

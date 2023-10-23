@@ -1,56 +1,56 @@
 {
-	"name": "@metaid/metaid",
-	"version": "0.0.1",
-	"description": "MetaID is a library for MetaID protocol. It provides a set of functions to manage the DID document and the DID transaction.",
-	"type": "module",
-	"main": "./dist/metaid.umd.cjs",
-	"module": "./dist/metaid.js",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/metaid.js",
-			"require": "./dist/metaid.umd.cjs"
-		}
-	},
-	"scripts": {
-		"hello": "tsc && node dist/index.js",
-		"build": "vite build",
-		"test": "vitest --ui"
-	},
-	"keywords": [
-		"MetaID",
-		"metaid",
-		"blockchain",
-		"DID protocol",
-		"mvc",
-		"Microvision Chain",
-		"MetaID-Labs"
-	],
-	"author": "MetaID-Labs",
-	"license": "MIT",
-	"files": [
-		"dist"
-	],
-	"types": "dist/index.d.ts",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/MetaID-Labs/metaid"
-	},
-	"publishConfig": {
-		"access": "public"
-	},
-	"devDependencies": {
-		"@vitest/ui": "^0.34.1",
-		"path": "^0.12.7",
-		"prettier": "^3.0.3",
-		"typescript": "^5.1.6",
-		"vite": "^4.4.11",
-		"vite-plugin-dts": "^3.6.0",
-		"vitest": "^0.34.6"
-	},
-	"dependencies": {
-		"axios": "^1.5.0",
-		"dayjs": "^1.11.9",
-		"meta-contract": "^0.3.30"
-	}
+  "name": "@metaid/metaid",
+  "version": "0.0.1",
+  "description": "MetaID is a library for MetaID protocol. It provides a set of functions to manage the DID document and the DID transaction.",
+  "type": "module",
+  "main": "./dist/metaid.umd.cjs",
+  "module": "./dist/metaid.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/metaid.js",
+      "require": "./dist/metaid.umd.cjs"
+    }
+  },
+  "scripts": {
+    "hello": "tsc && node dist/index.js",
+    "build": "vite build",
+    "test": "vitest --ui"
+  },
+  "keywords": [
+    "MetaID",
+    "metaid",
+    "blockchain",
+    "DID protocol",
+    "mvc",
+    "Microvision Chain",
+    "MetaID-Labs"
+  ],
+  "author": "MetaID-Labs",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MetaID-Labs/metaid"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^0.34.1",
+    "path": "^0.12.7",
+    "prettier": "^3.0.3",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.11",
+    "vite-plugin-dts": "^3.6.0",
+    "vitest": "^0.34.6"
+  },
+  "dependencies": {
+    "axios": "^1.5.0",
+    "dayjs": "^1.11.9",
+    "meta-contract": "^0.3.30"
+  }
 }

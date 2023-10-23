@@ -6,4 +6,5 @@ export const errors = {
   NO_OUTPUT: 'No output provided.',
   NO_ROOT_DETECTED: 'Cannot detect root address.',
   FAILED_TO_CREATE_ROOT: 'Failed to create root.',
+  METAID_NOT_FOUND: 'MetaID not found.',
 } as const

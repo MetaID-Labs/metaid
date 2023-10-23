@@ -1,13 +1,13 @@
 import axios from 'axios'
 
 export type User = {
-  metaId: string
+  metaid: string
   metaIdTag: string
   address: string
   pubKey: string
-  infoTxId: string
+  infoTxid: string
   infoPublicKey: string
-  protocolTxId: string
+  protocolTxid: string
   protocolPublicKey: string
   name: string
   nameEncrypt: string
@@ -15,7 +15,7 @@ export type User = {
   phoneEncrypt: string
   email: string
   emailEncrypt: string
-  avatarTxId: string
+  avatarTxid: string
   avatarImage: string
   avatarEncrypt: string
   coverUrl: string
@@ -53,7 +53,6 @@ export type LikeItem = {
 }
 
 export async function fetchMetaid({ address }: { address: string }): Promise<string | null> {
-  console.log({ address })
   const url = `https://api.show3.io/metaid-base/v1/meta/root/${address}`
 
   try {
@@ -61,8 +60,13 @@ export async function fetchMetaid({ address }: { address: string }): Promise<str
       .get(url)
       .then((res) => res.data)
       .then((res: MetaidBaseResponse) => {
-        console.log({ res })
-        if (res.code !== 200) throw new Error(`Error: ${res.code}`)
+        if (res.code !== 200) {
+          if (res.code === 601) {
+            return null
+          }
+
+          throw new Error(`Error: ${res.code}`)
+        }
 
         return res.result.rootTxId
       })
@@ -200,6 +204,10 @@ export async function fetchBiggestUtxo({ address }: { address: string }): Promis
   value: number
 }> {
   return await fetchUtxos({ address }).then((utxos) => {
+    if (utxos.length === 0) {
+      console.log({ address })
+      throw new Error('No UTXO')
+    }
     return utxos.reduce((prev, curr) => {
       return prev.value > curr.value ? prev : curr
     }, utxos[0])
@@ -210,7 +218,19 @@ export async function fetchUser(metaid: string): Promise<User> {
   const url = `https://api.show3.io/aggregation/v2/app/user/getUserAllInfo/${metaid}`
   return await axios.get(url).then((res) => {
     if (res.data.code == 0) {
-      return res.data.data
+      const user = res.data.data
+
+      // rename
+      user.metaid = user.metaId
+      user.protocolTxid = user.protocolTxId
+      user.infoTxid = user.infoTxId
+      user.avatarTxid = user.avatarTxId
+      delete user.metaId
+      delete user.protocolTxId
+      delete user.infoTxId
+      delete user.avatarTxId
+
+      return user
     } else {
       return null
     }
@@ -264,14 +284,14 @@ export async function broadcast({ txHex }: { txHex: string }): Promise<{
 }
 
 export async function getMetaidInitFee(params: {
-  address: string;
-  xpub: string;
+  address: string
+  xpub: string
   sigInfo: {
-    xSignature: string;
-    xPublickey: string;
-  };
+    xSignature: string
+    xPublickey: string
+  }
 }) {
-  const url = `https://api.show3.io/nodemvc/api/v1/pri/wallet/sendInitSatsForMetalet`;
+  const url = `https://api.show3.io/nodemvc/api/v1/pri/wallet/sendInitSatsForMetalet`
   return await axios
     .post(
       url,
@@ -281,18 +301,18 @@ export async function getMetaidInitFee(params: {
       },
       {
         headers: {
-          "Content-Type": "application/json",
-          accessKey: "",
-          timestamp: new Date().getTime() + "",
-          userName: "",
+          'Content-Type': 'application/json',
+          accessKey: '',
+          timestamp: new Date().getTime() + '',
+          userName: '',
           ...params.sigInfo,
         },
       }
     )
     .then((res) => {
-      console.log("getutxo123", res);
       if (res.data.code == 0) {
-        const utxo = res.data.result || {};
+        const utxo = res.data.result || {}
+        console.log({ utxo })
         return {
           ...utxo,
           outputIndex: +utxo.index,
@@ -303,12 +323,12 @@ export async function getMetaidInitFee(params: {
           script: utxo.scriptPubkey,
           addressType: 0,
           addressIndex: 0,
-        };
+        }
       } else {
-        throw new Error(res.data.msg);
+        throw new Error(res.data.msg)
       }
     })
     .catch((e) => {
-      throw new Error(e.msg);
-    });
+      throw new Error(e.msg)
+    })
 }

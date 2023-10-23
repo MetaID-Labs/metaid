@@ -13,7 +13,7 @@ type MetaidOpreturn = [
   string, // charset
 ]
 
-type BrfcRootOpreturn = [
+type RootOpreturn = [
   'mvc', // chain flag
   string, // public key of node
   string, // `${parentChainFlag(optional)}:${parentTxid}`
@@ -27,7 +27,7 @@ type BrfcRootOpreturn = [
   string, // charset
 ]
 
-type MetaIDRootOpreturn = [
+type UserOpreturn = [
   'mvc', // chain flag
   string, // public key of node
   string, // `${parentChainFlag(optional)}:${parentTxid}`
@@ -40,8 +40,8 @@ type MetaIDRootOpreturn = [
   string, // charset
 ]
 
-export function buildBrfcRootOpreturn({ publicKey, parentTxid, protocolName, body }) {
-  const opreturn: BrfcRootOpreturn = [
+export function buildRootOpreturn({ publicKey, parentTxid, protocolName, body }) {
+  const opreturn: RootOpreturn = [
     'mvc',
     publicKey,
     'mvc:' + parentTxid,
@@ -85,7 +85,7 @@ export function buildOpreturn({
   return opreturn
 }
 
-export function buildMetaidRootOpreturn({
+export function buildUserOpreturn({
   publicKey,
   parentTxid,
   protocolName,
@@ -96,7 +96,7 @@ export function buildMetaidRootOpreturn({
   protocolName: string
   body: any
 }) {
-  const opreturn: MetaIDRootOpreturn = [
+  const opreturn: UserOpreturn = [
     'mvc',
     publicKey,
     parentTxid ? 'mvc:' + parentTxid : 'mvc:' + 'NULL',
