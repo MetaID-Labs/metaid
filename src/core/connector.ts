@@ -4,6 +4,8 @@ import { TxComposer } from 'meta-contract'
 import { type User, fetchUser, fetchMetaid, getMetaidInitFee } from '@/api.js'
 import { API_AUTH_MESSAGE, DEFAULT_USERNAME } from '@/data/constants.js'
 import { sleep } from '@/utils/index.js'
+import type { EntitySchema } from '@/metaid-entities/entity.js'
+import { load } from '@/factories/load.js'
 
 export class Connector {
   private _isConnected: boolean
@@ -149,6 +151,10 @@ export class Connector {
 
   use(entitySymbol: string) {
     return use(entitySymbol, { connector: this })
+  }
+
+  load(entitySchema: EntitySchema) {
+    return load(entitySchema, { connector: this })
   }
 
   isConnected() {
