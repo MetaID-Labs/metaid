@@ -17,6 +17,7 @@ declare module 'vitest' {
     GM?: Entity
     Metaid?: Entity
     MetaFile?: Entity
+    Repost?: Entity
     wallet?: MetaIDConnectWallet
   }
 }
