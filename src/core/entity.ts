@@ -342,6 +342,7 @@ export class Entity {
       parentTxid: root.txid,
       protocolName: this.schema.nodeName,
       body,
+      invisible: options?.invisible,
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
@@ -375,10 +376,10 @@ export class Entity {
     return { txid }
   }
 
-  public async list() {
+  public async list(page: number) {
     if (this.name !== 'buzz') throw new Error(errors.NOT_SUPPORTED)
 
-    const items = await fetchBuzzes({ metaid: this.metaid })
+    const items = await fetchBuzzes({ metaid: this.metaid, page })
 
     return {
       items,
