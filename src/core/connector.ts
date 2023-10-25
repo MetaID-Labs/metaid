@@ -12,33 +12,38 @@ export class Connector {
   private wallet: MetaIDConnectWallet
   public metaid: string | undefined
   private user: User
-  private constructor(wallet: MetaIDConnectWallet) {
+  private constructor(wallet?: MetaIDConnectWallet) {
     this._isConnected = true
 
-    this.wallet = wallet
+    if (wallet) {
+      this.wallet = wallet
+    }
   }
 
   get address() {
-    return this.wallet.address
+    return this.wallet.address || ''
   }
 
   get xpub() {
-    return this.wallet.xpub
+    return this.wallet.xpub || ''
   }
 
-  public static async create(wallet: MetaIDConnectWallet) {
+  public static async create(wallet?: MetaIDConnectWallet) {
     const connector = new Connector(wallet)
 
-    // ask api for metaid
-    const metaid =
-      (await fetchMetaid({
-        address: wallet.address,
-      })) || undefined
-    connector.metaid = metaid
+    if (wallet) {
+      // ask api for metaid
+      const metaid =
+        (await fetchMetaid({
+          address: wallet.address,
+        })) || undefined
+      connector.metaid = metaid
 
-    if (!!metaid) {
-      connector.user = await fetchUser(metaid)
+      if (!!metaid) {
+        connector.user = await fetchUser(metaid)
+      }
     }
+
     return connector
   }
 
@@ -163,6 +168,7 @@ export class Connector {
 
   disconnect() {
     this._isConnected = false
+    this.wallet = undefined
   }
 
   /**
