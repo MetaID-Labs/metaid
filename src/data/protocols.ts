@@ -1,6 +1,7 @@
 export enum ProtocolName {
   SimpleMicroblog = 'SimpleMicroblog',
   SimpleGroupChat = 'SimpleGroupChat',
+  SimpleRePost = 'SimpleRePost',
   PayLike = 'PayLike',
   Name = 'name',
 }
@@ -30,6 +31,11 @@ export const BrfcRootName: {
   [ProtocolName.PayLike]: {
     brfcId: '2ae43eeb26d9',
     path: '/Protocols/PayLike',
+    version: '1.0.0',
+  },
+  [ProtocolName.SimpleRePost]: {
+    brfcId: '157cd804478e',
+    path: '/Protocols/SimpleRePost',
     version: '1.0.0',
   },
 }

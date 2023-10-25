@@ -277,6 +277,10 @@ export class Entity {
   @connected
   public async create(
     body: unknown,
+    payTo?: Array<{
+      address: string
+      amount: number //satoshi
+    }>,
     options?: Partial<{
       invisible: boolean
       encrypt: string
@@ -322,8 +326,15 @@ export class Entity {
       body,
       options,
     })
+    if (payTo.length) {
+      payTo.map((item) => {
+        linkTxComposer.appendP2PKHOutput({
+          address: mvc.Address.fromString(item.address, 'mainnet' as any),
+          satoshis: item.amount,
+        })
+      })
+    }
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
-
     const biggestUtxo = await fetchBiggestUtxo({ address: walletAddress.toString() })
     linkTxComposer.appendP2PKHInput({
       address: walletAddress,
@@ -331,6 +342,7 @@ export class Entity {
       outputIndex: biggestUtxo.outIndex,
       satoshis: biggestUtxo.value,
     })
+
     linkTxComposer.appendChangeOutput(walletAddress, 1)
 
     // save input-1's output for later use
@@ -348,7 +360,7 @@ export class Entity {
       inputIndex: 1,
     })
     const { txid } = await this.connector.broadcast(linkTxComposer)
-
+    console.log('11111', txid)
     await notify({ txHex: linkTxComposer.getRawHex() })
 
     return { txid }

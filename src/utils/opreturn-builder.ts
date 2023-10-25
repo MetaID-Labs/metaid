@@ -63,20 +63,19 @@ export function buildOpreturn({
   parentTxid,
   protocolName,
   body,
-  options
+  options,
 }: {
   publicKey: string
   parentTxid: string
   protocolName: string
-    body: any,
-    options?: Partial<{
-      encrypt:string
-      version: string
-      dataType: string
-      encoding:'UTF-8' | 'binary'
-    }>
-  }) {
-  const {encrypt,version,dataType,encoding} = options
+  body: any
+  options?: Partial<{
+    encrypt: string
+    version: string
+    dataType: string
+    encoding: 'UTF-8' | 'binary'
+  }>
+}) {
   const opreturn: MetaidOpreturn = [
     'mvc',
     publicKey,
@@ -84,10 +83,10 @@ export function buildOpreturn({
     'metaid',
     protocolName + '-' + publicKey.slice(0, 11),
     body == 'NULL' ? undefined : JSON.stringify(body),
-    encrypt ? encrypt : '0',
-    version ? version : '1.0.0',
-    dataType ? dataType : 'application/json',
-    encoding? encoding : 'UTF-8',
+    options?.encrypt ? options.encrypt : '0',
+    options?.version ? options.version : '1.0.0',
+    options?.dataType ? options.dataType : 'application/json',
+    options?.encoding ? options.encoding : 'UTF-8',
   ]
 
   return opreturn
