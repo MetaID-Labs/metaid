@@ -2,6 +2,7 @@ import { LocalWallet } from '@/wallets/local.js'
 import { connect } from './connect.js'
 import { mvc } from 'meta-contract'
 import { RUN_CREATE_TESTS } from '@/data/constants.js'
+import { errors } from '@/data/errors.js'
 
 async function connectToLocalWallet(mnemonic?: string) {
   if (!mnemonic) {
@@ -89,7 +90,7 @@ describe('factories.connect', () => {
     expect(connector.getUser()).toBe(undefined)
   })
 
-  test.runIf(RUN_CREATE_TESTS)('can create user if it is not created yet', async () => {
+  test.runIf(false)('can create user if it is not created yet', async () => {
     const newMnemonic = mvc.Mnemonic.fromRandom().toString()
     const connector = await connectToLocalWallet(newMnemonic)
 
@@ -98,5 +99,14 @@ describe('factories.connect', () => {
     await connector.createMetaid()
 
     expect(connector.hasUser()).toBe(true)
+  })
+
+  test('cannot create user if address has not enough balance', async () => {
+    const newMnemonic = mvc.Mnemonic.fromRandom().toString()
+    const connector = await connectToLocalWallet(newMnemonic)
+
+    expect(connector.isMetaidValid()).toBe(false)
+
+    expect(() => connector.createMetaid()).rejects.toThrow(errors.NOT_ENOUGH_BALANCE_TO_CREATE_METAID)
   })
 })

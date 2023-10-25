@@ -1,11 +1,12 @@
 import { use } from '@/factories/use.js'
 import { type MetaIDConnectWallet } from '../wallets/wallet.js'
 import { TxComposer } from 'meta-contract'
-import { type User, fetchUser, fetchMetaid, getMetaidInitFee } from '@/api.js'
-import { API_AUTH_MESSAGE, DEFAULT_USERNAME } from '@/data/constants.js'
+import { type User, fetchUser, fetchMetaid, getMetaidInitFee, fetchUtxos } from '@/api.js'
+import { API_AUTH_MESSAGE, DEFAULT_USERNAME, LEAST_AMOUNT_TO_CREATE_METAID } from '@/data/constants.js'
 import { sleep } from '@/utils/index.js'
 import type { EntitySchema } from '@/metaid-entities/entity.js'
 import { load } from '@/factories/load.js'
+import { errors } from '@/data/errors.js'
 
 export class Connector {
   private _isConnected: boolean
@@ -72,19 +73,32 @@ export class Connector {
       }
     }
 
-    const signature = await this.signMessage(API_AUTH_MESSAGE)
-    try {
-      await getMetaidInitFee({
-        address: this.address,
-        xpub: this.xpub,
-        sigInfo: {
-          xSignature: signature,
-          xPublickey: await this.getPublicKey('/0/0'),
-        },
-      })
-    } catch (error) {
-      console.log(error)
+    // check if has enough balance
+    const biggestUtxoAmount = await fetchUtxos({ address: this.address }).then((utxos) => {
+      return utxos.length
+        ? utxos.reduce((prev, curr) => {
+            return prev.value > curr.value ? prev : curr
+          }, utxos[0]).value
+        : 0
+    })
+
+    if (biggestUtxoAmount < LEAST_AMOUNT_TO_CREATE_METAID) {
+      throw new Error(errors.NOT_ENOUGH_BALANCE_TO_CREATE_METAID)
     }
+
+    // const signature = await this.signMessage(API_AUTH_MESSAGE)
+    // try {
+    //   await getMetaidInitFee({
+    //     address: this.address,
+    //     xpub: this.xpub,
+    //     sigInfo: {
+    //       xSignature: signature,
+    //       xPublickey: await this.getPublicKey('/0/0'),
+    //     },
+    //   })
+    // } catch (error) {
+    //   console.log(error)
+    // }
     if (!this.isMetaidValid()) {
       if (!user?.metaid) {
         const Metaid = await this.use('metaid-root')
