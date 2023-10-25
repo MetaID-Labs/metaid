@@ -112,10 +112,11 @@ export async function fetchRoot({ metaid, nodeName, nodeId }: { metaid: string; 
   }
 }
 
-// withCount(['like'])  likeCount: 3
-export async function fetchBuzzes({ metaid }: { metaid: string }) {
-  const url = `https://api.show3.io/aggregation/v2/app/show/posts/buzz?metaId=${metaid}`
+// get one buzz by txid
 
+// withCount(['like'])  likeCount: 3
+export async function fetchBuzzes({ metaid, page }: { metaid?: string; page: number }) {
+  const url = `https://api.show3.io/aggregation/v2/app/show/posts/buzz?${metaid ? 'metaId=' + metaid : ''}&page=${page}`
   try {
     const data = await axios
       .get(url)

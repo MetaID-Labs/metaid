@@ -7,7 +7,7 @@ type MetaidOpreturn = [
   'metaid',
   string, // protocol name
   string, // stringify json body
-  '0', // isEncrypted
+  '0' | '1', // isEncrypted
   string, // version
   string, // content type
   string, // charset
@@ -21,7 +21,7 @@ type RootOpreturn = [
   string, // protocol name
   string, //brfcid
   string, // stringify json body
-  '0', // isEncrypted
+  '0' | '1', // isEncrypted
   string, // version
   string, // content type
   string, // charset
@@ -34,7 +34,7 @@ type UserOpreturn = [
   'metaid',
   string, // protocol name
   string, // stringify json body
-  '0', // isEncrypted
+  '0' | '1', // isEncrypted
   string, // version
   string, // content type
   string, // charset
@@ -63,11 +63,13 @@ export function buildOpreturn({
   parentTxid,
   protocolName,
   body,
+  invisible,
 }: {
   publicKey: string
   parentTxid: string
   protocolName: string
   body: any
+  invisible?: boolean
 }) {
   const opreturn: MetaidOpreturn = [
     'mvc',
@@ -76,7 +78,7 @@ export function buildOpreturn({
     'metaid',
     protocolName + '-' + publicKey.slice(0, 11),
     body == 'NULL' ? undefined : JSON.stringify(body),
-    '0',
+    !!invisible ? '1' : '0', //
     '1.0.0',
     'application/json',
     'UTF-8',

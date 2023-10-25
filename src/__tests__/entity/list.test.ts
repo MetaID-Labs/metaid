@@ -11,7 +11,7 @@ describe('entity.list', () => {
   })
 
   test('can list buzzes', async ({ Buzz }) => {
-    const { items: buzzes } = await Buzz.list()
+    const { items: buzzes } = await Buzz.list(1)
 
     expect(buzzes).toBeTypeOf('object')
     expect(buzzes[0]).toBeTypeOf('object')
@@ -19,13 +19,13 @@ describe('entity.list', () => {
 
   test('can list buzzes even if it is not connected', async ({ Buzz }) => {
     Buzz.disconnect()
-    const { items: buzzes } = await Buzz.list()
+    const { items: buzzes } = await Buzz.list(1)
 
     expect(buzzes).toBeTypeOf('object')
     expect(buzzes[0]).toBeTypeOf('object')
   })
   test('can paginate', async ({ Buzz }) => {
-    const { limit } = await Buzz.list()
+    const { limit } = await Buzz.list(1)
 
     expect(limit).toBeTypeOf('number')
   })
@@ -34,6 +34,6 @@ describe('entity.list', () => {
     const wallet = LocalWallet.create(mnemonic)
 
     const GM = await (await connect(wallet)).use('group-message')
-    await expect(() => GM.list()).rejects.toThrow(errors.NOT_SUPPORTED)
+    await expect(() => GM.list(1)).rejects.toThrow(errors.NOT_SUPPORTED)
   })
 })
