@@ -320,9 +320,13 @@ export class Entity {
       dustValue = dusts[0].value
     } else {
       // 1.2 otherwise, send dust to root address
-      const { txid } = await this.connector.send(root.address, UTXO_DUST)
-      dustTxid = txid
-      dustValue = UTXO_DUST
+      try {
+        const { txid } = await this.connector.send(root.address, UTXO_DUST)
+        dustTxid = txid
+        dustValue = UTXO_DUST
+      } catch (error) {
+        throw new Error(errors.NOT_ENOUGH_BALANCE)
+      }
     }
 
     // 2. link tx
