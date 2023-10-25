@@ -61,6 +61,7 @@
           <div class="flex gap-4 items-center">
             <div class="font-bold text-white">Buzz List</div>
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getBuzzList">Get List</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="likeTheFirst">Like the first</button>
           </div>
 
           <!-- list -->
@@ -142,6 +143,17 @@
             buzzes.value = items
           }
 
+          const likeTheFirst = async () => {
+            const BuzzHandler = toRaw(Buzz.value)
+            const { items } = await BuzzHandler.list()
+            const { txid } = items[0]
+            console.log({ item: items[0] })
+            const Like = await BuzzHandler.connector.use('like')
+
+            await Like.getRoot()
+            await Like.create({ likeTo: txid, isLike: '1' })
+          }
+
           const createMetaid = async () => {
             const _wallet = await MetaletWallet.create()
             const connector = await connect(_wallet)
@@ -167,6 +179,7 @@
             getPublicKey,
             send2k,
             createMetaid,
+            likeTheFirst,
           }
         },
       }).mount('#app')

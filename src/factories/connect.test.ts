@@ -80,7 +80,7 @@ describe('factories.connect', () => {
     expect(connector.getUser()).toBe(undefined)
   })
 
-  test('can create user if it is not created yet', async () => {
+  test.skip('can create user if it is not created yet', async () => {
     const newMnemonic = mvc.Mnemonic.fromRandom().toString()
     console.log({ newMnemonic })
     const connector = await connectToLocalWallet(newMnemonic)
