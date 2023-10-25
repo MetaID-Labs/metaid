@@ -15,7 +15,7 @@ import { buildRootOpreturn, buildOpreturn, buildUserOpreturn } from '@/utils/opr
 import { Connector } from './connector.js'
 import { errors } from '@/data/errors.js'
 import { FEEB, UTXO_DUST } from '@/data/constants.js'
-import { sleep } from '@/utils/index.js'
+import { checkBalance, sleep } from '@/utils/index.js'
 
 type Root = {
   id: string
@@ -320,13 +320,12 @@ export class Entity {
       dustValue = dusts[0].value
     } else {
       // 1.2 otherwise, send dust to root address
-      try {
-        const { txid } = await this.connector.send(root.address, UTXO_DUST)
-        dustTxid = txid
-        dustValue = UTXO_DUST
-      } catch (error) {
+      if (!(await checkBalance(this.connector.address))) {
         throw new Error(errors.NOT_ENOUGH_BALANCE)
       }
+      const { txid } = await this.connector.send(root.address, UTXO_DUST)
+      dustTxid = txid
+      dustValue = UTXO_DUST
     }
 
     // 2. link tx
