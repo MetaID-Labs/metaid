@@ -5,7 +5,7 @@ test('run', async () => {
   expect(Buzz.name).toBe('buzz')
 })
 
-test('can load entity with multi-word name', async () => {
+test('can use entity with multi-word name', async () => {
   const Metaid = await use('metaid-root')
   expect(Metaid.name).toBe('metaid')
 })

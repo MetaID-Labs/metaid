@@ -4,39 +4,46 @@ import { TxComposer } from 'meta-contract'
 import { type User, fetchUser, fetchMetaid, getMetaidInitFee } from '@/api.js'
 import { API_AUTH_MESSAGE, DEFAULT_USERNAME } from '@/data/constants.js'
 import { sleep } from '@/utils/index.js'
+import type { EntitySchema } from '@/metaid-entities/entity.js'
+import { load } from '@/factories/load.js'
 
 export class Connector {
   private _isConnected: boolean
   private wallet: MetaIDConnectWallet
   public metaid: string | undefined
   private user: User
-  private constructor(wallet: MetaIDConnectWallet) {
+  private constructor(wallet?: MetaIDConnectWallet) {
     this._isConnected = true
 
-    this.wallet = wallet
+    if (wallet) {
+      this.wallet = wallet
+    }
   }
 
   get address() {
-    return this.wallet.address
+    return this.wallet.address || ''
   }
 
   get xpub() {
-    return this.wallet.xpub
+    return this.wallet.xpub || ''
   }
 
-  public static async create(wallet: MetaIDConnectWallet) {
+  public static async create(wallet?: MetaIDConnectWallet) {
     const connector = new Connector(wallet)
 
-    // ask api for metaid
-    const metaid =
-      (await fetchMetaid({
-        address: wallet.address,
-      })) || undefined
-    connector.metaid = metaid
+    if (wallet) {
+      // ask api for metaid
+      const metaid =
+        (await fetchMetaid({
+          address: wallet.address,
+        })) || undefined
+      connector.metaid = metaid
 
-    if (!!metaid) {
-      connector.user = await fetchUser(metaid)
+      if (!!metaid) {
+        connector.user = await fetchUser(metaid)
+      }
     }
+
     return connector
   }
 
@@ -151,12 +158,17 @@ export class Connector {
     return use(entitySymbol, { connector: this })
   }
 
+  load(entitySchema: EntitySchema) {
+    return load(entitySchema, { connector: this })
+  }
+
   isConnected() {
     return this._isConnected
   }
 
   disconnect() {
     this._isConnected = false
+    this.wallet = undefined
   }
 
   /**

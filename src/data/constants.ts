@@ -3,3 +3,5 @@ export const UTXO_DUST = 546
 
 export const API_AUTH_MESSAGE = 'metalet.space'
 export const DEFAULT_USERNAME = 'MetaID User'
+
+export const RUN_CREATE_TESTS = false

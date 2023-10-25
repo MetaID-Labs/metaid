@@ -10,7 +10,6 @@ describe("entity.getRoot", () => {
     console.log("wallet", wallet);
     //metaID-Root
     ctx.Buzz = await (await connect(wallet)).use("buzz");
-    //ctx.Metaid = await (await connect(wallet)).use("create-metaid-root");
   });
 
   test("can get root of the entity", async ({ Buzz }) => {

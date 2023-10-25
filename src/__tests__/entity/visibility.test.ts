@@ -2,7 +2,7 @@ import { errors } from '@/data/errors.js'
 import { connect } from '@/factories/connect.js'
 import { LocalWallet } from '@/wallets/local.js'
 
-describe('entity.encrypt', () => {
+describe('entity.visibility', () => {
   beforeEach(async (ctx) => {
     console.log('memonic')
     const mnemonic1 = import.meta.env.VITE_TEST_MNEMONIC

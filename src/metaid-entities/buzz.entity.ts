@@ -1,4 +1,6 @@
-const buzzSchema = {
+import type { EntitySchema } from './entity.js'
+
+const buzzSchema: EntitySchema = {
   name: 'buzz',
   nodeName: 'SimpleMicroblog',
   versions: [

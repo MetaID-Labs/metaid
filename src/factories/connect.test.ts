@@ -1,6 +1,7 @@
 import { LocalWallet } from '@/wallets/local.js'
 import { connect } from './connect.js'
 import { mvc } from 'meta-contract'
+import { RUN_CREATE_TESTS } from '@/data/constants.js'
 
 async function connectToLocalWallet(mnemonic?: string) {
   if (!mnemonic) {
@@ -14,6 +15,14 @@ async function connectToLocalWallet(mnemonic?: string) {
 describe('factories.connect', () => {
   test('can connect to a local wallet', async () => {
     const connector = await connectToLocalWallet()
+    expect(connector).toBeTypeOf('object')
+
+    const Buzz = await connector.use('buzz')
+    expect(Buzz.name).toBe('buzz')
+  })
+
+  test('can connect to no wallet', async () => {
+    const connector = await connect()
     expect(connector).toBeTypeOf('object')
 
     const Buzz = await connector.use('buzz')
@@ -80,9 +89,8 @@ describe('factories.connect', () => {
     expect(connector.getUser()).toBe(undefined)
   })
 
-  test('can create user if it is not created yet', async () => {
+  test.runIf(RUN_CREATE_TESTS)('can create user if it is not created yet', async () => {
     const newMnemonic = mvc.Mnemonic.fromRandom().toString()
-    console.log({ newMnemonic })
     const connector = await connectToLocalWallet(newMnemonic)
 
     expect(connector.isMetaidValid()).toBe(false)
