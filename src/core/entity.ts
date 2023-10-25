@@ -14,7 +14,7 @@ import { connected } from '@/decorators/connected.js'
 import { buildRootOpreturn, buildOpreturn, buildUserOpreturn } from '@/utils/opreturn-builder.js'
 import { Connector } from './connector.js'
 import { errors } from '@/data/errors.js'
-import { UTXO_DUST } from '@/data/constants.js'
+import { FEEB, UTXO_DUST } from '@/data/constants.js'
 import { sleep } from '@/utils/index.js'
 
 type Root = {
@@ -354,6 +354,10 @@ export class Entity {
       satoshis: biggestUtxo.value,
     })
     linkTxComposer.appendChangeOutput(walletAddress, 1)
+
+    // check if has enough balance
+    const feeRate = linkTxComposer.getFeeRate()
+    if (feeRate < FEEB) throw new Error(errors.NOT_ENOUGH_BALANCE)
 
     // save input-1's output for later use
     const input1Output = linkTxComposer.getInput(1).output
