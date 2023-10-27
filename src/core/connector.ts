@@ -1,7 +1,7 @@
 import { use } from '@/factories/use.js'
 import { type MetaIDConnectWallet } from '../wallets/wallet.js'
 import { TxComposer } from 'meta-contract'
-import { type User, fetchUser, fetchMetaid, getMetaidInitFee, fetchUtxos } from '@/api.js'
+import { type User, fetchUser, fetchMetaid, fetchUtxos } from '@/api.js'
 import { API_AUTH_MESSAGE, DEFAULT_USERNAME, LEAST_AMOUNT_TO_CREATE_METAID } from '@/data/constants.js'
 import { sleep } from '@/utils/index.js'
 import type { EntitySchema } from '@/metaid-entities/entity.js'
