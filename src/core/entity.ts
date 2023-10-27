@@ -173,6 +173,14 @@ export class Entity {
       outputIndex: biggestUtxo.outIndex,
       satoshis: biggestUtxo.value,
     })
+
+    const tx = linkTxComposer.getTx()
+    console.log({
+      tx,
+      txid: dustTxid,
+      address0: mvc.Address.fromString(protocolAddress, 'mainnet' as any).toString(),
+      address1: walletAddress.toString(),
+    })
     linkTxComposer.appendChangeOutput(walletAddress, 1)
 
     // save input-1's output for later use
