@@ -14,9 +14,14 @@ async function connectToLocalWallet(mnemonic?: string) {
 
 describe('entity.createRoot', () => {
   test('can create root of the entity', async () => {
-    const newMnemonic = ''
+    const newMnemonic = 'cigar fringe that else used arch side extra warrior trial royal modify'
     const connector = await connectToLocalWallet(newMnemonic)
 
     const File = await connector.use('file')
+
+    expect(connector.isMetaidValid()).toBe(true)
+
+    const root = await File.getRoot()
+    console.log({ root })
   })
 })

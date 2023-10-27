@@ -40,12 +40,12 @@ export class MetaletWallet implements MetaIDConnectWallet {
     if (!path) return this.address
 
     // cut the first slash for compatibility
-    return await this.internal.getAddress(path.slice(1))
+    return await this.internal.getAddress({ path: path.slice(1) })
   }
 
   public async getPublicKey(path: string = '/0/0') {
     // cut the first slash for compatibility
-    return await this.internal.getPublicKey(path.slice(1))
+    return await this.internal.getPublicKey({ path: path.slice(1) })
   }
 
   public async signMessage(message, encoding): Promise<string> {
