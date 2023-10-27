@@ -13,7 +13,7 @@ const buzzSchema: EntitySchema = {
           type: 'string',
         },
         {
-          name: 'attachmentIds',
+          name: 'attachments',
           type: 'array',
         },
       ],

@@ -158,9 +158,10 @@ export class Entity {
     const metaidOpreturn = buildRootOpreturn({
       publicKey: candidatePublicKey,
       parentTxid: protocolTxid,
-      protocolName: this.schema.nodeName,
+      schema: this.schema,
       body: undefined,
     })
+    console.log('metaidOpreturn', metaidOpreturn)
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
     const biggestUtxo = await fetchBiggestUtxo({

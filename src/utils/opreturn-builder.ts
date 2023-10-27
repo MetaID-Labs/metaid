@@ -40,20 +40,21 @@ type UserOpreturn = [
   string, // charset
 ]
 
-export function buildRootOpreturn({ publicKey, parentTxid, protocolName, body }) {
+export function buildRootOpreturn({ publicKey, parentTxid, schema, body }) {
   const opreturn: RootOpreturn = [
     'mvc',
     publicKey,
     'mvc:' + parentTxid,
     'metaid',
-    protocolName,
-    BrfcRootName[protocolName].brfcId,
+    schema.nodeName,
+    schema.versions[0].id,
     body,
     '0',
-    BrfcRootName[protocolName].version,
+    String(schema.versions[0].version),
     'text/plain',
     'UTF-8',
   ]
+  console.log({ opreturn })
 
   return opreturn
 }
