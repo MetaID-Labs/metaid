@@ -6,7 +6,7 @@ type MetaidOpreturn = [
   string, // `${parentChainFlag(optional)}:${parentTxid}`
   'metaid',
   string, // protocol name
-  string, // stringify json body
+  string | Buffer, // stringify json body
   '0' | '1', // isEncrypted
   string, // version
   string, // content type
@@ -78,7 +78,7 @@ export function buildOpreturn({
     'mvc:' + parentTxid,
     'metaid',
     protocolName + '-' + publicKey.slice(0, 11),
-    body == 'NULL' ? undefined : JSON.stringify(body),
+    body == 'NULL' ? undefined : Buffer.isBuffer(body) ? body : JSON.stringify(body),
     !!invisible ? '1' : '0', //
     '1.0.0',
     'application/json',
