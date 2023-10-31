@@ -21,6 +21,8 @@ export interface MetaIDConnectWallet {
     inputIndex: number
   }): TxComposer | Promise<TxComposer>
 
+  pay({ transactions }: { transactions: TxComposer[] }): Promise<TxComposer[]>
+
   send(
     toAddress: string,
     amount: number

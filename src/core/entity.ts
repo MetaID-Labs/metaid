@@ -350,33 +350,12 @@ export class Entity {
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
-    const biggestUtxo = await fetchBiggestUtxo({ address: walletAddress.toString() })
-    linkTxComposer.appendP2PKHInput({
-      address: walletAddress,
-      txId: biggestUtxo.txid,
-      outputIndex: biggestUtxo.outIndex,
-      satoshis: biggestUtxo.value,
-    })
-    linkTxComposer.appendChangeOutput(walletAddress, 1)
+    linkTxComposer = (
+      await this.connector.pay({
+        transactions: [linkTxComposer],
+      })
+    )[0]
 
-    // check if has enough balance
-    const feeRate = linkTxComposer.getFeeRate()
-    if (feeRate < FEEB) throw new Error(errors.NOT_ENOUGH_BALANCE)
-
-    // save input-1's output for later use
-    const input1Output = linkTxComposer.getInput(1).output
-
-    linkTxComposer = await this.connector.signInput({
-      txComposer: linkTxComposer,
-      inputIndex: 0,
-    })
-
-    // reassign input-1's output
-    linkTxComposer.getInput(1).output = input1Output
-    linkTxComposer = await this.connector.signInput({
-      txComposer: linkTxComposer,
-      inputIndex: 1,
-    })
     const { txid } = await this.connector.broadcast(linkTxComposer)
 
     await notify({ txHex: linkTxComposer.getRawHex() })

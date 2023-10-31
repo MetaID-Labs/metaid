@@ -105,6 +105,19 @@ export class MetaletWallet implements MetaIDConnectWallet {
     return new TxComposer(signedTx)
   }
 
+  public async pay({ transactions }: { transactions: TxComposer[] }): Promise<TxComposer[]> {
+    const { payedTransactions } = await this.internal.pay({
+      transactions: transactions.map((txComposer) => {
+        console.log({ serialize: txComposer.serialize() })
+        return txComposer.serialize()
+      }),
+    })
+
+    return payedTransactions.map((txComposerSerialized: string) => {
+      return TxComposer.deserialize(txComposerSerialized)
+    })
+  }
+
   public async send(
     toAddress: string,
     amount: number
