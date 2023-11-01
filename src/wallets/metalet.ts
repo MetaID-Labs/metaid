@@ -1,5 +1,5 @@
 import { staticImplements } from '@/utils/index.js'
-import { type MetaIDConnectWallet, type WalletStatic } from './wallet.js'
+import { type MetaIDConnectWallet, type Transaction, type WalletStatic } from './wallet.js'
 import { TxComposer, mvc } from 'meta-contract'
 import { errors } from '@/data/errors.js'
 import { broadcast as broadcastToApi } from '@/api.js'
@@ -105,11 +105,17 @@ export class MetaletWallet implements MetaIDConnectWallet {
     return new TxComposer(signedTx)
   }
 
-  public async pay({ transactions }: { transactions: TxComposer[] }): Promise<TxComposer[]> {
-    const { payedTransactions } = await this.internal.pay({
-      transactions: transactions.map((txComposer) => {
-        console.log({ serialize: txComposer.serialize() })
-        return txComposer.serialize()
+  public async pay({ transactions }: { transactions: Transaction[] }) {
+    const {
+      payedTransactions,
+    }: {
+      payedTransactions: string[]
+    } = await this.internal.pay({
+      transactions: transactions.map((transaction) => {
+        return {
+          txComposer: transaction.txComposer.serialize(),
+          message: transaction.message,
+        }
       }),
     })
 
