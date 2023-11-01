@@ -1,5 +1,5 @@
 import { use } from '@/factories/use.js'
-import { type MetaIDConnectWallet } from '../wallets/wallet.js'
+import { type MetaIDConnectWallet, type Transaction } from '../wallets/wallet.js'
 import { TxComposer } from 'meta-contract'
 import { type User, fetchUser, fetchMetaid, fetchUtxos } from '@/api.js'
 import { API_AUTH_MESSAGE, DEFAULT_USERNAME, LEAST_AMOUNT_TO_CREATE_METAID } from '@/data/constants.js'
@@ -187,10 +187,14 @@ export class Connector {
 
   /**
    * wallet delegation
-   * signInput / send / broadcast / getPublicKey / getAddress / signMessage
+   * signInput / send / broadcast / getPublicKey / getAddress / signMessage / pay
    */
   signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }) {
     return this.wallet.signInput({ txComposer, inputIndex })
+  }
+
+  pay({ transactions }: { transactions: Transaction[] }) {
+    return this.wallet.pay({ transactions })
   }
 
   send(toAddress: string, amount: number) {

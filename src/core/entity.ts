@@ -16,6 +16,7 @@ import { Connector } from './connector.js'
 import { errors } from '@/data/errors.js'
 import { FEEB, UTXO_DUST } from '@/data/constants.js'
 import { checkBalance, sleep } from '@/utils/index.js'
+import type { Transaction } from '@/wallets/wallet.js'
 
 type Root = {
   id: string
@@ -291,24 +292,6 @@ export class Entity {
     return { txid }
   }
 
-  // @connected
-  // private getPathByAddress(address: string) {
-  //   let i = 0;
-  //   let path;
-  //   while (i < 1000) {
-  //     const pathAddress = this.connector.getAddress(`/0/${i}`);
-  //     if (pathAddress == address) {
-  //       path = `/0/${i}`;
-  //       break;
-  //     }
-  //     i++;
-  //   }
-  //   if (!path) {
-  //     throw new Error(`path not found:${address}`);
-  //   }
-  //   return path;
-  // }
-
   @connected
   public async create(
     body: unknown,
@@ -319,7 +302,7 @@ export class Entity {
     }
   ) {
     const root = await this.getRoot()
-    const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
+    const transactions: Transaction[] = []
 
     let dustTxid = ''
     let dustValue = 0
@@ -334,8 +317,17 @@ export class Entity {
       if (!(await checkBalance(this.connector.address))) {
         throw new Error(errors.NOT_ENOUGH_BALANCE)
       }
-      const { txid } = await this.connector.send(root.address, UTXO_DUST)
-      dustTxid = txid
+
+      const dustTxComposer = new TxComposer()
+      dustTxComposer.appendP2PKHOutput({
+        address: new mvc.Address(root.address, 'mainnet' as any),
+        satoshis: UTXO_DUST,
+      })
+      transactions.push({
+        txComposer: dustTxComposer,
+        message: 'Create link dust utxo',
+      })
+      dustTxid = dustTxComposer.getTxId()
       dustValue = UTXO_DUST
     }
 
@@ -361,42 +353,23 @@ export class Entity {
       encoding: options?.encoding || this.schema?.encoding,
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
-
-    const biggestUtxo = await fetchBiggestUtxo({ address: walletAddress.toString() })
-    linkTxComposer.appendP2PKHInput({
-      address: walletAddress,
-      txId: biggestUtxo.txid,
-      outputIndex: biggestUtxo.outIndex,
-      satoshis: biggestUtxo.value,
-    })
-    linkTxComposer.appendChangeOutput(walletAddress, 1)
-
-    // check if has enough balance
-    const feeRate = linkTxComposer.getFeeRate()
-    if (feeRate < FEEB) throw new Error(errors.NOT_ENOUGH_BALANCE)
-
-    // save input-1's output for later use
-    const input1Output = linkTxComposer.getInput(1).output
-
-    linkTxComposer = await this.connector.signInput({
+    transactions.push({
       txComposer: linkTxComposer,
-      inputIndex: 0,
+      message: 'Create Buzz',
     })
 
-    // reassign input-1's output
-    linkTxComposer.getInput(1).output = input1Output
-    linkTxComposer = await this.connector.signInput({
-      txComposer: linkTxComposer,
-      inputIndex: 1,
+    const payRes = await this.connector.pay({
+      transactions,
     })
-    // this.connector.payTransactions({
-    //   transactions: [linkTxComposer]
-    // })
-    const { txid } = await this.connector.broadcast(linkTxComposer)
+    for (const txComposer of payRes) {
+      await this.connector.broadcast(txComposer)
+    }
 
-    await notify({ txHex: linkTxComposer.getRawHex() })
+    await notify({ txHex: payRes[payRes.length - 1].getRawHex() })
 
-    return { txid }
+    return {
+      txid: payRes[payRes.length - 1].getTxId(),
+    }
   }
 
   public async list(page: number) {

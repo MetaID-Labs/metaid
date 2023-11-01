@@ -4,6 +4,11 @@ export interface WalletStatic {
   create: ((mnemonic: string, derivePath?: string) => MetaIDConnectWallet) | (() => Promise<MetaIDConnectWallet>)
 }
 
+export type Transaction = {
+  txComposer: TxComposer
+  message: string
+}
+
 export interface MetaIDConnectWallet {
   address: string
   xpub: string
@@ -20,6 +25,8 @@ export interface MetaIDConnectWallet {
     txComposer: TxComposer
     inputIndex: number
   }): TxComposer | Promise<TxComposer>
+
+  pay({ transactions }: { transactions: Transaction[] }): Promise<TxComposer[]>
 
   send(
     toAddress: string,
