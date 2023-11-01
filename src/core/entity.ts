@@ -131,6 +131,7 @@ export class Entity {
     candidatePublicKey: string
   }) {
     const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
+    const transactions: Transaction[] = [] // apply pay
 
     let dustTxid = ''
     let dustValue = 0
@@ -142,6 +143,19 @@ export class Entity {
       dustValue = dusts[0].value
     } else {
       // 1.2 otherwise, send dust to root address
+
+      // apply pay
+      const dustTxComposer = new TxComposer()
+      dustTxComposer.appendP2PKHOutput({
+        address: new mvc.Address(protocolAddress, 'mainnet' as any),
+        satoshis: UTXO_DUST,
+      })
+      transactions.push({
+        txComposer: dustTxComposer,
+        message: 'Create link dust utxo',
+      })
+      // apply pay
+
       const { txid } = await this.connector.send(protocolAddress, UTXO_DUST)
       dustTxid = txid
       dustValue = UTXO_DUST
@@ -165,44 +179,57 @@ export class Entity {
     console.log('metaidOpreturn', metaidOpreturn)
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
-    const biggestUtxo = await fetchBiggestUtxo({
-      address: walletAddress.toString(),
-    })
-    linkTxComposer.appendP2PKHInput({
-      address: walletAddress,
-      txId: biggestUtxo.txid,
-      outputIndex: biggestUtxo.outIndex,
-      satoshis: biggestUtxo.value,
-    })
-
-    const tx = linkTxComposer.getTx()
-    console.log({
-      tx,
-      txid: dustTxid,
-      address0: mvc.Address.fromString(protocolAddress, 'mainnet' as any).toString(),
-      address1: walletAddress.toString(),
-    })
-    linkTxComposer.appendChangeOutput(walletAddress, 1)
-
-    // save input-1's output for later use
-    const input1Output = linkTxComposer.getInput(1).output
-
-    linkTxComposer = await this.connector.signInput({
+    transactions.push({
       txComposer: linkTxComposer,
-      inputIndex: 0,
+      message: 'Create Root',
     })
 
-    // reassign input-1's output
-    linkTxComposer.getInput(1).output = input1Output
-    linkTxComposer = await this.connector.signInput({
-      txComposer: linkTxComposer,
-      inputIndex: 1,
+    /////////////
+    // const biggestUtxo = await fetchBiggestUtxo({
+    //   address: walletAddress.toString(),
+    // })
+    // linkTxComposer.appendP2PKHInput({
+    //   address: walletAddress,
+    //   txId: biggestUtxo.txid,
+    //   outputIndex: biggestUtxo.outIndex,
+    //   satoshis: biggestUtxo.value,
+    // })
+
+    // const tx = linkTxComposer.getTx()
+
+    // linkTxComposer.appendChangeOutput(walletAddress, 1)
+
+    // // save input-1's output for later use
+    // const input1Output = linkTxComposer.getInput(1).output
+
+    // linkTxComposer = await this.connector.signInput({
+    //   txComposer: linkTxComposer,
+    //   inputIndex: 0,
+    // })
+
+    // // reassign input-1's output
+    // linkTxComposer.getInput(1).output = input1Output
+    // linkTxComposer = await this.connector.signInput({
+    //   txComposer: linkTxComposer,
+    //   inputIndex: 1,
+    // })
+    // const { txid } = await this.connector.broadcast(linkTxComposer)
+
+    // await notify({ txHex: linkTxComposer.getRawHex() })
+
+    ///// apply pay
+    const payRes = await this.connector.pay({
+      transactions,
     })
-    const { txid } = await this.connector.broadcast(linkTxComposer)
+    for (const txComposer of payRes) {
+      await this.connector.broadcast(txComposer)
+    }
 
-    await notify({ txHex: linkTxComposer.getRawHex() })
+    await notify({ txHex: payRes[payRes.length - 1].getRawHex() })
 
-    return { txid }
+    return {
+      txid: payRes[payRes.length - 1].getTxId(),
+    }
   }
 
   @connected
@@ -216,6 +243,8 @@ export class Entity {
     nodeName: string
   ) {
     const walletAddress = mvc.Address.fromString(this.connector.address, 'mainnet' as any)
+    const transactions: Transaction[] = []
+
     // 1. send dust to root address
 
     let dustTxid = ''
@@ -229,6 +258,17 @@ export class Entity {
         dustValue = dusts[0].value
       } else {
         // 1.2 otherwise, send dust to root address
+
+        const dustTxComposer = new TxComposer()
+        dustTxComposer.appendP2PKHOutput({
+          address: new mvc.Address(parent.address, 'mainnet' as any),
+          satoshis: UTXO_DUST,
+        })
+        transactions.push({
+          txComposer: dustTxComposer,
+          message: 'Create link dust utxo',
+        })
+
         const { txid } = await this.connector.send(parent.address, UTXO_DUST)
         dustTxid = txid
         dustValue = UTXO_DUST
@@ -256,40 +296,58 @@ export class Entity {
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
-    const biggestUtxo = await fetchBiggestUtxo({ address: walletAddress.toString() })
-    linkTxComposer.appendP2PKHInput({
-      address: walletAddress,
-      txId: biggestUtxo.txid,
-      outputIndex: biggestUtxo.outIndex,
-      satoshis: biggestUtxo.value,
-    })
-    linkTxComposer.appendChangeOutput(walletAddress, 1)
-
-    let input1Output: any
-    if (parent?.address) {
-      // save input-1's output for later use
-      input1Output = linkTxComposer.getInput(1).output
-    }
-
-    linkTxComposer = await this.connector.signInput({
+    transactions.push({
       txComposer: linkTxComposer,
-      inputIndex: 0,
-      // path: parent.path, //"/0/0",
+      message: 'Create Root Metaid',
     })
-    if (parent?.address) {
-      linkTxComposer.getInput(1).output = input1Output
-      linkTxComposer = await this.connector.signInput({
-        txComposer: linkTxComposer,
-        inputIndex: 1,
-        // path: "/0/0",
-      })
+
+    // const biggestUtxo = await fetchBiggestUtxo({ address: walletAddress.toString() })
+    // linkTxComposer.appendP2PKHInput({
+    //   address: walletAddress,
+    //   txId: biggestUtxo.txid,
+    //   outputIndex: biggestUtxo.outIndex,
+    //   satoshis: biggestUtxo.value,
+    // })
+    // linkTxComposer.appendChangeOutput(walletAddress, 1)
+
+    // let input1Output: any
+    // if (parent?.address) {
+    //   // save input-1's output for later use
+    //   input1Output = linkTxComposer.getInput(1).output
+    // }
+
+    // linkTxComposer = await this.connector.signInput({
+    //   txComposer: linkTxComposer,
+    //   inputIndex: 0,
+    //   // path: parent.path, //"/0/0",
+    // })
+    // if (parent?.address) {
+    //   linkTxComposer.getInput(1).output = input1Output
+    //   linkTxComposer = await this.connector.signInput({
+    //     txComposer: linkTxComposer,
+    //     inputIndex: 1,
+    //     // path: "/0/0",
+    //   })
+    // }
+
+    // const { txid } = await this.connector.broadcast(linkTxComposer)
+    // console.log('txid', txid)
+    // await notify({ txHex: linkTxComposer.getRawHex() })
+
+    // return { txid }
+    ///// apply pay
+    const payRes = await this.connector.pay({
+      transactions,
+    })
+    for (const txComposer of payRes) {
+      await this.connector.broadcast(txComposer)
     }
 
-    const { txid } = await this.connector.broadcast(linkTxComposer)
-    console.log('txid', txid)
-    await notify({ txHex: linkTxComposer.getRawHex() })
+    await notify({ txHex: payRes[payRes.length - 1].getRawHex() })
 
-    return { txid }
+    return {
+      txid: payRes[payRes.length - 1].getTxId(),
+    }
   }
 
   @connected
@@ -297,6 +355,7 @@ export class Entity {
     body: unknown,
     options?: {
       invisible: boolean
+      signMessage: string
       dataType?: string
       encoding?: string
     }
@@ -353,11 +412,12 @@ export class Entity {
       encoding: options?.encoding || this.schema?.encoding,
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
+
     transactions.push({
       txComposer: linkTxComposer,
-      message: 'Create Buzz',
+      message: options.signMessage,
     })
-
+    ///// apply pay
     const payRes = await this.connector.pay({
       transactions,
     })
