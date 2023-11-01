@@ -314,6 +314,8 @@ export class Entity {
     body: unknown,
     options?: {
       invisible: boolean
+      dataType?: string
+      encoding?: string
     }
   ) {
     const root = await this.getRoot()
@@ -342,7 +344,7 @@ export class Entity {
     const randomPub = randomPriv.toPublicKey()
 
     let linkTxComposer = new TxComposer()
-    linkTxComposer.appendP2PKHInput({
+    linkTxComposer. ({
       address: mvc.Address.fromString(root.address, 'mainnet' as any),
       txId: dustTxid,
       outputIndex: 0,
@@ -355,6 +357,8 @@ export class Entity {
       protocolName: this.schema.nodeName,
       body,
       invisible: options?.invisible,
+      dataType: options?.dataType,
+      encoding: options?.encoding || this.schema?.encoding,
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 
@@ -385,6 +389,9 @@ export class Entity {
       txComposer: linkTxComposer,
       inputIndex: 1,
     })
+    // this.connector.payTransactions({
+    //   transactions: [linkTxComposer]
+    // })
     const { txid } = await this.connector.broadcast(linkTxComposer)
 
     await notify({ txHex: linkTxComposer.getRawHex() })
