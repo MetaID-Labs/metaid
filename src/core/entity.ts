@@ -336,7 +336,7 @@ export class Entity {
     const randomPub = randomPriv.toPublicKey()
 
     let linkTxComposer = new TxComposer()
-    linkTxComposer. ({
+    linkTxComposer.appendP2PKHInput({
       address: mvc.Address.fromString(root.address, 'mainnet' as any),
       txId: dustTxid,
       outputIndex: 0,
