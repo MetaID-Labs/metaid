@@ -53,7 +53,7 @@ export type LikeItem = {
 }
 
 export async function fetchMetaid({ address }: { address: string }): Promise<string | null> {
-  const url = `https://api.show3.io/metaid-base/v1/meta/root/${address}`
+  const url = `https://api.metaid.io/metaid-base/v1/meta/root/${address}`
 
   try {
     const data = await axios
@@ -78,7 +78,7 @@ export async function fetchMetaid({ address }: { address: string }): Promise<str
 }
 
 export async function fetchRoot({ metaid, nodeName, nodeId }: { metaid: string; nodeName: string; nodeId: string }) {
-  const url = `https://api.show3.io/aggregation/v2/app/metaId/getProtocolBrfcNode/${metaid}/${nodeName}`
+  const url = `https://api.metaid.io/aggregation/v2/app/metaId/getProtocolBrfcNode/${metaid}/${nodeName}`
   try {
     const data = await axios
       .get(url)
@@ -116,7 +116,9 @@ export async function fetchRoot({ metaid, nodeName, nodeId }: { metaid: string; 
 
 // withCount(['like'])  likeCount: 3
 export async function fetchBuzzes({ metaid, page }: { metaid?: string; page: number }) {
-  const url = `https://api.show3.io/aggregation/v2/app/show/posts/buzz?${metaid ? 'metaId=' + metaid : ''}&page=${page}`
+  const url = `https://api.metaid.io/aggregation/v2/app/show/posts/buzz?${
+    metaid ? 'metaId=' + metaid : ''
+  }&page=${page}`
   try {
     const data = await axios
       .get(url)
@@ -172,7 +174,7 @@ export async function fetchBuzzes({ metaid, page }: { metaid?: string; page: num
 }
 
 export async function notify({ txHex }: { txHex: string }) {
-  const url = 'https://api.show3.io/metaid-base/v1/meta/upload/raw'
+  const url = 'https://api.metaid.io/metaid-base/v1/meta/upload/raw'
 
   const notifyRes = await axios.post(url, {
     raw: txHex,
@@ -216,8 +218,15 @@ export async function fetchBiggestUtxo({ address }: { address: string }): Promis
   })
 }
 
+export async function fetchTxid(txid: string) {
+  const url = `https://mainnet.mvcapi.com/tx/${txid}`
+  return await axios.get(url).then((res) => {
+    return res.data
+  })
+}
+
 export async function fetchUser(metaid: string): Promise<User> {
-  const url = `https://api.show3.io/aggregation/v2/app/user/getUserAllInfo/${metaid}`
+  const url = `https://api.metaid.io/aggregation/v2/app/user/getUserAllInfo/${metaid}`
   return await axios.get(url).then((res) => {
     if (res.data.code == 0) {
       const user = res.data.data
@@ -246,7 +255,7 @@ export async function fetchRootCandidate(params: { xpub: string; parentTxId: str
     publicKey: string
   }>(async (resolve, reject) => {
     let node
-    const url = `https://api.show3.io/serviceapi/api/v1/showService/getPublicKeyForNewNode`
+    const url = `https://api.metaid.io/serviceapi/api/v1/showService/getPublicKeyForNewNode`
     const { xpub, parentTxId } = params
     const res = await axios.post(url, {
       data: JSON.stringify({
@@ -283,4 +292,12 @@ export async function broadcast({ txHex }: { txHex: string }): Promise<{
       hex: txHex,
     })
     .then((res) => res.data)
+}
+
+export async function batchBroadcast(params: { hex: string }[]): Promise<
+  {
+    txid: string
+  }[]
+> {
+  return await axios.post('https://mainnet.mvcapi.com/tx/broadcast/batch', params).then((res) => res.data)
 }

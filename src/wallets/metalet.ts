@@ -2,7 +2,7 @@ import { staticImplements } from '@/utils/index.js'
 import { type MetaIDConnectWallet, type Transaction, type WalletStatic } from './wallet.js'
 import { TxComposer, mvc } from 'meta-contract'
 import { errors } from '@/data/errors.js'
-import { broadcast as broadcastToApi } from '@/api.js'
+import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/api.js'
 import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
 
 @staticImplements<WalletStatic>()
@@ -117,6 +117,7 @@ export class MetaletWallet implements MetaIDConnectWallet {
           message: transaction.message,
         }
       }),
+      hasMetaid: true,
     })
 
     return payedTransactions.map((txComposerSerialized: string) => {
@@ -151,7 +152,14 @@ export class MetaletWallet implements MetaIDConnectWallet {
   public async broadcast(txComposer: TxComposer): Promise<{ txid: string }> {
     // broadcast locally first
     const txHex = txComposer.getTx().toString()
-
     return await broadcastToApi({ txHex })
+  }
+
+  public async batchBroadcast(txComposer: TxComposer[]): Promise<{ txid: string }[]> {
+    // broadcast locally first
+    const hexs = txComposer.map((d) => {
+      return { hex: d.getTx().toString() }
+    })
+    return await batchBroadcastApi(hexs)
   }
 }

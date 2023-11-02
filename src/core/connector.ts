@@ -1,7 +1,7 @@
 import { use } from '@/factories/use.js'
 import { type MetaIDConnectWallet, type Transaction } from '../wallets/wallet.js'
 import { TxComposer } from 'meta-contract'
-import { type User, fetchUser, fetchMetaid, fetchUtxos } from '@/api.js'
+import { type User, fetchUser, fetchMetaid, fetchUtxos, notify, fetchTxid } from '@/api.js'
 import { API_AUTH_MESSAGE, DEFAULT_USERNAME, LEAST_AMOUNT_TO_CREATE_METAID } from '@/data/constants.js'
 import { sleep } from '@/utils/index.js'
 import type { EntitySchema } from '@/metaid-entities/entity.js'
@@ -65,7 +65,6 @@ export class Connector {
     let user: any = {}
     if (this.metaid) {
       user = await fetchUser(this.metaid)
-
       if (user && user.metaid && user.protocolTxid && (user.infoTxid && user).name) {
         this.user = user
 
@@ -100,65 +99,105 @@ export class Connector {
     //   console.log(error)
     // }
     if (!this.isMetaidValid()) {
+      let allTransactions: Transaction[] = []
+      let tempUser = {
+        metaid: '',
+        protocolTxid: '',
+        infoTxid: '',
+        name: '',
+      }
       if (!user?.metaid) {
+        // console.log('run in userMetaid')
         const Metaid = await this.use('metaid-root')
         const publicKey = await this.getPublicKey('/0/0')
-        const { txid } = await Metaid.createMetaidRoot(
+        const tx1 = await Metaid.createMetaidRoot(
           {
             publicKey,
           },
           Metaid.schema.nodeName
         )
-        this.metaid = txid
-        user.metaid = txid
+        allTransactions = allTransactions.concat(tx1)
+
+        // this.metaid = tx1[tx1.length - 1].txComposer.getTxId()
+        tempUser.metaid = tx1[tx1.length - 1].txComposer.getTxId()
       }
       await sleep(1000)
       if (!user?.protocolTxid) {
         const Protocols = await this.use('metaid-protocol')
         const publicKey = await this.getPublicKey('/0/2')
-        const { txid } = await Protocols.createMetaidRoot(
+        const tx2 = await Protocols.createMetaidRoot(
           {
             publicKey,
-            txid: user.metaid,
+            txid: tempUser.metaid,
           },
           Protocols.schema.nodeName
         )
-        user.protocolTxid = txid
+        allTransactions = allTransactions.concat(tx2)
+        tempUser.protocolTxid = tx2[tx2.length - 1].txComposer.getTxId()
       }
       if (!user?.infoTxid) {
         const Info = await this.use('metaid-info')
         const publicKey = await this.getPublicKey('/0/1')
-        const { txid } = await Info.createMetaidRoot(
+        const tx3 = await Info.createMetaidRoot(
           {
             publicKey,
-            txid: user.metaid,
+            txid: tempUser.metaid,
           },
           Info.schema.nodeName
         )
-        user.infoTxid = txid
+        allTransactions = allTransactions.concat(tx3)
+        tempUser.infoTxid = tx3[tx3.length - 1].txComposer.getTxId()
       }
       if (!user?.name) {
         const Name = await this.use('metaid-name')
         const address = await this.getAddress('/0/1')
         const publicKey = await this.getPublicKey('/0/1')
         const useName = body?.name ? body.name : DEFAULT_USERNAME
-        const { txid } = await Name.createMetaidRoot(
+        const tx4 = await Name.createMetaidRoot(
           {
             address,
             publicKey,
-            txid: user.infoTxid,
+            txid: tempUser.infoTxid,
             body: useName,
           },
           Name.schema.nodeName
         )
-        user.name = useName
+
+        allTransactions = allTransactions.concat(tx4)
+        tempUser.name = useName
+      }
+      // this.user = user
+      const payRes = await this.wallet.pay({
+        transactions: allTransactions,
+      })
+
+      await this.wallet.batchBroadcast(payRes)
+
+      sleep(1000)
+      for (const p of payRes) {
+        const txid = p.getTxId()
+        const isValid = !!(await fetchTxid(txid))
+        // console.log('bbbbb', isValid, await fetchTxid(txid))
+        if (isValid) {
+          await notify({ txHex: p.getRawHex() })
+        } else {
+          throw new Error('txid is not valid')
+        }
       }
 
-      this.user = user
-    }
+      if (user?.metaId) {
+        this.metaid = user.metaid
+      } else {
+        this.metaid = payRes[0].getTxId()
+      }
 
+      // for (const p of payRes) {
+      //   await notify({ txHex: p.getRawHex() })
+      // }
+    }
     await sleep(1000)
     const refetchUser = await fetchUser(this.metaid)
+    this.user = refetchUser
     console.log({ refetchUser })
     return refetchUser
   }
@@ -203,6 +242,10 @@ export class Connector {
 
   broadcast(txComposer: TxComposer) {
     return this.wallet.broadcast(txComposer)
+  }
+
+  batchBroadcast(txComposer: TxComposer[]) {
+    return this.wallet.batchBroadcast(txComposer)
   }
 
   getPublicKey(path?: string) {

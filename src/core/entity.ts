@@ -9,6 +9,7 @@ import {
   fetchUtxos,
   notify,
   type User,
+  fetchTxid,
 } from '@/api.js'
 import { connected } from '@/decorators/connected.js'
 import { buildRootOpreturn, buildOpreturn, buildUserOpreturn } from '@/utils/opreturn-builder.js'
@@ -143,7 +144,9 @@ export class Entity {
       dustValue = dusts[0].value
     } else {
       // 1.2 otherwise, send dust to root address
-
+      if (!(await checkBalance(this.connector.address))) {
+        throw new Error(errors.NOT_ENOUGH_BALANCE)
+      }
       // apply pay
       const dustTxComposer = new TxComposer()
       dustTxComposer.appendP2PKHOutput({
@@ -156,8 +159,8 @@ export class Entity {
       })
       // apply pay
 
-      const { txid } = await this.connector.send(protocolAddress, UTXO_DUST)
-      dustTxid = txid
+      // const { txid } = await this.connector.send(protocolAddress, UTXO_DUST)
+      dustTxid = dustTxComposer.getTxId()
       dustValue = UTXO_DUST
     }
 
@@ -221,10 +224,10 @@ export class Entity {
     const payRes = await this.connector.pay({
       transactions,
     })
-    for (const txComposer of payRes) {
-      await this.connector.broadcast(txComposer)
-    }
-
+    // for (const txComposer of payRes) {
+    //   await this.connector.broadcast(txComposer)
+    // }
+    await this.connector.batchBroadcast(payRes)
     await notify({ txHex: payRes[payRes.length - 1].getRawHex() })
 
     return {
@@ -258,7 +261,9 @@ export class Entity {
         dustValue = dusts[0].value
       } else {
         // 1.2 otherwise, send dust to root address
-
+        if (!(await checkBalance(this.connector.address))) {
+          throw new Error(errors.NOT_ENOUGH_BALANCE)
+        }
         const dustTxComposer = new TxComposer()
         dustTxComposer.appendP2PKHOutput({
           address: new mvc.Address(parent.address, 'mainnet' as any),
@@ -270,7 +275,7 @@ export class Entity {
         })
 
         const { txid } = await this.connector.send(parent.address, UTXO_DUST)
-        dustTxid = txid
+        dustTxid = dustTxComposer.getTxId()
         dustValue = UTXO_DUST
       }
 
@@ -298,7 +303,7 @@ export class Entity {
 
     transactions.push({
       txComposer: linkTxComposer,
-      message: 'Create Root Metaid',
+      message: `Create Root Metaid with ${nodeName}`,
     })
 
     // const biggestUtxo = await fetchBiggestUtxo({ address: walletAddress.toString() })
@@ -336,18 +341,19 @@ export class Entity {
 
     // return { txid }
     ///// apply pay
-    const payRes = await this.connector.pay({
-      transactions,
-    })
-    for (const txComposer of payRes) {
-      await this.connector.broadcast(txComposer)
-    }
 
-    await notify({ txHex: payRes[payRes.length - 1].getRawHex() })
+    // const payRes = await this.connector.pay({
+    //   transactions,
+    // })
 
-    return {
-      txid: payRes[payRes.length - 1].getTxId(),
-    }
+    // await this.connector.batchBroadcast(payRes)
+    // await notify({ txHex: payRes[payRes.length - 1].getRawHex() })
+
+    // return {
+    //   txid: payRes[payRes.length - 1].getTxId(),
+    // }
+
+    return transactions
   }
 
   @connected
@@ -358,10 +364,12 @@ export class Entity {
       signMessage: string
       dataType?: string
       encoding?: string
+      serialAction?: 'combo' | 'finish'
+      transactions?: Transaction[]
     }
   ) {
     const root = await this.getRoot()
-    const transactions: Transaction[] = []
+    const transactions: Transaction[] = options?.transactions ?? []
 
     let dustTxid = ''
     let dustValue = 0
@@ -417,16 +425,34 @@ export class Entity {
       txComposer: linkTxComposer,
       message: options.signMessage,
     })
+    if (options?.serialAction === 'combo') {
+      return { transactions }
+    }
+
     ///// apply pay
     const payRes = await this.connector.pay({
       transactions,
     })
     for (const txComposer of payRes) {
+      console.log('txcomp', txComposer)
       await this.connector.broadcast(txComposer)
     }
-
-    await notify({ txHex: payRes[payRes.length - 1].getRawHex() })
-
+    // await this.connector.batchBroadcast(payRes)
+    sleep(2000)
+    console.log(
+      'payRes txids',
+      payRes.map((d) => d.getTxId())
+    )
+    for (const p of payRes) {
+      const txid = p.getTxId()
+      const isValid = !!(await fetchTxid(txid))
+      console.log('bbbbb', isValid, await fetchTxid(txid))
+      if (isValid) {
+        await notify({ txHex: p.getRawHex() })
+      } else {
+        throw new Error('txid is not valid')
+      }
+    }
     return {
       txid: payRes[payRes.length - 1].getTxId(),
     }

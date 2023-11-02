@@ -35,7 +35,8 @@ export interface MetaIDConnectWallet {
     txid: string
   }>
 
-  broadcast(txComposer: TxComposer): Promise<{ txid: string }>
+  broadcast(txComposer: TxComposer | TxComposer[]): Promise<{ txid: string } | { txid: string }[]>
+  batchBroadcast(txComposer: TxComposer[]): Promise<{ txid: string }[]>
 
   // encrypt(message: string, publicKey: string): Promise<string>;
 
