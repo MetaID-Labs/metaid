@@ -433,20 +433,14 @@ export class Entity {
     const payRes = await this.connector.pay({
       transactions,
     })
-    for (const txComposer of payRes) {
-      console.log('txcomp', txComposer)
-      await this.connector.broadcast(txComposer)
-    }
-    // await this.connector.batchBroadcast(payRes)
-    sleep(2000)
-    console.log(
-      'payRes txids',
-      payRes.map((d) => d.getTxId())
-    )
+    // for (const txComposer of payRes) {
+    //   await this.connector.broadcast(txComposer)
+    // }
+    await this.connector.batchBroadcast(payRes)
+
     for (const p of payRes) {
       const txid = p.getTxId()
       const isValid = !!(await fetchTxid(txid))
-      console.log('bbbbb', isValid, await fetchTxid(txid))
       if (isValid) {
         await notify({ txHex: p.getRawHex() })
       } else {
