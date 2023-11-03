@@ -113,6 +113,27 @@ export async function fetchRoot({ metaid, nodeName, nodeId }: { metaid: string; 
 }
 
 // get one buzz by txid
+export async function fetchOneBuzz(txid: string) {
+  const url = `https://api.metaid.io/aggregation/v2/app/buzz/getOneBuzz/${txid}`
+  try {
+    const data = await axios
+      .get(url)
+      .then((res) => res.data)
+      .then((res: AggregationResponse) => {
+        if (res.code !== 0) throw new Error(`Error: ${res.code}`)
+
+        const { results } = res.data
+
+        const buzz = results.items[0]
+
+        return buzz
+      })
+
+    return data
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 // withCount(['like'])  likeCount: 3
 export async function fetchBuzzes({ metaid, page }: { metaid?: string; page: number }) {
@@ -138,6 +159,7 @@ export async function fetchBuzzes({ metaid, page }: { metaid?: string; page: num
             content: string
             attachments: any[]
             like: LikeItem[]
+            isFull: boolean
           }) => {
             // aggregate user info
             const user = {
@@ -158,6 +180,7 @@ export async function fetchBuzzes({ metaid, page }: { metaid?: string; page: num
               user,
               body,
               likes: item.like,
+              isFull: item.isFull,
             }
 
             return buzz

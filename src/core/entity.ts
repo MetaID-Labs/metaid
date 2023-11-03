@@ -10,6 +10,7 @@ import {
   notify,
   type User,
   fetchTxid,
+  fetchOneBuzz,
 } from '@/api.js'
 import { connected } from '@/decorators/connected.js'
 import { buildRootOpreturn, buildOpreturn, buildUserOpreturn } from '@/utils/opreturn-builder.js'
@@ -467,5 +468,12 @@ export class Entity {
       items,
       limit: 50,
     }
+  }
+  public async one(txid: string) {
+    if (this.name !== 'buzz') throw new Error(errors.NOT_SUPPORTED)
+
+    const buzz = await fetchOneBuzz(txid)
+
+    return buzz
   }
 }
