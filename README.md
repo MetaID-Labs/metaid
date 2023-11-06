@@ -48,172 +48,147 @@ const buzzEntitySchema: EntitySchema = {
 export default buzzEntitySchema
 ```
 
-### Load entity, or create one on the fly
+
+### Connect to wallet 
 
 ```ts
-import { define, use } from '@metaid/metaid'
-
-// `define` api returns a class represents what the entity is.
-const MyFirstEntity = define('my-first-entity', {
-  //...
-})
-
-// `use` api returns a class represents what the entity is. (using pre-defined entity)
-const Buzz = use('buzz') // this will search for `buzz.entity.ts` in `src/metaid-entities` folder and use its schema.
-const GroupMessage = use('group-message')
-```
-
-### Connect to wallet
-
-```ts
-import { LocalWallet, MetaletWallet, connect } from '@metaid/metaid'
-
-// create a local wallet instance using mnemonic
-const localWallet = new LocalWallet('abchereisyourmnenonicstring')
-// or use metalet wallet
+import {  MetaletWallet, connect } from '@metaid/metaid'
 const metaletWallet = new MetaletWallet()
+// connect to wallet to have a baseconnector to use specific entities
+const baseConnector = connect(localWallet)
+ ```
 
-// connect to wallet and use specific entities
-const baseEntity = connect(localWallet)
-
-const Buzz = connect(localWallet).use('buzz')
-const GroupMessage = connect(metaletWallet).use('group-message')
-```
+ > Note: you can connect an empty object. At this point, you can only use entity to retrieve data from blockchain but cannot store d ata.
+  
 
 ### Create MetaID
+Once you've built the baseConnector, the possibilities of what you can do become more extensive. First of all, we can utilize the baseconnector to 
+create a MetaID Account, the following code will use a connector which is connected to a Metalet wallet. Then it will check whether the Metalet account has build a MetaID account, if not , it will accept the userName parameter provided by the user to create a brand new MetaID account.
 
 ```ts
-const baseEntity = connect(localWallet)
-if (!baseEntity.hasMetaid()) {
-  await baseEntity.createMetaid()
-}
-
-const Buzz = baseEntity.use('buzz')
+const handleCreateMetaid = async (userName: string) => {
+  if (!!baseConnector && !baseConnector.isMetaidValid()) {
+    try {
+      await baseConnector.createMetaid({ name: userName });
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
+};
 ```
 
-### Use entity
+### Use entity to interact with blockchain
 
 ```ts
-// has root
-// 1. hasRoot(), createRoot()
-const hasRoot: boolean = Buzz.hasRoot()
-
-// create root
-if (!hasRoot) {
-  await Buzz.createRoot()
-}
-
-// list
-const buzzes = await Buzz.list()
-
-// list filtered by query
-const buzzes = await Buzz.list({
-  where: {
-    title: 'Hello World',
-  },
-  orderBy,
-  orderByDesc,
-  limit,
-  metaid: '0x1234567890', // filter by metaid
-})
-
-// my list
-const myBuzzes = Buzz.myList()
-
-// get one buzz
-const buzz = Buzz.one('0x1234567890') // txid
-const buzz = Buzz.first('0x1234567890') // or use alias `first`
-const buzz = Buzz.get('0x1234567890') // ...or `get`
-const buzz = Buzz.one({
-  // use sql-like query
-  where: {
-    title: 'Hello World',
-  },
-})
+// create a buzz handler with use method
+const	buzzHandler = await baseConnector.use("buzz");
+// get buzz listh data
+const { items } = await buzzHandler.list(page);
+ 
 
 // create
-const newBuzz = Buzz.create(
-  {
-    title: 'Hello World',
-    content: 'This is my first buzz',
-  },
-  {
-    visible: true, // set this to true if you want to create an invisible resource
-    // undefined = true
-  },
-)
-if (visible)
-  // update
-  const updatedBuzz = Buzz.update(newBuzz.id, {
-    title: 'Hello World Again',
-    content: 'Here we go..',
-  })
-// or update one existing resource
-const oldBuzz = Buzz.get('0x1234567890')
-const updatedBuzz = oldBuzz.update({ content: 'Good day, commander!' })
-
-// delete
-const deletedBuzz = Buzz.delete('0x1234567890')
-// or delete one existing resource
-oldBuzz.delete()
+const body = { content: "Hello World", attachments: [] }
+const { txid } = await Buzz.create(body);
+ 
 ```
 
 ## Some more complex use cases
 
-### Create a buzz with 3 photos
+
+### Create a buzz with attachments
+First, define a new file entity schema.
+```ts
+const fileSchema = {
+  name: 'file',
+  nodeName: 'MetaFile',
+  encoding: 'binary',
+  versions: [
+    {
+      version: '1.0.1',
+      id: 'fcac10a5ed83',
+      body: '',
+    },
+  ],
+}
+```
+then we can generate txid based on this schema. It is worth noting that you need to transform binary image data to hex format with Buffer.from method.
 
 ```ts
-const Buzz = use('buzz')
-const File = use('metafile')
-
-// 1. create 3 metafile resources representing the photos
-const photos = await File.create([
-  {
-    name: 'photo1.jpg',
-    type: 'image/jpeg',
-    content: 'base64 string',
-  },
-  {
-    name: 'photo2.jpg',
-    type: 'image/jpeg',
-    content: 'base64 string',
-  },
-  {
-    name: 'photo3.jpg',
-    type: 'image/jpeg',
-    content: 'base64 string',
-  },
-])
-
-// 2. create a buzz resource with the photos.
-// use `with` api to create a resource with its related resources to represent a 1-to-many relationship.
-const buzz = await Buzz.with(photos).create({ content: 'Have a nice day!' })
+let attachMetafileUri = [];
+const fileHandler = await baseConnector.use("file");
+for (const a of attachments) {
+		const data = Buffer.from(a.data, "hex");
+		const { transactions: txs } = await fileHandler.create(data, {
+			dataType: a.fileType,
+			signMessage: "upload file",
+			serialAction: "combo",
+			transactions: fileTransactions,
+		});
+		attachMetafileUri.push(
+			"metafile://" + txs[txs.length - 1].txComposer.getTxId()
+		);
+		fileTransactions = txs;
+}
+body.attachments = attachMetafileUri;
 ```
-
-### Give a like to a group message
-
+As you can see, The create method also accepts an optional parameter.
+When you need to send multiple entities data to the blockchain. Until the last create method, you need to set the value of the options.serialAction parameter to combo in the previous create method.The purpose of this action is to bundle multiple transactions, thus avoiding multiple pop-ups when signing the transaction with the Metalet wallet and achieving a better user experience.
 ```ts
-const GroupMessage = use('group-message')
-const Like = use('like')
-
-// 1. fetch the group message we're about to like
-const theMessage = await GroupMessage.get('0x1234567890')
-
-// 2. create a like resource.
-// use `belongsTo` api to create a resource with its related resource to represent a 1-to-1 relationship.
-await Like.belongsTo(theMessage).create()
+public async create(
+    body: unknown, /* The data structure type of the 'body' parameter varies depending on the different 'entitySchema' definitions you've made.*/
+    options?: {
+      invisible: boolean //whether data is encrypted or not
+      signMessage: string // 
+      dataType?: string  // for different on-chain data type
+      encoding?: string
+      serialAction?: 'combo' | 'finish'
+      transactions?: Transaction[]
+    }
+  ) {
+		...
+}
+Finally, we can create a buzz with three image attachments
+```ts
+await Buzz.create(body, {
+				signMessage: "create buzz",
+				serialAction: "finish",
+				transactions: fileTransactions,
+			});
 ```
 
-### Refer an NFT info in a buzz
-
-````ts
-const Reference = use('reference')
-
-await Reference.belongsTo(nft).create({
-  content: 'Have a look at my gorgeous NFT!',
-  nftId: nft.id,
-})```
-
+```
+### Give a like to a buzz
+First we need a new Like entity, base on its metaprocol definition, we have the following like entity schema definition.
+```ts
+const likeSchema = {
+	name: "like",
+	nodeName: "PayLike",
+	versions: [
+		{
+			version: 1,
+			id: "2ae43eeb26d9",
+			body: [
+				{
+					name: "likeTo",
+					type: "string",
+				},
+				{
+					name: "isLike",
+					type: "string",
+				},
+			],
+		},
+	],
+};
+```
+And then, based on a logged-in MetaID account, you can like any buzz by calling this likeHandler.create method.The corresponding code is quite simple.
+```js
+const res = await likeHandler.create(
+  { likeTo: txid, isLike: "1" },
+  { signMessage: "like buzz" }
+);
+```
+ 
 ---
 
 ## API Reference
@@ -241,9 +216,11 @@ connect(wallet: Wallet): Promise<Connector>
 
 // connector methods
 connector.isConnected(): boolean
+connector.disconnect(): void
 connector.use(entityName: string): Entity
-connector.hasMetaid(): boolean
+connector.isMetaidValid(): boolean
 connector.createMetaid(): Promise<string>
+
 ```
 
 ### Entity
@@ -252,8 +229,7 @@ An entity is a controller class to operate on a specific resource.
 
 ```ts
 connector.use(entityName: string): Entity
-connector.define(entityName: string, schema: EntitySchema): Entity
-
+   
 entity.hasRoot(): boolean
 entity.createRoot(): Promise<string>
 
