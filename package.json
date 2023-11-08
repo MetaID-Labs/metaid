@@ -1,6 +1,6 @@
 {
   "name": "@metaid/metaid",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "MetaID is a library for MetaID protocol. It provides a set of functions to manage the DID document and the DID transaction.",
   "type": "module",
   "main": "./dist/metaid.umd.cjs",
@@ -46,7 +46,7 @@
     "prettier": "^3.0.3",
     "typescript": "^5.1.6",
     "vite": "^4.4.11",
-    "vite-plugin-dts": "^3.6.0",
+    "vite-plugin-dts": "^3.6.3",
     "vitest": "^0.34.6"
   },
   "dependencies": {

@@ -11,14 +11,9 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': '/src',
+      '@': resolve(__dirname, 'src'),
     },
   },
-  plugins: [
-    dts({
-      insertTypesEntry: true,
-    }),
-  ],
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
@@ -27,4 +22,5 @@ export default defineConfig({
     },
     minify: false,
   },
+  plugins: [dts()],
 })
