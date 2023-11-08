@@ -18,8 +18,8 @@ dependencies:
     specifier: ^1.11.9
     version: 1.11.9
   meta-contract:
-    specifier: ^0.3.30
-    version: 0.3.34
+    specifier: ^0.3.35
+    version: 0.3.35
 
 devDependencies:
   '@vitest/ui':
@@ -1442,8 +1442,8 @@ packages:
     engines: {node: '>= 8'}
     dev: true
 
-  /meta-contract@0.3.34:
-    resolution: {integrity: sha512-EVRwugNh8UhuyoKRniTuY8eDY/AHEC6+AVYBB07xb/DTZe6lxk1J8MCPsye+xsUIDvO5YQzC7BK7waotREU3fQ==}
+  /meta-contract@0.3.35:
+    resolution: {integrity: sha512-Q2H1Df54octNsQ/blVXdmzCQuanxxL+e65JqnfMKgKFH8Gv776ld9VLgM6mdiJAAbD04HYfJJGR6ppnzx+CPng==}
     engines: {node: '>=12.0.0'}
     dependencies:
       mvc-scrypt: 0.1.6
