@@ -38,7 +38,7 @@ devDependencies:
     specifier: ^4.4.11
     version: 4.4.11(@types/node@20.4.7)
   vite-plugin-dts:
-    specifier: ^3.6.0
+    specifier: ^3.6.3
     version: 3.6.3(typescript@5.1.6)(vite@4.4.11)
   vitest:
     specifier: ^0.34.6

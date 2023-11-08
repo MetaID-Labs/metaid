@@ -70,17 +70,11 @@ export class LocalWallet implements MetaIDConnectWallet {
 
   private getPrivatekey() {
     return mvc.Mnemonic.fromString(this.mnemonic)
-      .toHDPrivateKey(undefined, "mainnet" as any)
-      .deriveChild(this.derivePath).privateKey;
+      .toHDPrivateKey(undefined, 'mainnet' as any)
+      .deriveChild(this.derivePath).privateKey
   }
 
-  public signInput({
-    txComposer,
-    inputIndex,
-  }: {
-    txComposer: TxComposer;
-    inputIndex: number;
-  }) {
+  public signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }) {
     // look at the input's address and find out if it can be derived from the mnemonic
     const input = txComposer.tx.inputs[inputIndex]
     const toSignAddress = input.output.script.toAddress().toString()
@@ -120,32 +114,26 @@ export class LocalWallet implements MetaIDConnectWallet {
     return { txid }
   }
 
-  public async signMessage(
-    message: string,
-    encoding: "utf-8" | "base64" | "hex" | "utf8" = "hex"
-  ): Promise<string> {
-    const messageHash = mvc.crypto.Hash.sha256(Buffer.from(message));
+  public async signMessage(message: string, encoding: 'utf-8' | 'base64' | 'hex' | 'utf8' = 'hex'): Promise<string> {
+    const messageHash = mvc.crypto.Hash.sha256(Buffer.from(message))
 
-    let sigBuf = mvc.crypto.ECDSA.sign(
-      messageHash,
-      this.getPrivatekey()
-    ).toBuffer();
+    let sigBuf = mvc.crypto.ECDSA.sign(messageHash, this.getPrivatekey()).toBuffer()
 
-    let signature: string;
+    let signature: string
     switch (encoding) {
-      case "utf-8":
-      case "utf8":
-        signature = sigBuf.toString("utf-8");
-        break;
-      case "base64":
-        signature = sigBuf.toString("base64");
-        break;
-      case "hex":
+      case 'utf-8':
+      case 'utf8':
+        signature = sigBuf.toString('utf-8')
+        break
+      case 'base64':
+        signature = sigBuf.toString('base64')
+        break
+      case 'hex':
       default:
-        signature = sigBuf.toString("hex");
-        break;
+        signature = sigBuf.toString('hex')
+        break
     }
 
-    return signature;
+    return signature
   }
 }
