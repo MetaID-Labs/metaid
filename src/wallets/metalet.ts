@@ -13,7 +13,7 @@ export class MetaletWallet implements MetaIDConnectWallet {
 
   private constructor() {}
 
-  static async create(): Promise<any> {
+  static async create(): Promise<MetaIDConnectWallet> {
     // if it's not in the browser, throw an error
     if (typeof window === 'undefined') {
       throw new Error(errors.NOT_IN_BROWSER)
