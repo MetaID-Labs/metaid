@@ -2,7 +2,6 @@ import { TxComposer, mvc } from 'meta-contract'
 
 import {
   fetchUser,
-  fetchBiggestUtxo,
   fetchBuzzes,
   fetchRootCandidate,
   fetchRoot,
@@ -16,9 +15,9 @@ import { connected } from '@/decorators/connected.js'
 import { buildRootOpreturn, buildOpreturn, buildUserOpreturn } from '@/utils/opreturn-builder.js'
 import { Connector } from './connector.js'
 import { errors } from '@/data/errors.js'
-import { FEEB, UTXO_DUST } from '@/data/constants.js'
+import { UTXO_DUST } from '@/data/constants.js'
 import { checkBalance, sleep } from '@/utils/index.js'
-import type { Transaction } from '@/wallets/wallet.js'
+import { type Transaction } from '@/wallets/wallet.js'
 
 type Root = {
   id: string

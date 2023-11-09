@@ -1,5 +1,5 @@
 import { staticImplements } from '@/utils/index.js'
-import { type MetaIDConnectWallet, type Transaction, type WalletStatic } from './wallet.js'
+import type { MetaIDConnectWallet, Transaction, WalletStatic } from './wallet.js'
 import { TxComposer, mvc } from 'meta-contract'
 import { errors } from '@/data/errors.js'
 import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/api.js'
@@ -13,7 +13,7 @@ export class MetaletWallet implements MetaIDConnectWallet {
 
   private constructor() {}
 
-  static async create(): Promise<any> {
+  static async create(): Promise<MetaIDConnectWallet> {
     // if it's not in the browser, throw an error
     if (typeof window === 'undefined') {
       throw new Error(errors.NOT_IN_BROWSER)
