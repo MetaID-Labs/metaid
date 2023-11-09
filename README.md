@@ -147,6 +147,7 @@ public async create(
   ) {
 		...
 }
+```
 Finally, we can create a buzz with three image attachments
 ```ts
 await Buzz.create(body, {
@@ -156,8 +157,9 @@ await Buzz.create(body, {
 			});
 ```
 
-```
+ 
 ### Give a like to a buzz
+
 First we need a new Like entity, base on its metaprocol definition, we have the following like entity schema definition.
 ```ts
 const likeSchema = {
