@@ -4,7 +4,6 @@ import { TxComposer, mvc } from 'meta-contract'
 import { errors } from '@/data/errors.js'
 import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/api.js'
 import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
-
 @staticImplements<WalletStatic>()
 export class MetaletWallet implements MetaIDConnectWallet {
   public address: string | undefined
@@ -46,6 +45,10 @@ export class MetaletWallet implements MetaIDConnectWallet {
   public async getPublicKey(path: string = '/0/0') {
     // cut the first slash for compatibility
     return await this.internal.getPublicKey({ path: path.slice(1) })
+  }
+
+  public async getBalance() {
+    return await this.internal.getBalance()
   }
 
   public async signMessage(message, encoding): Promise<string> {

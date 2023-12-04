@@ -1,4 +1,4 @@
-import { TxComposer } from 'meta-contract'
+import { API_TARGET, TxComposer } from 'meta-contract'
 
 export interface WalletStatic {
   create: ((mnemonic: string, derivePath?: string) => MetaIDConnectWallet) | (() => Promise<MetaIDConnectWallet>)
@@ -41,4 +41,7 @@ export interface MetaIDConnectWallet {
   // encrypt(message: string, publicKey: string): Promise<string>;
 
   signMessage(message: string, encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8'): Promise<string>
+  getBalance():
+    | Promise<{ address: string; confirmed: number; unconfirmed: number }>
+    | { address: string; confirmed: number; unconfirmed: number }
 }

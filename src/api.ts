@@ -211,6 +211,7 @@ export async function fetchUtxos({ address }: { address: string }): Promise<
     outIndex: number
     address: string
     value: number
+    height: number
   }[]
 > {
   const url = `https://mainnet.mvcapi.com/address/${address}/utxo`
