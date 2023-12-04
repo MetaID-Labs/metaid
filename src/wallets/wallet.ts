@@ -17,6 +17,9 @@ export interface MetaIDConnectWallet {
 
   getAddress(path?: string): string | Promise<string>
   getPublicKey(path?: string): string | Promise<string>
+  getBalance():
+    | { address: string; confirmed: number; unconfirmed: number; total: number }
+    | Promise<{ address: string; confirmed: number; unconfirmed: number; total: number }>
 
   signInput({
     txComposer,
@@ -41,7 +44,4 @@ export interface MetaIDConnectWallet {
   // encrypt(message: string, publicKey: string): Promise<string>;
 
   signMessage(message: string, encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8'): Promise<string>
-  getBalance():
-    | Promise<{ address: string; confirmed: number; unconfirmed: number }>
-    | { address: string; confirmed: number; unconfirmed: number }
 }

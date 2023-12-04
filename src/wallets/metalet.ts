@@ -6,8 +6,8 @@ import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from
 import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
 @staticImplements<WalletStatic>()
 export class MetaletWallet implements MetaIDConnectWallet {
-  public address: string | undefined
-  public xpub: string | undefined
+  public address: string
+  public xpub: string
   private internal: any
 
   private constructor() {}
