@@ -1,17 +1,37 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "nodenext",
-    "target": "ES2015",
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "verbatimModuleSyntax": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+
+    /* Strictness */
+    // "strict": true,
+    "noUncheckedIndexedAccess": true,
+
+    /* If transpiling with TypeScript: */
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "outDir": "dist",
+    "sourceMap": true,
+
+    /* If your code runs in the DOM: */
+    "lib": ["es2022", "dom", "dom.iterable"],
+
+    /* If you're building for a library: */
     "declaration": true,
-    "outDir": "./dist",
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
+
+    // custom
     "experimentalDecorators": true,
     "paths": {
       "@/*": ["./src/*"]
     },
     "types": ["vitest/globals"]
   },
+
   "include": ["src/**/*", "src/**/*.d.ts"]
 }

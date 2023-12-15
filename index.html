@@ -46,54 +46,39 @@
 						</button>
 					</div>
 
-					<!-- metalet wallet -->
-					<h3 class="mt-4 text-white">Metalet Wallet</h3>
-					<div class="mt-2 space-x-4">
-						<button
-							class="px-4 py-2 bg-white rounded-md shadow-md"
-							@click="connectMetalet"
-						>
-							Connect Metalet
-						</button>
-						<button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getAddress">
-							Get Address
-						</button>
-						<button
-							class="px-4 py-2 bg-white rounded-md shadow-md"
-							@click="getPublicKey"
-						>
-							Get Public Key
-						</button>
-						<button class="px-4 py-2 bg-white rounded-md shadow-md" @click="send2k">
-							Send 2k
-						</button>
-					</div>
+          <!-- metalet wallet -->
+          <h3 class="mt-4 text-white">Metalet Wallet</h3>
+          <div class="mt-2 grid grid-cols-4 gap-4">
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="connectMetalet">Connect Metalet</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getAddress">Get Address</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getPublicKey">Get Public Key</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="send2k">Send 2k</button>
+
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createMetaid">Create MetaID</button>
+          </div>
 
 					<p v-if="connected" class="text-teal-200 mt-2">Connected</p>
 				</div>
 
-				<div class="flex items-center gap-4">
-					<input
-						type="text"
-						class="grow rounded-lg h-full text-sm p-3"
-						placeholder="You buzz content"
-						v-model="content"
-					/>
-					<button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createBuzz">
-						Create Buzz
-					</button>
-				</div>
+        <div class="flex items-center gap-4">
+          <input
+            type="text"
+            class="grow rounded-lg h-full text-sm p-3"
+            placeholder="You buzz content"
+            v-model="content"
+          />
+          <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createBuzz">Create Buzz</button>
+          <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createBuzzPicture">
+            Create Buzz With Image
+          </button>
+        </div>
 
-				<div class="">
-					<div class="flex gap-4 items-center">
-						<div class="font-bold text-white">Buzz List</div>
-						<button
-							class="px-4 py-2 bg-white rounded-md shadow-md"
-							@click="getBuzzList"
-						>
-							Get List
-						</button>
-					</div>
+        <div class="">
+          <div class="flex gap-4 items-center">
+            <div class="font-bold text-white">Buzz List</div>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getBuzzList">Get List</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="likeTheFirst">Like the first</button>
+          </div>
 
 					<!-- list -->
 					<div class="">
@@ -113,38 +98,48 @@
 			import { createApp, ref, computed, toRaw } from "vue";
 			import { LocalWallet, MetaletWallet, connect } from "./dist/metaid.js";
 
-			createApp({
-				setup() {
-					const mnemonic = ref("");
-					const path = ref(`m/44'/10001'/0'/0/0`);
-					const Buzz = ref(null);
-					const connected = computed(() => !!Buzz.value);
-					const content = ref("");
-					const buzzes = ref([]);
-					const wallet = ref(null);
+      createApp({
+        setup() {
+          const mnemonic = ref('')
+          const path = ref(`m/44'/10001'/0'/0/0`)
+          const Buzz = ref(null)
+          const File = ref(null)
+          const connected = computed(() => !!Buzz.value)
+          const content = ref('')
+          const buzzes = ref([])
+          const connector = ref(null)
+          const wallet = ref(null)
 
-					const connectWallet = async () => {
-						const _wallet = await LocalWallet.create(mnemonic.value, path.value);
-						wallet.value = _wallet;
+          const connectWallet = async () => {
+            const _wallet = await LocalWallet.create(mnemonic.value, path.value)
+            wallet.value = _wallet
 
-						const baseEntity = await connect(_wallet);
-						const handler = await baseEntity.use("buzz");
-						Buzz.value = handler;
-					};
+            const baseEntity = await connect(_wallet)
+            console.log('baseEntity', baseEntity)
+            const handler = await baseEntity.use('buzz')
+            Buzz.value = handler
+            const fileHandler = await baseEntity.use('file')
+            File.value = fileHandler
+          }
 
-					const connectMetalet = async () => {
-						console.log("connectMetalet");
+          const connectMetalet = async () => {
+            console.log('connectMetalet')
 
-						const _wallet = await MetaletWallet.create();
-						wallet.value = _wallet;
-						Buzz.value = await (await connect(_wallet)).use("buzz");
-					};
+            const _wallet = await MetaletWallet.create()
+            wallet.value = _wallet
+            const baseEntity = await connect(_wallet)
 
-					const getAddress = async () => {
-						const address = await toRaw(wallet.value).getAddress();
+            Buzz.value = await baseEntity.use('buzz')
+            const fileHandler = await baseEntity.use('file')
+            File.value = fileHandler
+          }
 
-						console.log({ address });
-					};
+          const getAddress = async () => {
+            const address = await toRaw(wallet.value).getAddress()
+            const baseEntity = await connect(toRaw(wallet.value))
+            console.log('baseEntity', baseEntity)
+            console.log({ address })
+          }
 
 					const getPublicKey = async () => {
 						const publicKey = await toRaw(wallet.value).getPublicKey("/0/2");
@@ -159,35 +154,73 @@
 						console.log({ res });
 					};
 
-					const createBuzz = async () => {
-						await toRaw(Buzz.value).create({ content: content.value });
-					};
+          const createBuzz = async () => {
+            await toRaw(Buzz.value).create({ content: content.value })
+          }
+          const createBuzzPicture = async () => {
+            let attachMetafileUri = []
+            console.log('file', 'start')
+            for (const a of attachments) {
+              const { txid: id } = await toRaw(File.value).create(a.data, {dataType: a.fileType});
+              attachMetafileUri.push("metafile://" + id);
+            }
+            console.log('attachMetafileUri', attachMetafileUri)
+            await toRaw(Buzz.value).create({ content: content.value, attachments: attachMetafileUri })
+          }
 
-					const getBuzzList = async () => {
-						const { items } = await toRaw(Buzz.value).list();
+          const getBuzzList = async () => {
+            const { items } = await toRaw(Buzz.value).list()
+            const txids = items.map(({ txid }) => txid)
+            // check if there are duplicated txids
+            const set = new Set(txids)
+            console.log(set.size, txids.length)
 
-						console.log({ items });
+            console.log({ items, txids })
 
-						buzzes.value = items;
-					};
+            buzzes.value = items
+          }
 
-					return {
-						connectWallet,
-						connectMetalet,
-						path,
-						wallet,
-						mnemonic,
-						connected,
-						content,
-						createBuzz,
-						getBuzzList,
-						buzzes,
-						getAddress,
-						getPublicKey,
-						send2k,
-					};
-				},
-			}).mount("#app");
-		</script>
-	</body>
+          const likeTheFirst = async () => {
+            const BuzzHandler = toRaw(Buzz.value)
+            const { items } = await BuzzHandler.list()
+            const { txid } = items[0]
+            console.log({ item: items[0] })
+            const Like = await BuzzHandler.connector.use('like')
+
+            await Like.getRoot()
+            await Like.create({ likeTo: txid, isLike: '1' })
+          }
+
+          const createMetaid = async () => {
+            const _wallet = await MetaletWallet.create()
+            const connector = await connect(_wallet)
+            console.log({ connector })
+            if (!connector.isMetaidValid()) {
+              const res = await connector.createMetaid()
+              console.log({ res })
+            }
+          }
+
+          return {
+            connectWallet,
+            connectMetalet,
+            path,
+            wallet,
+            mnemonic,
+            connected,
+            content,
+            createBuzz,
+            createBuzzPicture,
+            getBuzzList,
+            buzzes,
+            getAddress,
+            getPublicKey,
+            send2k,
+            createMetaid,
+            likeTheFirst,
+          }
+        },
+      }).mount('#app')
+    </script>
+  </body>
 </html>

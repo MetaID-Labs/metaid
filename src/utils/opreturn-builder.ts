@@ -1,53 +1,62 @@
-import { BrfcRootName, ProtocolName } from "@/data/protocols.ts";
+import { BrfcRootName, ProtocolName } from '@/data/protocols.js'
 
 type MetaidOpreturn = [
-  "mvc", // chain flag
+  'mvc', // chain flag
   string, // public key of node
   string, // `${parentChainFlag(optional)}:${parentTxid}`
-  "metaid",
+  'metaid',
   string, // protocol name
-  string, // stringify json body
-  "0", // isEncrypted
+  string | Buffer, // stringify json body
+  '0' | '1', // isEncrypted
   string, // version
   string, // content type
-  string // charset
-];
+  string, // charset
+]
 
-type BrfcRootOpreturn = [
-  "mvc", // chain flag
+type RootOpreturn = [
+  'mvc', // chain flag
   string, // public key of node
   string, // `${parentChainFlag(optional)}:${parentTxid}`
-  "metaid",
+  'metaid',
   string, // protocol name
   string, //brfcid
   string, // stringify json body
-  "0", // isEncrypted
+  '0' | '1', // isEncrypted
   string, // version
   string, // content type
-  string // charset
-];
+  string, // charset
+]
 
-export function buildBrfcRootOpreturn({
-  publicKey,
-  parentTxid,
-  protocolName,
-  body,
-}) {
-  const opreturn: BrfcRootOpreturn = [
-    "mvc",
+type UserOpreturn = [
+  'mvc', // chain flag
+  string, // public key of node
+  string, // `${parentChainFlag(optional)}:${parentTxid}`
+  'metaid',
+  string, // protocol name
+  string, // stringify json body
+  '0' | '1', // isEncrypted
+  string, // version
+  string, // content type
+  string, // charset
+]
+
+export function buildRootOpreturn({ publicKey, parentTxid, schema, body }) {
+  const opreturn: RootOpreturn = [
+    'mvc',
     publicKey,
-    "mvc:" + parentTxid,
-    "metaid",
-    protocolName,
-    BrfcRootName[protocolName].brfcId,
+    'mvc:' + parentTxid,
+    'metaid',
+    schema.nodeName,
+    schema.versions[0].id,
     body,
-    "0",
-    BrfcRootName[protocolName].version,
-    "text/plain",
-    "UTF-8",
-  ];
+    '0',
+    String(schema.versions[0].version),
+    'text/plain',
+    'UTF-8',
+  ]
+  console.log({ opreturn })
 
-  return opreturn;
+  return opreturn
 }
 
 export function buildOpreturn({
@@ -55,24 +64,57 @@ export function buildOpreturn({
   parentTxid,
   protocolName,
   body,
+  invisible,
+  dataType = 'application/json',
+  encoding = 'UTF-8',
 }: {
-  publicKey: string;
-  parentTxid: string;
-  protocolName: string;
-  body: any;
+  publicKey: string
+  parentTxid: string
+  protocolName: string
+  body: any
+  invisible?: boolean
+  dataType?: string
+  encoding?: string
 }) {
   const opreturn: MetaidOpreturn = [
-    "mvc",
+    'mvc',
     publicKey,
-    "mvc:" + parentTxid,
-    "metaid",
-    protocolName + "-" + publicKey.slice(0, 11),
-    body == "NULL" ? undefined : JSON.stringify(body),
-    "0",
-    "1.0.0",
-    "application/json",
-    "UTF-8",
-  ];
+    'mvc:' + parentTxid,
+    'metaid',
+    protocolName + '-' + publicKey.slice(0, 11),
+    body == 'NULL' ? undefined : Buffer.isBuffer(body) ? body : JSON.stringify(body),
+    !!invisible ? '1' : '0', //
+    '1.0.0',
+    dataType,
+    encoding,
+  ]
 
-  return opreturn;
+  return opreturn
+}
+
+export function buildUserOpreturn({
+  publicKey,
+  parentTxid,
+  protocolName,
+  body,
+}: {
+  publicKey: string
+  parentTxid: string
+  protocolName: string
+  body: any
+}) {
+  const opreturn: UserOpreturn = [
+    'mvc',
+    publicKey,
+    parentTxid ? 'mvc:' + parentTxid : 'mvc:' + 'NULL',
+    'metaid',
+    protocolName,
+    body === 'NULL' ? 'NULL' : body,
+    '0',
+    protocolName === 'Root' ? '1.0.1' : 'NULL',
+    protocolName === 'Root' ? 'NULL' : 'text/plain',
+    protocolName === 'Root' ? 'NULL' : 'UTF-8',
+  ]
+
+  return opreturn
 }

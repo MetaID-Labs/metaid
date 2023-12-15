@@ -1,19 +1,18 @@
-import { staticImplements } from '@/utils/index.ts'
-import { MetaIDConnectWallet, WalletStatic } from './wallet.ts'
+import { staticImplements } from '@/utils/index.js'
+import type { MetaIDConnectWallet, Transaction, WalletStatic } from './wallet.js'
 import { TxComposer, mvc } from 'meta-contract'
-import { errors } from '@/data/errors.ts'
-import { broadcast as broadcastToApi } from '@/api.ts'
-import { DERIVE_MAX_DEPTH } from '@/data/constants.ts'
-
+import { errors } from '@/data/errors.js'
+import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/api.js'
+import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
 @staticImplements<WalletStatic>()
 export class MetaletWallet implements MetaIDConnectWallet {
-  public address: string | undefined
-  public xpub: string | undefined
+  public address: string
+  public xpub: string
   private internal: any
 
   private constructor() {}
 
-  static async create(): Promise<any> {
+  static async create(): Promise<MetaIDConnectWallet> {
     // if it's not in the browser, throw an error
     if (typeof window === 'undefined') {
       throw new Error(errors.NOT_IN_BROWSER)
@@ -40,23 +39,33 @@ export class MetaletWallet implements MetaIDConnectWallet {
     if (!path) return this.address
 
     // cut the first slash for compatibility
-    return await this.internal.getAddress(path.slice(1))
+    return await this.internal.getAddress({ path: path.slice(1) })
   }
 
   public async getPublicKey(path: string = '/0/0') {
     // cut the first slash for compatibility
-    return await this.internal.getPublicKey(path.slice(1))
+    return await this.internal.getPublicKey({ path: path.slice(1) })
+  }
+
+  public async getBalance() {
+    return await this.internal.getBalance()
+  }
+
+  public async signMessage(message, encoding): Promise<string> {
+    const { signature } = await this.internal.signMessage({
+      message,
+      encoding,
+    })
+    return signature.signature
   }
 
   public async signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }) {
-    // get input's address
-    console.log({
-      inputIndex,
-      output0: txComposer.getInput(0).output,
-      output1: txComposer.getInput(1).output,
-    })
-    const outputScript = txComposer.getInput(inputIndex).output.script
+    const prevOutput = txComposer.getInput(inputIndex).output
+    if (!prevOutput) throw new Error(errors.NO_OUTPUT)
+
+    const outputScript = prevOutput.script
     const address = outputScript.toAddress().toString()
+    const satoshis = prevOutput.satoshis
 
     // get xpub from metalet
     const xpubObj = mvc.HDPublicKey.fromString(this.xpub)
@@ -85,24 +94,43 @@ export class MetaletWallet implements MetaIDConnectWallet {
         {
           txHex: txComposer.getTx().toString(),
           inputIndex,
-          address,
           scriptHex: outputScript.toHex(),
           path: toUsePath,
-          sigtype: 0xc1,
+          satoshis,
+          // sigtype: 0xc1,
         },
       ],
     })
 
     // update the txComposer
     const signedTx = new mvc.Transaction(signedTransactions[0].txHex)
-    console.log({ signedTx })
 
     return new TxComposer(signedTx)
   }
 
+  public async pay({ transactions }: { transactions: Transaction[] }) {
+    const {
+      payedTransactions,
+    }: {
+      payedTransactions: string[]
+    } = await this.internal.pay({
+      transactions: transactions.map((transaction) => {
+        return {
+          txComposer: transaction.txComposer.serialize(),
+          message: transaction.message,
+        }
+      }),
+      hasMetaid: true,
+    })
+
+    return payedTransactions.map((txComposerSerialized: string) => {
+      return TxComposer.deserialize(txComposerSerialized)
+    })
+  }
+
   public async send(
     toAddress: string,
-    amount: number,
+    amount: number
   ): Promise<{
     txid: string
   }> {
@@ -127,7 +155,14 @@ export class MetaletWallet implements MetaIDConnectWallet {
   public async broadcast(txComposer: TxComposer): Promise<{ txid: string }> {
     // broadcast locally first
     const txHex = txComposer.getTx().toString()
-
     return await broadcastToApi({ txHex })
+  }
+
+  public async batchBroadcast(txComposer: TxComposer[]): Promise<{ txid: string }[]> {
+    // broadcast locally first
+    const hexs = txComposer.map((d) => {
+      return { hex: d.getTx().toString() }
+    })
+    return await batchBroadcastApi(hexs)
   }
 }
