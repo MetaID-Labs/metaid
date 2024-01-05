@@ -253,7 +253,7 @@ export class Connector {
   }
 
   getAddress(path?: string) {
-    return this.wallet.getAddress(path)
+    return this.wallet.getAddress({ path, blockchain: this.wallet.blockchain })
   }
 
   signMessage(message: string, encoding: 'utf-8' | 'base64' | 'hex' | 'utf8' = 'hex') {

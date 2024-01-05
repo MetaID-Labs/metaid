@@ -1,7 +1,10 @@
+import type { Blockchain } from '@/types/index.js'
 import { API_TARGET, TxComposer } from 'meta-contract'
 
 export interface WalletStatic {
-  create: ((mnemonic: string, derivePath?: string) => MetaIDConnectWallet) | (() => Promise<MetaIDConnectWallet>)
+  create:
+    | ((mnemonic: string, derivePath?: string) => Promise<MetaIDConnectWallet>)
+    | (() => Promise<MetaIDConnectWallet>)
 }
 
 export type Transaction = {
@@ -12,22 +15,15 @@ export type Transaction = {
 export interface MetaIDConnectWallet {
   address: string
   xpub: string
-
+  blockchain: Blockchain
+  // network: Network
   hasAddress(): boolean
 
-  getAddress(path?: string): string | Promise<string>
-  getPublicKey(path?: string): string | Promise<string>
-  getBalance():
-    | { address: string; confirmed: number; unconfirmed: number; total: number }
-    | Promise<{ address: string; confirmed: number; unconfirmed: number; total: number }>
+  getAddress({ blockchain, path }: { blockchain: Blockchain; path?: string }): Promise<string>
+  getPublicKey(path?: string): Promise<string>
+  getBalance(): Promise<{ address: string; confirmed: number; unconfirmed: number }>
 
-  signInput({
-    txComposer,
-    inputIndex,
-  }: {
-    txComposer: TxComposer
-    inputIndex: number
-  }): TxComposer | Promise<TxComposer>
+  signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }): Promise<TxComposer>
 
   pay({ transactions }: { transactions: Transaction[] }): Promise<TxComposer[]>
 

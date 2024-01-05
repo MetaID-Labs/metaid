@@ -1,64 +1,55 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>MetaID Test Page</title>
-		<script type="importmap">
-			{
-				"imports": {
-					"vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
-				}
-			}
-		</script>
-		<script src="https://cdn.tailwindcss.com"></script>
-		<link rel="icon" href="https://avatars.githubusercontent.com/u/130353550?s=24" />
-	</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MetaID Test Page</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        }
+      }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/130353550?s=24" />
+  </head>
 
-	<body class="min-h-screen bg-gradient-to-br from-sky-500 to-indigo-500 text-white">
-		<div id="app" class="max-w-3xl mx-auto py-8">
-			<h3 class="text-center font-bold text-2xl">Metaid.js Test Page</h3>
+  <body class="min-h-screen bg-gradient-to-br from-sky-500 to-indigo-500 text-white">
+    <div id="app" class="max-w-3xl mx-auto py-8">
+      <h3 class="text-center font-bold text-2xl">Metaid.js Test Page</h3>
 
-			<!-- control -->
-			<div class="mt-16 text-sky-800 font-bold space-y-8">
-				<div class="">
-					<div class="flex items-center gap-4">
-						<div class="grow flex flex-col gap-y-2">
-							<input
-								type="text"
-								class="grow rounded-lg h-full text-sm p-3"
-								placeholder="Mnemonic"
-								v-model="mnemonic"
-							/>
-							<input
-								type="text"
-								class="grow rounded-lg h-full text-sm p-3"
-								placeholder="Path"
-								v-model="path"
-							/>
-						</div>
+      <!-- control -->
+      <div class="mt-16 text-sky-800 font-bold space-y-8">
+        <div class="">
+          <div class="flex items-center gap-4">
+            <div class="grow flex flex-col gap-y-2">
+              <input type="text" class="grow rounded-lg h-full text-sm p-3" placeholder="Mnemonic" v-model="mnemonic" />
+              <input type="text" class="grow rounded-lg h-full text-sm p-3" placeholder="Path" v-model="path" />
+            </div>
 
-						<button
-							class="px-4 py-2 bg-white rounded-md shadow-md"
-							@click="connectWallet"
-						>
-							Connect Local Wallet
-						</button>
-					</div>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="connectWallet">Connect Local Wallet</button>
+          </div>
 
           <!-- metalet wallet -->
           <h3 class="mt-4 text-white">Metalet Wallet</h3>
           <div class="mt-2 grid grid-cols-4 gap-4">
-            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="connectMetalet">Connect Metalet</button>
-            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getAddress">Get Address</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="connectMetaletWithBtc">
+              Connect Metalet With Btc
+            </button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="connectMetaletWithMvc">
+              Connect Metalet With Mvc
+            </button>
+            <!-- <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getBtcAddress">Get BTC Address</button> -->
+            <!-- <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getMvcAddress">Get Mvc Address</button> -->
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getPublicKey">Get Public Key</button>
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="send2k">Send 2k</button>
 
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createMetaid">Create MetaID</button>
           </div>
 
-					<p v-if="connected" class="text-teal-200 mt-2">Connected</p>
-				</div>
+          <p v-if="connected" class="text-teal-200 mt-2">Connected Success {{btcAddress}}</p>
+        </div>
 
         <div class="flex items-center gap-4">
           <input
@@ -80,23 +71,23 @@
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="likeTheFirst">Like the first</button>
           </div>
 
-					<!-- list -->
-					<div class="">
-						<div v-for="buzz in buzzes" class="bg-white rounded-md shadow-md p-4 mt-4">
-							<div class="flex items-center gap-4">
-								<div class="flex-grow">
-									<div class="text-sm text-gray-500">{{ buzz.body.content }}</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+          <!-- list -->
+          <div class="">
+            <div v-for="buzz in buzzes" class="bg-white rounded-md shadow-md p-4 mt-4">
+              <div class="flex items-center gap-4">
+                <div class="flex-grow">
+                  <div class="text-sm text-gray-500">{{ buzz.body.content }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-		<script type="module">
-			import { createApp, ref, computed, toRaw } from "vue";
-			import { LocalWallet, MetaletWallet, connect } from "./dist/metaid.js";
+    <script type="module">
+      import { createApp, ref, computed, toRaw } from 'vue'
+      import { LocalWallet, MetaletWallet, connect } from './dist/metaid.js'
 
       createApp({
         setup() {
@@ -109,6 +100,7 @@
           const buzzes = ref([])
           const connector = ref(null)
           const wallet = ref(null)
+          const btcAddress = computed(() => wallet.value.address)
 
           const connectWallet = async () => {
             const _wallet = await LocalWallet.create(mnemonic.value, path.value)
@@ -122,37 +114,52 @@
             File.value = fileHandler
           }
 
-          const connectMetalet = async () => {
-            console.log('connectMetalet')
-
-            const _wallet = await MetaletWallet.create()
+          const connectMetaletWithBtc = async () => {
+            console.log('connectMetaletWithBtc')
+            const _wallet = await MetaletWallet.create('btc')
             wallet.value = _wallet
-            const baseEntity = await connect(_wallet)
 
+            btcAddress.value = await _wallet.getAddress({})
+            console.log(`Your btc address is ${btcAddress.value}`)
+            const baseEntity = await connect(_wallet)
             Buzz.value = await baseEntity.use('buzz')
             const fileHandler = await baseEntity.use('file')
             File.value = fileHandler
           }
+          const connectMetaletWithMvc = async () => {
+            console.log('connectMetaletWithMvc')
+            const _wallet = await MetaletWallet.create()
+            wallet.value = _wallet
 
-          const getAddress = async () => {
-            const address = await toRaw(wallet.value).getAddress()
-            const baseEntity = await connect(toRaw(wallet.value))
-            console.log('baseEntity', baseEntity)
-            console.log({ address })
+            btcAddress.value = await _wallet.getAddress({})
+            console.log(`Your mvc address is ${btcAddress.value}`)
           }
 
-					const getPublicKey = async () => {
-						const publicKey = await toRaw(wallet.value).getPublicKey("/0/2");
+          const getBtcAddress = async () => {
+            const address = await toRaw(wallet.value).getAddress({ blockchain: 'btc' })
+            console.log({ address })
+            // const baseEntity = await connect(toRaw(wallet.value))
+            // console.log('baseEntity', baseEntity)
+          }
+          const getMvcAddress = async () => {
+            const address = await toRaw(wallet.value).getAddress({ blockchain: 'mvc' })
+            console.log({ address })
+            // const baseEntity = await connect(toRaw(wallet.value))
+            // console.log('baseEntity', baseEntity)
+          }
 
-						console.log({ publicKey });
-					};
+          const getPublicKey = async () => {
+            const publicKey = await toRaw(wallet.value).getPublicKey('/0/2')
 
-					const send2k = async () => {
-						const toAddress = "1F7uWqyb7mJxvPKG8HzsQJWLkP8DqAdHkW";
-						const res = await toRaw(wallet.value).send(toAddress, 2000);
+            console.log({ publicKey })
+          }
 
-						console.log({ res });
-					};
+          const send2k = async () => {
+            const toAddress = '1F7uWqyb7mJxvPKG8HzsQJWLkP8DqAdHkW'
+            const res = await toRaw(wallet.value).send(toAddress, 2000)
+
+            console.log({ res })
+          }
 
           const createBuzz = async () => {
             await toRaw(Buzz.value).create({ content: content.value })
@@ -161,8 +168,8 @@
             let attachMetafileUri = []
             console.log('file', 'start')
             for (const a of attachments) {
-              const { txid: id } = await toRaw(File.value).create(a.data, {dataType: a.fileType});
-              attachMetafileUri.push("metafile://" + id);
+              const { txid: id } = await toRaw(File.value).create(a.data, { dataType: a.fileType })
+              attachMetafileUri.push('metafile://' + id)
             }
             console.log('attachMetafileUri', attachMetafileUri)
             await toRaw(Buzz.value).create({ content: content.value, attachments: attachMetafileUri })
@@ -203,7 +210,8 @@
 
           return {
             connectWallet,
-            connectMetalet,
+            connectMetaletWithBtc,
+            connectMetaletWithMvc,
             path,
             wallet,
             mnemonic,
@@ -213,11 +221,13 @@
             createBuzzPicture,
             getBuzzList,
             buzzes,
-            getAddress,
+            getMvcAddress,
+            getBtcAddress,
             getPublicKey,
             send2k,
             createMetaid,
             likeTheFirst,
+            btcAddress,
           }
         },
       }).mount('#app')

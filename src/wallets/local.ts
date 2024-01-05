@@ -6,12 +6,14 @@ import { staticImplements } from '@/utils/index.js'
 import { errors } from '@/data/errors.js'
 import { fetchUtxos } from '@/api.js'
 import { parseLocalTransaction, pickUtxo } from '@/utils/crypto.js'
+import type { Blockchain } from '@/types/index.js'
 
 @staticImplements<WalletStatic>()
 export class LocalWallet implements MetaIDConnectWallet {
   private mnemonic: string
   private derivePath: string
   private internal: InternalWallet | undefined
+  public blockchain: Blockchain
   public address: string
   public xpub: string | undefined
 
@@ -27,7 +29,10 @@ export class LocalWallet implements MetaIDConnectWallet {
     throw new Error('Method not implemented.')
   }
 
-  public static create(mnemonic: string, derivePath: string = `m/44'/10001'/0'/0/0`): MetaIDConnectWallet {
+  public static async create(
+    mnemonic: string,
+    derivePath: string = `m/44'/10001'/0'/0/0`
+  ): Promise<MetaIDConnectWallet> {
     // create a new wallet
     const wallet = new LocalWallet(mnemonic, derivePath)
 
@@ -47,18 +52,26 @@ export class LocalWallet implements MetaIDConnectWallet {
     return wallet
   }
 
-  public getAddress(path?: string) {
+  public async getAddress({ blockchain, path }: { blockchain: Blockchain; path?: string }) {
     if (!path) return this.address
 
-    const fullPath = this.basePath + path
-    let basePk = mvc.Mnemonic.fromString(this.mnemonic)
-      .toHDPrivateKey(undefined, 'mainnet' as any)
-      .deriveChild(fullPath)
+    switch (blockchain) {
+      case 'mvc':
+        const fullPath = this.basePath + path
+        let basePk = mvc.Mnemonic.fromString(this.mnemonic)
+          .toHDPrivateKey(undefined, 'mainnet' as any)
+          .deriveChild(fullPath)
 
-    return basePk.publicKey.toAddress('mainnet' as any).toString()
+        return basePk.publicKey.toAddress('mainnet' as any).toString()
+      case 'btc':
+        return 'aaa'
+
+      default:
+        break
+    }
   }
 
-  public getPublicKey(path: string = '/0/0') {
+  public async getPublicKey(path: string = '/0/0') {
     const fullPath = this.basePath + path
     const basePk = mvc.Mnemonic.fromString(this.mnemonic)
       .toHDPrivateKey(undefined, 'mainnet' as any)
@@ -85,7 +98,7 @@ export class LocalWallet implements MetaIDConnectWallet {
       .deriveChild(this.derivePath).privateKey
   }
 
-  public signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }) {
+  public async signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }) {
     // look at the input's address and find out if it can be derived from the mnemonic
     const input = txComposer.tx.inputs[inputIndex]
     const toSignAddress = input.output.script.toAddress().toString()
