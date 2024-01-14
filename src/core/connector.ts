@@ -24,6 +24,9 @@ export class Connector {
   get address() {
     return this.wallet.address || ''
   }
+  get blockchain() {
+    return this.wallet.blockchain
+  }
 
   get xpub() {
     return this.wallet.xpub || ''

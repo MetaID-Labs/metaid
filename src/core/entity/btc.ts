@@ -13,11 +13,12 @@ import {
 } from '@/api.js'
 import { connected } from '@/decorators/connected.js'
 import { buildRootOpreturn, buildOpreturn, buildUserOpreturn } from '@/utils/opreturn-builder.js'
-import { Connector } from './connector.js'
+import { Connector } from '../connector.js'
 import { errors } from '@/data/errors.js'
 import { UTXO_DUST } from '@/data/constants.js'
 import { checkBalance, sleep } from '@/utils/index.js'
 import { type Transaction } from '@/wallets/wallet.js'
+import type { Encryption, Operation } from '@/utils/dataoutput-builder.js'
 
 type Root = {
   id: string
@@ -41,6 +42,9 @@ export class Entity {
     this._name = name
     this._schema = schema
     //this.connector.entity = this;
+  }
+  get blockchain() {
+    return this.connector.blockchain
   }
 
   get name() {
@@ -364,13 +368,14 @@ export class Entity {
       signMessage: string
       dataType?: string
       encoding?: string
-      serialAction?: 'combo' | 'finish'
+      serialAction?: 'combo' | 'finish' // to-do v2
       transactions?: Transaction[]
     }
   ) {
     const root = await this.getRoot()
     const transactions: Transaction[] = options?.transactions ?? []
 
+    // 1 construct dust transaction
     let dustTxid = ''
     let dustValue = 0
     // 1.1 first, check if root address already has dust utxos;
@@ -450,6 +455,70 @@ export class Entity {
     return {
       txid: payRes[payRes.length - 1].getTxId(),
     }
+  }
+
+  @connected
+  public async createV2(
+    body: unknown,
+    options?: {
+      operation: Operation
+      path: string
+      encryption: Encryption
+      signMessage: string
+      dataType?: string
+      encoding?: string
+      serialAction?: 'combo' | 'finish'
+      transactions?: Transaction[]
+    }
+  ) {
+    const transactions: Transaction[] = options?.transactions ?? []
+    // txcomposer ==> PSBT
+    /**
+     * 1. build two transactions in sequence:
+     *  1.1 commit tx for building data-output(opfalse),
+     *      its value set to 10546 satoshi temporarily
+     *  1.2 reveal tx for writing data onchain,
+     *      its output value set to 546 satoshi
+     * 2. link last two tx: 1.1 tx as 1.2 tx's input
+     */
+
+    if (!(await checkBalance(this.connector.address))) {
+      throw new Error(errors.NOT_ENOUGH_BALANCE)
+    }
+    //// commitTxComposer
+    const commitTxComposer = new TxComposer()
+
+    commitTxComposer.appendP2PKHOutput({
+      address: new btc.Address(address, 'mainnet' as any),
+      satoshis: 2546,
+    })
+
+    // todo: 找零逻辑
+
+    transactions.push({
+      txComposer: commitTxComposer,
+      message: 'Create Commit dust utxo',
+    })
+
+    const commitTxid = commitTxComposer.getTxId()
+    const commitValue = 2546
+
+    const metaidDataOutput = []
+    commitTxComposer.appendDataoutput(metaidDataOutput)
+
+    ///// revealTxComposer
+    const revealTxComposer = new TxComposer()
+
+    revealTxComposer.appendP2PKHInput({
+      address: new btc.Address(address, 'mainnet' as any),
+      txId: commitTxid,
+      outputIndex: 0,
+      satoshis: commitValue,
+    })
+    revealTxComposer.appendP2PKHOutput({
+      address: new btc.Address(address, 'mainnet' as any),
+      satoshis: 546,
+    })
   }
 
   public async list(page: number) {
