@@ -1,4 +1,4 @@
-import { fetchUtxos } from '@/api.js'
+import { fetchUtxos } from '@/service/mvc.js'
 
 /* class decorator */
 export function staticImplements<T>() {

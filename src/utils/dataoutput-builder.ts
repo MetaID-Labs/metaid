@@ -29,7 +29,7 @@ export function buildDataOutput({
   const dataOutput: MetaidDataOutput = [
     'metaid', // chain flag
     operation, // operation type
-    path, // path to operate, exp: /root/protocols/SimpleBuzz
+    path, // path to operate, exp:  /protocols/SimpleBuzz
     encryption, // content的加密类型，0为不加密；1为ECIES加密，2为ECDH协商密钥加密
     '1.0.0', // version
     dataType, // optional，content-type，default: application/jason

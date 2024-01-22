@@ -10,7 +10,7 @@ import {
   type User,
   fetchTxid,
   fetchOneBuzz,
-} from '@/api.js'
+} from '@/service/mvc.js'
 import { connected } from '@/decorators/connected.js'
 import { buildRootOpreturn, buildOpreturn, buildUserOpreturn } from '@/utils/opreturn-builder.js'
 import { Connector } from '../connector.js'

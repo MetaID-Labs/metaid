@@ -2,7 +2,7 @@ import { staticImplements } from '@/utils/index.js'
 import type { MetaIDConnectWallet, Transaction, WalletStatic } from './wallet.js'
 import { TxComposer, mvc } from 'meta-contract'
 import { errors } from '@/data/errors.js'
-import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/api.js'
+import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/service/mvc.js'
 import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
 import type { Blockchain } from '@/types/index.js'
 @staticImplements<WalletStatic>()

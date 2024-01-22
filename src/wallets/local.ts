@@ -4,7 +4,7 @@ import type { MetaIDConnectWallet, Transaction, WalletStatic } from './wallet.js
 import { DERIVE_MAX_DEPTH, FEEB } from '@/data/constants.js'
 import { staticImplements } from '@/utils/index.js'
 import { errors } from '@/data/errors.js'
-import { fetchUtxos } from '@/api.js'
+import { fetchUtxos } from '@/service/mvc.js'
 import { parseLocalTransaction, pickUtxo } from '@/utils/crypto.js'
 import type { Blockchain } from '@/types/index.js'
 

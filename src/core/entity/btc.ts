@@ -1,5 +1,4 @@
 import { TxComposer, mvc } from 'meta-contract'
-
 import {
   fetchUser,
   fetchBuzzes,
@@ -10,7 +9,7 @@ import {
   type User,
   fetchTxid,
   fetchOneBuzz,
-} from '@/api.js'
+} from '@/service/mvc.js'
 import { connected } from '@/decorators/connected.js'
 import { buildRootOpreturn, buildOpreturn, buildUserOpreturn } from '@/utils/opreturn-builder.js'
 import { Connector } from '../connector.js'
@@ -19,6 +18,7 @@ import { UTXO_DUST } from '@/data/constants.js'
 import { checkBalance, sleep } from '@/utils/index.js'
 import { type Transaction } from '@/wallets/wallet.js'
 import type { Encryption, Operation } from '@/utils/dataoutput-builder.js'
+import * as bitcoin from 'bitcoinjs-lib'
 
 type Root = {
   id: string
@@ -361,103 +361,6 @@ export class Entity {
   }
 
   @connected
-  public async create(
-    body: unknown,
-    options?: {
-      invisible: boolean
-      signMessage: string
-      dataType?: string
-      encoding?: string
-      serialAction?: 'combo' | 'finish' // to-do v2
-      transactions?: Transaction[]
-    }
-  ) {
-    const root = await this.getRoot()
-    const transactions: Transaction[] = options?.transactions ?? []
-
-    // 1 construct dust transaction
-    let dustTxid = ''
-    let dustValue = 0
-    // 1.1 first, check if root address already has dust utxos;
-    // if so, use it directly;
-    const dusts = await fetchUtxos({ address: root.address })
-    if (dusts.length > 0) {
-      dustTxid = dusts[0].txid
-      dustValue = dusts[0].value
-    } else {
-      // 1.2 otherwise, send dust to root address
-      if (!(await checkBalance(this.connector.address))) {
-        throw new Error(errors.NOT_ENOUGH_BALANCE)
-      }
-
-      const dustTxComposer = new TxComposer()
-      dustTxComposer.appendP2PKHOutput({
-        address: new mvc.Address(root.address, 'mainnet' as any),
-        satoshis: UTXO_DUST,
-      })
-      transactions.push({
-        txComposer: dustTxComposer,
-        message: 'Create link dust utxo',
-      })
-      dustTxid = dustTxComposer.getTxId()
-      dustValue = UTXO_DUST
-    }
-
-    // 2. link tx
-    const randomPriv = new mvc.PrivateKey(undefined, 'mainnet')
-    const randomPub = randomPriv.toPublicKey()
-
-    let linkTxComposer = new TxComposer()
-    linkTxComposer.appendP2PKHInput({
-      address: mvc.Address.fromString(root.address, 'mainnet' as any),
-      txId: dustTxid,
-      outputIndex: 0,
-      satoshis: dustValue,
-    })
-
-    const metaidOpreturn = buildOpreturn({
-      publicKey: randomPub.toString(),
-      parentTxid: root.txid,
-      protocolName: this.schema.nodeName,
-      body,
-      invisible: options?.invisible,
-      dataType: options?.dataType,
-      encoding: options?.encoding || this.schema?.encoding,
-    })
-    linkTxComposer.appendOpReturnOutput(metaidOpreturn)
-
-    transactions.push({
-      txComposer: linkTxComposer,
-      message: options.signMessage,
-    })
-    if (options?.serialAction === 'combo') {
-      return { transactions }
-    }
-
-    ///// apply pay
-    const payRes = await this.connector.pay({
-      transactions,
-    })
-    // for (const txComposer of payRes) {
-    //   await this.connector.broadcast(txComposer)
-    // }
-    await this.connector.batchBroadcast(payRes)
-
-    for (const p of payRes) {
-      const txid = p.getTxId()
-      const isValid = !!(await fetchTxid(txid))
-      if (isValid) {
-        await notify({ txHex: p.getRawHex() })
-      } else {
-        throw new Error('txid is not valid')
-      }
-    }
-    return {
-      txid: payRes[payRes.length - 1].getTxId(),
-    }
-  }
-
-  @connected
   public async createV2(
     body: unknown,
     options?: {
@@ -485,6 +388,21 @@ export class Entity {
     if (!(await checkBalance(this.connector.address))) {
       throw new Error(errors.NOT_ENOUGH_BALANCE)
     }
+    // construct dataoutput
+    const dataOutput = { body: 'Hello World', operation: 'create' }
+    const leafScriptAsm = JSON.stringify(dataOutput)
+    const leafScript = bitcoin.script.fromASM(leafScriptAsm)
+
+    const scriptTree = {
+      output: leafScript,
+    }
+
+    const { output, address, hash } = bitcoin.payments.p2tr({
+      internalPubkey: toXOnly(internalKey.publicKey),
+      scriptTree,
+      network: regtest,
+    })
+
     //// commitTxComposer
     const commitTxComposer = new TxComposer()
 

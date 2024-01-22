@@ -1,4 +1,4 @@
-import type { User } from '@/api.js'
+import type { User } from '@/service/mvc.js'
 import type { Connector } from '../connector.js'
 
 export interface BaseEntity {

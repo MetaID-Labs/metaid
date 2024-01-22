@@ -1,7 +1,11 @@
-/// <reference types="vitest" />
-import { defineConfig } from "vite";
-import { resolve } from "path";
-import dts from "vite-plugin-dts";
+/**
+ * <reference types="vitest" />
+ *  */
+import { defineConfig } from 'vite'
+import { resolve } from 'path'
+import dts from 'vite-plugin-dts'
+import wasm from 'vite-plugin-wasm'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
   test: {
@@ -22,5 +26,5 @@ export default defineConfig({
     },
     minify: false,
   },
-  plugins: [dts()],
+  plugins: [dts(), nodePolyfills(), wasm()],
 })
