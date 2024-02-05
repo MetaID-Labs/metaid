@@ -1,39 +1,38 @@
-import { use } from '@/factories/use.js'
-import { type MetaIDConnectWallet, type Transaction } from '@/wallets/wallet.js'
+import { useMvc, useBtc } from '@/factories/use.js'
+import { type MetaIDWalletForMvc, type Transaction } from '@/wallets/metalet/mvcWallet.js'
 import { TxComposer } from 'meta-contract'
 import { type User, fetchUser, fetchMetaid, fetchUtxos, notify, fetchTxid } from '@/service/mvc.js'
 import { DEFAULT_USERNAME, LEAST_AMOUNT_TO_CREATE_METAID } from '@/data/constants.js'
 import { sleep } from '@/utils/index.js'
 import type { EntitySchema } from '@/metaid-entities/entity.js'
-import { load } from '@/factories/load.js'
+import { loadBtc, loadMvc } from '@/factories/load.js'
 import { errors } from '@/data/errors.js'
+import type { Blockchain } from '@/types/index.js'
+import type { MetaIDWalletForBtc } from '@/wallets/metalet/btcWallet.js'
 
-export class Connector {
+export class MvcConnector {
   private _isConnected: boolean
-  private wallet: MetaIDConnectWallet
+  private wallet: MetaIDWalletForMvc
   public metaid: string | undefined
   private user: User
-  private constructor(wallet?: MetaIDConnectWallet) {
-    this._isConnected = true
 
+  private constructor(wallet?: MetaIDWalletForMvc) {
+    this._isConnected = true
     if (wallet) {
-      this.wallet = wallet
+      this.wallet = wallet as MetaIDWalletForMvc
     }
   }
 
   get address() {
     return this.wallet.address || ''
   }
-  get blockchain() {
-    return this.wallet.blockchain
-  }
 
   get xpub() {
     return this.wallet.xpub || ''
   }
 
-  public static async create(wallet?: MetaIDConnectWallet) {
-    const connector = new Connector(wallet)
+  public static async create(wallet?: MetaIDWalletForMvc) {
+    const connector = new MvcConnector(wallet)
 
     if (wallet) {
       // ask api for metaid
@@ -88,19 +87,6 @@ export class Connector {
       throw new Error(errors.NOT_ENOUGH_BALANCE_TO_CREATE_METAID)
     }
 
-    // const signature = await this.signMessage(API_AUTH_MESSAGE)
-    // try {
-    //   await getMetaidInitFee({
-    //     address: this.address,
-    //     xpub: this.xpub,
-    //     sigInfo: {
-    //       xSignature: signature,
-    //       xPublickey: await this.getPublicKey('/0/0'),
-    //     },
-    //   })
-    // } catch (error) {
-    //   console.log(error)
-    // }
     if (!this.isMetaidValid()) {
       let allTransactions: Transaction[] = []
       let tempUser = {
@@ -193,10 +179,6 @@ export class Connector {
       } else {
         this.metaid = payRes[0].getTxId()
       }
-
-      // for (const p of payRes) {
-      //   await notify({ txHex: p.getRawHex() })
-      // }
     }
     await sleep(1000)
     const refetchUser = await fetchUser(this.metaid)
@@ -211,11 +193,11 @@ export class Connector {
   }
 
   use(entitySymbol: string) {
-    return use(entitySymbol, { connector: this })
+    return useMvc(entitySymbol, { connector: this })
   }
 
   load(entitySchema: EntitySchema) {
-    return load(entitySchema, { connector: this })
+    return loadMvc(entitySchema, { connector: this })
   }
 
   isConnected() {
@@ -256,7 +238,7 @@ export class Connector {
   }
 
   getAddress(path?: string) {
-    return this.wallet.getAddress({ path, blockchain: this.wallet.blockchain })
+    return this.wallet.getAddress({ path })
   }
 
   signMessage(message: string, encoding: 'utf-8' | 'base64' | 'hex' | 'utf8' = 'hex') {

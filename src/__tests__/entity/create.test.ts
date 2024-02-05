@@ -1,7 +1,7 @@
 import { RUN_CREATE_TESTS } from '@/data/constants.js'
 import { errors } from '@/data/errors.js'
 import { connect } from '@/factories/connect.js'
-import { LocalWallet } from '@/wallets/local.js'
+import { LocalWallet } from '@/wallets/localwallet/local.js'
 
 describe('entity.create', () => {
   beforeEach(async (ctx) => {

@@ -1,6 +1,6 @@
 {
   "name": "@metaid/metaid",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "MetaID is a library for MetaID protocol. It provides a set of functions to manage the DID document and the DID transaction.",
   "type": "module",
   "main": "./dist/metaid.umd.cjs",
@@ -54,12 +54,16 @@
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
     "@metaid/metaid-cli": "0.0.2",
+    "@okxweb3/crypto-lib": "^1.0.1",
     "@scure/bip39": "^1.2.2",
     "axios": "^1.5.0",
     "bip32": "^4.0.0",
+    "bip39": "^3.1.0",
     "bitcoinjs-lib": "^6.1.5",
     "chalk": "3.0.0",
     "dayjs": "^1.11.9",
-    "meta-contract": "^0.3.35"
+    "meta-contract": "^0.3.35",
+    "ramda": "^0.29.1",
+    "tiny-secp256k1": "^2.2.3"
   }
 }

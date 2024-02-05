@@ -1,19 +1,19 @@
 import { staticImplements } from '@/utils/index.js'
-import type { MetaIDConnectWallet, Transaction, WalletStatic } from './wallet.js'
+import type { MetaIDWalletForMvc, Transaction, WalletStatic } from './mvcWallet.js'
 import { TxComposer, mvc } from 'meta-contract'
 import { errors } from '@/data/errors.js'
 import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/service/mvc.js'
 import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
-import type { Blockchain } from '@/types/index.js'
+
 @staticImplements<WalletStatic>()
-export class MetaletWallet implements MetaIDConnectWallet {
+export class MetaletWalletForMvc implements MetaIDWalletForMvc {
   public address: string
   public xpub: string
-  public blockchain: Blockchain
+
   private internal: any
   private constructor() {}
 
-  static async create(blockchain: Blockchain = 'mvc'): Promise<MetaIDConnectWallet> {
+  static async create(): Promise<MetaIDWalletForMvc> {
     // if it's not in the browser, throw an error
     if (typeof window === 'undefined') {
       throw new Error(errors.NOT_IN_BROWSER)
@@ -22,14 +22,13 @@ export class MetaletWallet implements MetaIDConnectWallet {
     // get xpub from metalet
     const xpub: string = await window.metaidwallet.getXPublicKey()
 
-    const wallet = new MetaletWallet()
-    wallet.blockchain = blockchain
+    const wallet = new MetaletWalletForMvc()
 
     const { address } = await window.metaidwallet.connect()
     wallet.address = address
-    if (blockchain === 'btc') {
-      wallet.address = await window.metaidwallet.btc.getAddress()
-    }
+    // if (blockchain === 'btc') {
+    //   wallet.address = await window.metaidwallet.btc.getAddress()
+    // }
     wallet.xpub = xpub
     wallet.internal = window.metaidwallet
 
@@ -44,48 +43,44 @@ export class MetaletWallet implements MetaIDConnectWallet {
     if (!path) return this.address
 
     // cut the first slash for compatibility
-    if (this.blockchain === 'mvc') {
-      return await this.internal.getAddress({ path: path.slice(1) })
-    }
-    if (this.blockchain === 'btc') {
-      return await this.internal.btc.getAddress()
-    }
+    return await this.internal.getAddress({ path: path.slice(1) })
+
+    // if (this.blockchain === 'btc') {
+    //   return await this.internal.btc.getAddress()
+    // }
   }
 
   public async getPublicKey(path: string = '/0/0') {
     // cut the first slash for compatibility
-    if (this.blockchain === 'mvc') {
-      return await this.internal.getPublicKey({ path: path.slice(1) })
-    }
-    if (this.blockchain === 'btc') {
-      return await this.internal.btc.getPublicKey()
-    }
+    return await this.internal.getPublicKey({ path: path.slice(1) })
+
+    // if (this.blockchain === 'btc') {
+    //   return await this.internal.btc.getPublicKey()
+    // }
   }
 
   public async getBalance() {
-    if (this.blockchain === 'mvc') {
-      return await this.internal.getBalance()
-    }
-    if (this.blockchain === 'btc') {
-      return await this.internal.btc.getBalance()
-    }
+    return await this.internal.getBalance()
+
+    // if (this.blockchain === 'btc') {
+    //   return await this.internal.btc.getBalance()
+    // }
   }
 
   public async signMessage(message, encoding): Promise<string> {
-    if (this.blockchain === 'mvc') {
-      const { signature } = await this.internal.signMessage({
-        message,
-        encoding,
-      })
-      return signature.signature
-    }
-    if (this.blockchain === 'btc') {
-      const { signature } = await this.internal.btc.signMessage({
-        message,
-        encoding,
-      })
-      return signature.signature
-    }
+    const { signature } = await this.internal.signMessage({
+      message,
+      encoding,
+    })
+    return signature.signature
+
+    // if (this.blockchain === 'btc') {
+    //   const { signature } = await this.internal.btc.signMessage({
+    //     message,
+    //     encoding,
+    //   })
+    //   return signature.signature
+    // }
   }
 
   public async signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }) {

@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
     /* Base Options: */
+
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "target": "es2022",
-    "verbatimModuleSyntax": true,
+    "target": "es2020",
+    "module": "ESNext",
+    "verbatimModuleSyntax": false,
     "allowJs": true,
     "resolveJsonModule": true,
     "moduleDetection": "force",
@@ -14,8 +16,14 @@
     "noUncheckedIndexedAccess": true,
 
     /* If transpiling with TypeScript: */
-    "moduleResolution": "NodeNext",
-    "module": "NodeNext",
+    // "moduleResolution": "NodeNext",
+    // "module": "NodeNext",
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+
     "outDir": "dist",
     "sourceMap": true,
 

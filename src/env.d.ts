@@ -10,7 +10,7 @@ interface ImportMeta {
 
 import { TestContext } from 'vitest'
 import { Entity } from '@/core/entity/mvc.ts'
-import { MetaIDConnectWallet } from '@/wallets/wallet.ts'
+import { MetaIDConnectWallet } from '@/wallets/metalet/mvcWallet.ts'
 declare module 'vitest' {
   export interface TestContext {
     Buzz?: Entity

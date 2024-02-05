@@ -9,7 +9,10 @@ async function connectToLocalWallet() {
 }
 
 beforeEach(async (ctx) => {
-  ctx.Buzz = await use('buzz')
+  const connector = await connectToLocalWallet()
+
+  const Buzz = await connector.use('buzz')
+  ctx.Buzz = Buzz
 })
 
 describe('entity', () => {

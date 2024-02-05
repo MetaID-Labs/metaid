@@ -1,5 +1,5 @@
-import { LocalWallet } from '@/wallets/local.js'
-import { connect } from './connect.js'
+import { LocalWallet } from '@/wallets/localwallet/local.js'
+import { mvcConnect } from './connect.js'
 import { mvc } from 'meta-contract'
 import { RUN_CREATE_TESTS } from '@/data/constants.js'
 import { errors } from '@/data/errors.js'
@@ -8,9 +8,9 @@ async function connectToLocalWallet(mnemonic?: string) {
   if (!mnemonic) {
     mnemonic = import.meta.env.VITE_TEST_MNEMONIC
   }
-  const wallet = LocalWallet.create(mnemonic)
+  const wallet = await LocalWallet.create(mnemonic)
 
-  return connect(wallet)
+  return await mvcConnect(wallet)
 }
 
 describe('factories.connect', () => {
@@ -23,7 +23,7 @@ describe('factories.connect', () => {
   })
 
   test('can connect to no wallet', async () => {
-    const connector = await connect()
+    const connector = await mvcConnect()
     expect(connector).toBeTypeOf('object')
 
     const Buzz = await connector.use('buzz')

@@ -13,11 +13,12 @@ import {
 } from '@/service/mvc.js'
 import { connected } from '@/decorators/connected.js'
 import { buildRootOpreturn, buildOpreturn, buildUserOpreturn } from '@/utils/opreturn-builder.js'
-import { Connector } from '../connector.js'
 import { errors } from '@/data/errors.js'
 import { UTXO_DUST } from '@/data/constants.js'
 import { checkBalance, sleep } from '@/utils/index.js'
-import { type Transaction } from '@/wallets/wallet.js'
+import { type Transaction } from '@/wallets/metalet/mvcWallet.js'
+import type { EntitySchema } from '@/metaid-entities/entity.js'
+import type { MvcConnector } from '../connector/mvc.js'
 
 type Root = {
   id: string
@@ -31,16 +32,14 @@ type Root = {
   createdAt: number
 }
 
-export class Entity {
-  public connector: Connector | undefined
-  private _name: string
-  private _schema: any
+export class MvcEntity {
   private _root: Root
-  public userInfo: User
-  constructor(name: string, schema: any) {
+  public connector: MvcConnector
+  public _name: string
+  public _schema: EntitySchema
+  constructor(name: string, schema: EntitySchema) {
     this._name = name
     this._schema = schema
-    //this.connector.entity = this;
   }
 
   get name() {
@@ -417,7 +416,7 @@ export class Entity {
       body,
       invisible: options?.invisible,
       dataType: options?.dataType,
-      encoding: options?.encoding || this.schema?.encoding,
+      encoding: options?.encoding,
     })
     linkTxComposer.appendOpReturnOutput(metaidOpreturn)
 

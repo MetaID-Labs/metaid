@@ -19,10 +19,12 @@ export default defineConfig({
     },
   },
   build: {
+    target: ['edge90', 'chrome90', 'firefox90', 'safari15'],
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'Metaid',
       fileName: 'metaid',
+      formats: ['es'],
     },
     minify: false,
   },

@@ -1,6 +1,6 @@
-import { errors } from "@/data/errors.js";
-import { connect } from "@/factories/connect.js";
-import { LocalWallet } from "@/wallets/local.js";
+import { errors } from '@/data/errors.js'
+import { connect } from '@/factories/connect.js'
+import { LocalWallet } from '@/wallets/localwallet/local.js'
 
 describe('entity.list', () => {
   beforeEach(async (ctx) => {

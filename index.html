@@ -46,6 +46,7 @@
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="send2k">Send 2k</button>
 
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createMetaid">Create MetaID</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="debug">Debug</button>
           </div>
 
           <p v-if="connected" class="text-teal-200 mt-2">Connected Success {{btcAddress}}</p>
@@ -87,7 +88,14 @@
 
     <script type="module">
       import { createApp, ref, computed, toRaw } from 'vue'
-      import { LocalWallet, MetaletWallet, connect } from './dist/metaid.js'
+      import {
+        Transaction,
+        Psbt,
+        LocalWallet,
+        MetaletWalletForMvc,
+        MetaletWalletForBtc,
+        btcConnect,
+      } from './dist/metaid.js'
 
       createApp({
         setup() {
@@ -105,34 +113,35 @@
           const connectWallet = async () => {
             const _wallet = await LocalWallet.create(mnemonic.value, path.value)
             wallet.value = _wallet
-
-            const baseEntity = await connect(_wallet)
-            console.log('baseEntity', baseEntity)
-            const handler = await baseEntity.use('buzz')
-            Buzz.value = handler
-            const fileHandler = await baseEntity.use('file')
-            File.value = fileHandler
           }
 
           const connectMetaletWithBtc = async () => {
             console.log('connectMetaletWithBtc')
-            const _wallet = await MetaletWallet.create('btc')
+            const _wallet = await MetaletWalletForBtc.create()
             wallet.value = _wallet
 
             btcAddress.value = await _wallet.getAddress({})
             console.log(`Your btc address is ${btcAddress.value}`)
-            const baseEntity = await connect(_wallet)
-            Buzz.value = await baseEntity.use('buzz')
-            const fileHandler = await baseEntity.use('file')
-            File.value = fileHandler
+
+            const baseConnector = await btcConnect(_wallet)
+
+            const metaid = await baseConnector.createMetaid()
+            console.log('your metaid', metaid)
           }
+
           const connectMetaletWithMvc = async () => {
             console.log('connectMetaletWithMvc')
-            const _wallet = await MetaletWallet.create()
+            const _wallet = await MetaletWalletForMvc.create()
             wallet.value = _wallet
 
             btcAddress.value = await _wallet.getAddress({})
             console.log(`Your mvc address is ${btcAddress.value}`)
+
+            const baseEntity = await connect('mvc', _wallet)
+            console.log('baseEntity', baseEntity)
+
+            const handler = await baseEntity.use('buzz')
+            Buzz.value = handler
           }
 
           const getBtcAddress = async () => {
@@ -197,9 +206,36 @@
             await Like.getRoot()
             await Like.create({ likeTo: txid, isLike: '1' })
           }
-
+          const debug = async () => {
+            const txhex =
+              '01000000000101431016ade3f7be33ea56831f60e0725efcdddc873d1851488b73e38f5f12b4da0000000000f5ffffff0122020000000000001600141b8cdc41f30b26f50f67e0861a0c87171764a14c034012765648c01c1e0690795c4026b8d016b440a7a0d14c332952be776e0e2caca91c672d45f46c4805ce70835f4592a3f30423290287da34886b11ed2817466d7cfd500120db80413b6ebeac3c1efbb8df939a874dd50b22ef57685f12fafca573f3e39797ac00630674657374696406637265617465172f70726f746f636f6c732f73696d706c6562757a7a2f31000131106170706c69636174696f6e2f6a736f6e4cef7b22636f6e74656e74223a22426974636f696e20697320616e20696e6e6f766174697665207061796d656e74206e6574776f726b20616e642061206e6577206b696e64206f66206d6f6e65792e2046696e6420616c6c20796f75206e65656420746f206b6e6f7720616e64206765742073746172746564207769746820426974636f696e206f6e20626974636f696e2e6f72672e20416c736f20426974636f696e20697320646174612e222c22636f6e74656e7454797065223a22746578742f706c61696e222c2263726561746554696d65223a313730353534393831393932392c2271756f74655478223a22227d6821c1db80413b6ebeac3c1efbb8df939a874dd50b22ef57685f12fafca573f3e3979700000000'
+            const psbt = Transaction.fromHex(txhex)
+            console.log(psbt)
+          }
+          const debug2 = async () => {
+            const psbt = new Psbt()
+            psbt.addInput({
+              hash: '7d067b4a697a09d2c3cff7d4d9506c9955e93bff41bf82d439da7d030382bc3e',
+              index: 0,
+              nonWitnessUtxo: Buffer.from(
+                '0200000001f9f34e95b9d5c8abcd20fc5bd4a825d1517be62f0f775e5f36da944d9' +
+                  '452e550000000006b483045022100c86e9a111afc90f64b4904bd609e9eaed80d48' +
+                  'ca17c162b1aca0a788ac3526f002207bb79b60d4fc6526329bf18a77135dc566020' +
+                  '9e761da46e1c2f1152ec013215801210211755115eabf846720f5cb18f248666fec' +
+                  '631e5e1e66009ce3710ceea5b1ad13ffffffff01905f0100000000001976a9148bb' +
+                  'c95d2709c71607c60ee3f097c1217482f518d88ac00000000',
+                'hex'
+              ),
+              sighashType: 1,
+            })
+            psbt.addOutput({
+              address: '1KRMKfeZcmosxALVYESdPNez1AP1mEtywp',
+              value: 80000,
+            })
+            console.log('psbt', psbt)
+          }
           const createMetaid = async () => {
-            const _wallet = await MetaletWallet.create()
+            const _wallet = await MetaletWalletForMvc.create()
             const connector = await connect(_wallet)
             console.log({ connector })
             if (!connector.isMetaidValid()) {
@@ -228,6 +264,7 @@
             createMetaid,
             likeTheFirst,
             btcAddress,
+            debug,
           }
         },
       }).mount('#app')

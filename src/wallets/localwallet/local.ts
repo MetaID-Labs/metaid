@@ -1,6 +1,6 @@
 import { TxComposer, mvc, Wallet as InternalWallet, API_NET, API_TARGET, Api } from 'meta-contract'
 
-import type { MetaIDConnectWallet, Transaction, WalletStatic } from './wallet.js'
+import type { MetaIDConnectWallet, Transaction, WalletStatic } from '../metalet/mvcWallet.js'
 import { DERIVE_MAX_DEPTH, FEEB } from '@/data/constants.js'
 import { staticImplements } from '@/utils/index.js'
 import { errors } from '@/data/errors.js'
