@@ -23,8 +23,7 @@ export interface MetaIDWalletForBtc {
 
   broadcast(txComposer: TxComposer | TxComposer[]): Promise<{ txid: string } | { txid: string }[]>
   batchBroadcast(txComposer: TxComposer[]): Promise<{ txid: string }[]>
-
+  inscribe({ data, options }: { data: any; options?: { noBroadcast: boolean } }): Promise<any>
   // encrypt(message: string, publicKey: string): Promise<string>;
-
   signMessage(message: string, encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8'): Promise<string>
 }

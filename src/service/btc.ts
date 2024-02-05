@@ -32,6 +32,16 @@ export type Pin = {
   contentSummary: string
 }
 
+export type UserInfo = {
+  number: number
+  rootTxId: string
+  name: string
+  address: string
+  avatar: string | null
+  bio: string
+  soulbondToken: string
+}
+
 const BASE_METALET_TEST_URL = `https://www.metalet.space/wallet-api/v3`
 const BASE_METAID_TEST_URL = `http://man-test.metaid.io`
 
@@ -100,6 +110,43 @@ export async function getRootPinByAddress({
   network?: 'livenet' | 'testnet'
 }): Promise<Pin | null> {
   const url = `${BASE_METAID_TEST_URL}/api/btc/address/pin/root/${address}`
+
+  try {
+    const data = await axios.get(url).then((res) => res.data)
+
+    return data.data
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+
+export async function getPinListByAddress({
+  address,
+  network = 'testnet',
+}: {
+  address: string
+  network?: 'livenet' | 'testnet'
+}): Promise<Pin[] | null> {
+  const url = `${BASE_METAID_TEST_URL}/api/btc/address/pin/list/${address}`
+
+  try {
+    const data = await axios.get(url).then((res) => res.data)
+    return data.data
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+
+export async function getInfoByAddress({
+  address,
+  network = 'testnet',
+}: {
+  address: string
+  network?: 'livenet' | 'testnet'
+}): Promise<UserInfo | null> {
+  const url = `${BASE_METAID_TEST_URL}/api/btc/info/address/${address}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)

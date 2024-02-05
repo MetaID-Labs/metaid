@@ -6,15 +6,29 @@ import { loadBtc } from '@/factories/load.js'
 import { errors } from '@/data/errors.js'
 import type { Blockchain } from '@/types/index.js'
 import type { MetaIDWalletForBtc } from '@/wallets/metalet/btcWallet.js'
-import { broadcast, getRootPinByAddress, type Network } from '@/service/btc'
+import { broadcast, fetchUtxos, getInfoByAddress, getRootPinByAddress, type Network } from '@/service/btc'
 import * as bitcoin from '../entity/btc/bitcoinjs-lib'
+import { InscriptionRequest, MetaidData, Operation, PrevOutput } from '../entity/btc/inscribePsbt'
+import { InscribeOptions } from '../entity/btc'
 
+type User = {
+  metaid: string
+  address: string
+  name: string
+  avatar: string | null
+  bio: string
+}
+
+interface NBD {
+  no: { commitTxId: string; revealTxIds: string[] }
+  yes: { commitTxHex: string; revealTxsHex: string[] }
+}
 export class BtcConnector {
   private _isConnected: boolean
   private wallet: MetaIDWalletForBtc
   public blockchain: Blockchain
   public metaid: string | undefined
-  private user: string
+  private user: User
   private constructor(wallet?: MetaIDWalletForBtc) {
     this._isConnected = true
 
@@ -31,19 +45,21 @@ export class BtcConnector {
     const connector = new BtcConnector(wallet)
 
     if (wallet) {
-      // // ask api for metaid
+      // ask api for metaid and user
       const rootPin = await getRootPinByAddress({ address: wallet.address })
-      const metaid = rootPin.rootTxId
-      connector.metaid = metaid
-      // const metaid =
-      //   (await fetchMetaid({
-      //     address: wallet.address,
-      //   })) || undefined
-      // connector.metaid = metaid
-      // // ask api for user
-      // if (!!metaid) {
-      //   connector.user = await fetchUser(metaid)
-      // }
+      const metaid = rootPin?.rootTxId
+      if (!!metaid) {
+        connector.metaid = metaid
+
+        const user = await getInfoByAddress({ address: wallet.address })
+        connector.user = {
+          metaid: user.rootTxId,
+          address: user.address,
+          name: user.name,
+          avatar: user.avatar,
+          bio: user.bio,
+        }
+      }
     }
 
     return connector
@@ -54,19 +70,79 @@ export class BtcConnector {
     return !!this.user
   }
 
-  isMetaidValid() {
-    return true
-  }
-
   getUser() {
     return this.user
   }
 
-  async createMetaid(body?: { name: string }): Promise<string> {
-    const initEntity = await this.use('metaid-root')
-    const metaid = await initEntity.inscribe('init', this.address, bitcoin.networks.testnet)
+  public async inscribe<T extends keyof NBD>(
+    operation: Operation,
+    address: string,
+    noBroadcast: T,
+    inscribeOptions?: InscribeOptions | undefined
+  ): Promise<NBD[T]> {
+    // const faucetUtxos = await fetchUtxos({
+    //   address: address,
+    //   network: 'testnet',
+    // })
+    // const toUseUtxo = faucetUtxos[0] // presume toUseUtxo.value >= 11546
+    // console.log('to use utxo have satoshi', toUseUtxo.satoshi)
 
+    // const pub = await this.getPublicKey(`m/86'/0'/0'/0/0`)
+    // const commitTxPrevOutputList: PrevOutput[] = [
+    //   {
+    //     txId: toUseUtxo.txId,
+    //     vOut: toUseUtxo.vout,
+    //     amount: toUseUtxo.satoshi,
+    //     address: address,
+    //     pub,
+    //   },
+    // ]
+    const metaidDataList: MetaidData[] = [
+      {
+        operation,
+        revealAddr: address,
+        body: inscribeOptions?.body,
+        path: inscribeOptions?.path,
+        contentType: inscribeOptions?.contentType,
+        encryption: inscribeOptions?.encryption,
+        version: '1.0.0', //this._schema.versions[0].version.toString(),
+        encoding: inscribeOptions?.encoding,
+      },
+    ]
+
+    const request: InscriptionRequest = {
+      // commitTxPrevOutputList,
+      commitFeeRate: 1,
+      revealFeeRate: 1,
+      revealOutValue: 546,
+      metaidDataList,
+      changeAddress: address,
+    }
+    console.log('request', request)
+    const res = this.wallet.inscribe({
+      data: request,
+      options: {
+        noBroadcast: noBroadcast === 'no' ? false : true,
+      },
+    })
+
+    return res
+  }
+
+  async createMetaid(body?: { name?: string }): Promise<string> {
+    const initRes = await this.inscribe('init', this.address, 'no')
+    const metaid = initRes.revealTxIds[0]
+    this.metaid = metaid
+    if (!!body?.name) {
+      const nameRes = await this.inscribe('create', this.address, 'no', { body: body?.name, path: '/info/name' })
+    }
     return metaid
+    // const initEntity = await this.use('metaid-root')
+    // const metaid = await initEntity.inscribe('init', this.address, bitcoin.networks.testnet)
+    // const userEntity = await this.use('info')
+    // const userInfo =  await userEntity.create()
+    // this.metaid = metaid
+    // this.user = userInfo
   }
 
   // metaid

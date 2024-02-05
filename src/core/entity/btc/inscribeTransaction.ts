@@ -38,6 +38,7 @@ export type InscriptionRequest = {
   commitFeeRate: number
   revealFeeRate: number
   metaidDataList: MetaidData[]
+
   revealOutValue: number
   changeAddress: string
   minChangeValue?: number

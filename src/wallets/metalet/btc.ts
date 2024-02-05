@@ -42,6 +42,10 @@ export class MetaletWalletForBtc implements MetaIDWalletForBtc {
     return await this.internal.btc.getAddress()
   }
 
+  public async inscribe({ data, options }: { data: any; options?: { noBroadcast: boolean } }): Promise<any> {
+    return await this.internal.btc.process({ data, options })
+  }
+
   public async getPublicKey(path: string = '/0/0') {
     return await this.internal.btc.getPublicKey()
   }

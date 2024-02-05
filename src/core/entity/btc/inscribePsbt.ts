@@ -25,6 +25,7 @@ export type MetaidData = {
   encryption?: '0' | '1' | '2'
   version?: string
   encoding?: string
+
   revealAddr: string
 }
 
@@ -37,7 +38,7 @@ export type PrevOutput = {
 }
 
 export type InscriptionRequest = {
-  commitTxPrevOutputList: PrevOutput[]
+  // commitTxPrevOutputList: PrevOutput[]
   commitFeeRate: number
   revealFeeRate: number
   metaidDataList: MetaidData[]
@@ -103,7 +104,7 @@ export class InscriptionTool {
   ) => {
     finalScriptWitness: Buffer
   }
-  static newInscriptionTool(network: bitcoin.Network, request: InscriptionRequest) {
+  static newInscriptionTool(network: bitcoin.Network, request: any) {
     const tool = new InscriptionTool()
     tool.network = network
 

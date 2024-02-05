@@ -77,7 +77,7 @@
             <div v-for="buzz in buzzes" class="bg-white rounded-md shadow-md p-4 mt-4">
               <div class="flex items-center gap-4">
                 <div class="flex-grow">
-                  <div class="text-sm text-gray-500">{{ buzz.body.content }}</div>
+                  <div class="text-sm text-gray-500">{{ buzz?.contentSummary ?? 'empty value' }}</div>
                 </div>
               </div>
             </div>
@@ -104,7 +104,7 @@
           const Buzz = ref(null)
           const File = ref(null)
           const connected = computed(() => !!Buzz.value)
-          const content = ref('')
+          const content = ref('Dont beee a pussssy!!!!')
           const buzzes = ref([])
           const connector = ref(null)
           const wallet = ref(null)
@@ -123,10 +123,18 @@
             btcAddress.value = await _wallet.getAddress({})
             console.log(`Your btc address is ${btcAddress.value}`)
 
-            const baseConnector = await btcConnect(_wallet)
+            const btcConnector = await btcConnect(_wallet)
 
-            const metaid = await baseConnector.createMetaid()
+            console.log('current metaid and user info', {
+              metaid: btcConnector?.metaid,
+              user: btcConnector?.user,
+            })
+
+            const metaid = await btcConnector.createMetaid()
             console.log('your metaid', metaid)
+
+            const buzzEntity = btcConnector.use('buzz')
+            Buzz.value = buzzEntity
           }
 
           const connectMetaletWithMvc = async () => {
@@ -171,7 +179,8 @@
           }
 
           const createBuzz = async () => {
-            await toRaw(Buzz.value).create({ content: content.value })
+            console.log('I wanna publish a buzz:', content.value)
+            await toRaw(Buzz.value).create({ body: content.value })
           }
           const createBuzzPicture = async () => {
             let attachMetafileUri = []
@@ -185,15 +194,9 @@
           }
 
           const getBuzzList = async () => {
-            const { items } = await toRaw(Buzz.value).list()
-            const txids = items.map(({ txid }) => txid)
-            // check if there are duplicated txids
-            const set = new Set(txids)
-            console.log(set.size, txids.length)
-
-            console.log({ items, txids })
-
-            buzzes.value = items
+            const res = await toRaw(Buzz.value).getPins()
+            console.log('buzz res', res)
+            buzzes.value = res
           }
 
           const likeTheFirst = async () => {
