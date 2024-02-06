@@ -9,7 +9,7 @@ interface Window {
       getPublicKey: () => Promise<string>
       getAddress: () => Promise<string>
       getBalance: () => Promise<{ address: string; total: number; confirmed: number; unconfirmed: number }>
-      process: ({ data, options }: { data: any; options?: { noBroadcast: boolean } }) => Promise<any>
+      inscribe: ({ data, options }: { data: any; options?: { noBroadcast: boolean } }) => Promise<any>
     }
   }
 }

@@ -119,7 +119,7 @@ export class BtcConnector {
       changeAddress: address,
     }
     console.log('request', request)
-    const res = this.wallet.inscribe({
+    const res = await this.wallet.inscribe({
       data: request,
       options: {
         noBroadcast: noBroadcast === 'no' ? false : true,

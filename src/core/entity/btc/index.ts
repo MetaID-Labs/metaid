@@ -60,13 +60,15 @@ export class BtcEntity {
   }
 
   public async getPins() {
-    const pins = await getPinListByAddress({ address: this.connector.address })
+    const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
+    // const pins = await getPinListByAddress({ address: this.connector.address })
     return pins.filter((d) => d.path.includes(this.schema.path))
   }
   @connected
   public async create({ body }: { body: any }) {
     const path = this.schema.path + uuidv4()
     const res = await this.connector.inscribe('create', this.address, 'no', { body, path })
+    console.log('entity create res', res)
     return res
   }
 

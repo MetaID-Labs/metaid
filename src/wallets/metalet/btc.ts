@@ -4,6 +4,21 @@ import { TxComposer, mvc } from 'meta-contract'
 import { errors } from '@/data/errors.js'
 import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/service/mvc.js'
 import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
+
+const request = {
+  commitFeeRate: 1,
+  revealFeeRate: 1,
+  revealOutValue: 546,
+  metaidDataList: [
+    {
+      operation: 'init',
+      revealAddr: 'tb1pv3efxdwc2nkck5kg8updw62kxqt8mclshk3a2ywlazqa6n225n9qm9url7',
+      version: '1.0.0',
+    },
+  ],
+  changeAddress: 'tb1pv3efxdwc2nkck5kg8updw62kxqt8mclshk3a2ywlazqa6n225n9qm9url7',
+}
+
 @staticImplements<WalletStatic>()
 export class MetaletWalletForBtc implements MetaIDWalletForBtc {
   public address: string
@@ -43,7 +58,7 @@ export class MetaletWalletForBtc implements MetaIDWalletForBtc {
   }
 
   public async inscribe({ data, options }: { data: any; options?: { noBroadcast: boolean } }): Promise<any> {
-    return await this.internal.btc.process({ data, options })
+    return await this.internal.btc.inscribe({ data, options })
   }
 
   public async getPublicKey(path: string = '/0/0') {
