@@ -8,10 +8,10 @@ import wasm from 'vite-plugin-wasm'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
-  test: {
-    globals: true,
-    testTimeout: 30000,
-  },
+  // test: {
+  //   globals: true,
+  //   testTimeout: 30000,
+  // },
 
   resolve: {
     alias: {

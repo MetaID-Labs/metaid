@@ -11,7 +11,7 @@ import {
 import { Psbt } from './bitcoinjs-lib/psbt'
 
 import * as bitcoin from './bitcoinjs-lib'
-import { fetchUtxos, getPinListByAddress, Pin } from '@/service/btc.js'
+import { fetchUtxos, getAllPinByParentPath, getPinListByAddress, Pin } from '@/service/btc.js'
 import { errors } from '@/data/errors.js'
 import type { BtcConnector } from '@/core/connector/btc.js'
 import { isNil } from 'ramda'
@@ -59,14 +59,14 @@ export class BtcEntity {
     return this.connector?.metaid
   }
 
-  public async getPins(): Promise<Pin[]> {
+  public async getPins({ page, limit }: { page: number; limit: number }): Promise<Pin[]> {
     // const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
-    const pins = await getPinListByAddress({ address: this.connector.address })
-    return pins.filter((d) => d.path.includes(this.schema.path))
+    const pins = await getAllPinByParentPath({ parentPath: this.schema.path, page, limit })
+    return pins.currentPage.filter((d) => d.path.includes(this.schema.path))
   }
   @connected
   public async create({ body }: { body: any }) {
-    const path = this.schema.path + uuidv4()
+    const path = this.schema.path + '/' + uuidv4()
     const res = await this.connector.inscribe('create', this.address, 'no', { body, path })
     console.log('entity create res', res)
     return res
