@@ -124,16 +124,16 @@
             console.log(`Your btc address is ${btcAddress.value}`)
 
             const btcConnector = await btcConnect(_wallet)
+            // if (!btcConnector.hasMetaid) {
+            //   const metaid = await btcConnector.createMetaid()
+            // }
 
-            console.log('current metaid and user info', {
-              metaid: btcConnector?.metaid,
-              user: btcConnector?.user,
-            })
+            // console.log('current metaid and user info', {
+            //   metaid: btcConnector?.metaid,
+            //   user: btcConnector?.user,
+            // })
 
-            const metaid = await btcConnector.createMetaid()
-            console.log('your metaid', metaid)
-
-            const buzzEntity = btcConnector.use('buzz')
+            const buzzEntity = await btcConnector.use('buzz')
             Buzz.value = buzzEntity
           }
 
@@ -194,6 +194,7 @@
           }
 
           const getBuzzList = async () => {
+            console.log(toRaw(Buzz.value))
             const res = await toRaw(Buzz.value).getPins()
             console.log('buzz res', res)
             buzzes.value = res
