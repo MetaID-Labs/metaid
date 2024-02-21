@@ -19,7 +19,7 @@ type User = {
   bio: string
 }
 
-interface NBD {
+export interface NBD {
   no: { commitTxId: string; revealTxIds: string[] }
   yes: { commitTxHex: string; revealTxsHex: string[] }
 }

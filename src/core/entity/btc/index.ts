@@ -13,7 +13,7 @@ import { Psbt } from './bitcoinjs-lib/psbt'
 import * as bitcoin from './bitcoinjs-lib'
 import { fetchUtxos, getPinListByAddress } from '@/service/btc.js'
 import { errors } from '@/data/errors.js'
-import type { BtcConnector } from '@/core/connector/btc.js'
+import type { BtcConnector, NBD } from '@/core/connector/btc.js'
 import { isNil } from 'ramda'
 
 import BIP32Factory, { type BIP32Interface } from 'bip32'
@@ -64,9 +64,13 @@ export class BtcEntity {
     return pins.filter((d) => d.path.includes(this.schema.path))
   }
   @connected
-  public async create({ body }: { body: any }) {
+  public async create<T extends keyof NBD>({ body, noBroadcast }: { body: any; noBroadcast: T }): Promise<NBD[T]> {
     const path = this.schema.path + uuidv4()
-    const res = await this.connector.inscribe('create', this.address, 'no', { body, path })
+    const res = await this.connector.inscribe('create', this.address, noBroadcast, {
+      body,
+      path,
+    })
+
     return res
   }
 
