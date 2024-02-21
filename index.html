@@ -195,7 +195,7 @@
 
           const getBuzzList = async () => {
             console.log(toRaw(Buzz.value))
-            const res = await toRaw(Buzz.value).getPins()
+            const res = await toRaw(Buzz.value).getPins({ page: 1, limit: 5 })
             console.log('buzz res', res)
             buzzes.value = res
           }
