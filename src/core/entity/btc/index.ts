@@ -24,7 +24,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 const bip32 = BIP32Factory(ecc)
 
-export type InscribeOptions = Omit<MetaidData, 'operation' | 'revealAddr'>
+export type InscribeOptions = Omit<MetaidData, 'revealAddr'>
+export type CreateOptions = Omit<InscribeOptions, 'operation' | 'path'>
 
 export class BtcEntity {
   public connector: BtcConnector
@@ -61,16 +62,25 @@ export class BtcEntity {
 
   public async getPins({ page, limit }: { page: number; limit: number }): Promise<Pin[]> {
     // const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
-    const pins = await getAllPinByParentPath({ parentPath: this.schema.path, page, limit })
+    const parentPath = this.schema.path.endsWith('/') ? this.schema.path.slice(0, -1) : this.schema.path
+    const pins = await getAllPinByParentPath({ parentPath, page, limit })
     return pins.currentPage.filter((d) => d.path.includes(this.schema.path))
   }
   @connected
-  public async create<T extends keyof NBD>({ body, noBroadcast }: { body: any; noBroadcast: T }): Promise<NBD[T]> {
+  public async create<T extends keyof NBD>({
+    options,
+    noBroadcast,
+  }: {
+    options: CreateOptions[]
+    noBroadcast: T
+  }): Promise<NBD[T]> {
     const path = this.schema.path + uuidv4()
-    const res = await this.connector.inscribe('create', this.address, noBroadcast, {
-      body,
-      path,
-    })
+    // console.log('pin path', path)
+    const res = await this.connector.inscribe(
+      options.map((d) => ({ ...d, operation: 'create', path })),
+
+      noBroadcast
+    )
 
     return res
   }

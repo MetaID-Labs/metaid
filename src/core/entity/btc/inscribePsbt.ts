@@ -18,8 +18,8 @@ export type Operation = 'init' | 'create' | 'modify' | 'revoke'
 export type Encryption = '0' | '1' | '2'
 
 export type MetaidData = {
-  body?: string | Buffer
   operation: Operation
+  body?: string | Buffer
   path?: string
   contentType?: string
   encryption?: '0' | '1' | '2'

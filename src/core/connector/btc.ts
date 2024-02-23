@@ -74,12 +74,7 @@ export class BtcConnector {
     return this.user
   }
 
-  public async inscribe<T extends keyof NBD>(
-    operation: Operation,
-    address: string,
-    noBroadcast: T,
-    inscribeOptions?: InscribeOptions | undefined
-  ): Promise<NBD[T]> {
+  public async inscribe<T extends keyof NBD>(inscribeOptions: InscribeOptions[], noBroadcast: T): Promise<NBD[T]> {
     // const faucetUtxos = await fetchUtxos({
     //   address: address,
     //   network: 'testnet',
@@ -97,28 +92,26 @@ export class BtcConnector {
     //     pub,
     //   },
     // ]
-    const metaidDataList: MetaidData[] = [
-      {
-        operation,
-        revealAddr: address,
-        body: inscribeOptions?.body,
-        path: inscribeOptions?.path,
-        contentType: inscribeOptions?.contentType,
-        encryption: inscribeOptions?.encryption,
-        version: '1.0.0', //this._schema.versions[0].version.toString(),
-        encoding: inscribeOptions?.encoding,
-      },
-    ]
+    const metaidDataList: MetaidData[] = inscribeOptions.map((inp) => ({
+      operation: inp.operation,
+      revealAddr: this.address,
+      body: inp?.body,
+      path: inp?.path,
+      contentType: inp?.contentType,
+      encryption: inp?.encryption,
+      version: '1.0.0', //this._schema.versions[0].version.toString(),
+      encoding: inp?.encoding,
+    }))
 
     const request: InscriptionRequest = {
       // commitTxPrevOutputList,
-      commitFeeRate: 1,
-      revealFeeRate: 1,
+      commitFeeRate: 2,
+      revealFeeRate: 2,
       revealOutValue: 546,
       metaidDataList,
-      changeAddress: address,
+      changeAddress: this.wallet.address,
     }
-    console.log('request', request)
+    console.log('request', request, 'noBroadcast', noBroadcast === 'no' ? false : true)
     const res = await this.wallet.inscribe({
       data: request,
       options: {
@@ -129,12 +122,30 @@ export class BtcConnector {
     return res
   }
 
-  async createMetaid(body?: { name?: string }): Promise<string> {
-    const initRes = await this.inscribe('init', this.address, 'no')
+  async createMetaid(body?: { name?: string; bio?: string; avatar?: string }): Promise<string> {
+    const initRes = await this.inscribe([{ operation: 'init' }], 'no')
     const metaid = initRes.revealTxIds[0]
     this.metaid = metaid
     if (!!body?.name) {
-      const nameRes = await this.inscribe('create', this.address, 'no', { body: body?.name, path: '/info/name' })
+      const nameRes = await this.inscribe(
+        [{ operation: 'create', body: body?.name, path: '/info/name' }],
+
+        'no'
+      )
+    }
+    if (!!body?.bio) {
+      const bioRes = await this.inscribe(
+        [{ operation: 'create', body: body?.bio, path: '/info/bio' }],
+
+        'no'
+      )
+    }
+    if (!!body?.name) {
+      const avatarRes = await this.inscribe(
+        [{ operation: 'create', body: body?.avatar, path: '/info/avatar' }],
+
+        'no'
+      )
     }
     return metaid
     // const initEntity = await this.use('metaid-root')
