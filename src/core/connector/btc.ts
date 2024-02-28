@@ -6,18 +6,11 @@ import { loadBtc } from '@/factories/load.js'
 import { errors } from '@/data/errors.js'
 import type { Blockchain } from '@/types/index.js'
 import type { MetaIDWalletForBtc } from '@/wallets/metalet/btcWallet.js'
-import { broadcast, fetchUtxos, getInfoByAddress, getRootPinByAddress, type Network } from '@/service/btc'
+import { broadcast, fetchUtxos, getInfoByAddress, getRootPinByAddress, UserInfo, type Network } from '@/service/btc'
 import * as bitcoin from '../entity/btc/bitcoinjs-lib'
 import { InscriptionRequest, MetaidData, Operation, PrevOutput } from '../entity/btc/inscribePsbt'
 import { InscribeOptions } from '../entity/btc'
-
-type User = {
-  metaid: string
-  address: string
-  name: string
-  avatar: string | null
-  bio: string
-}
+import { isNil } from 'ramda'
 
 export interface NBD {
   no: { commitTxId: string; revealTxIds: string[] }
@@ -28,7 +21,7 @@ export class BtcConnector {
   private wallet: MetaIDWalletForBtc
   public blockchain: Blockchain
   public metaid: string | undefined
-  private user: User
+  private user: UserInfo
   private constructor(wallet?: MetaIDWalletForBtc) {
     this._isConnected = true
 
@@ -52,13 +45,7 @@ export class BtcConnector {
         connector.metaid = metaid
 
         const user = await getInfoByAddress({ address: wallet.address })
-        connector.user = {
-          metaid: user.rootTxId,
-          address: user.address,
-          name: user.name,
-          avatar: user.avatar,
-          bio: user.bio,
-        }
+        connector.user = user
       }
     }
 
@@ -70,7 +57,10 @@ export class BtcConnector {
     return !!this.user
   }
 
-  getUser() {
+  async getUser(currentAddress?: string) {
+    if (!isNil(currentAddress)) {
+      return await getInfoByAddress({ address: currentAddress })
+    }
     return this.user
   }
 
@@ -105,11 +95,10 @@ export class BtcConnector {
 
     const request: InscriptionRequest = {
       // commitTxPrevOutputList,
-      commitFeeRate: 2,
-      revealFeeRate: 2,
+      feeRate: 2,
       revealOutValue: 546,
       metaidDataList,
-      changeAddress: this.wallet.address,
+      changeAddress: this.address,
     }
     console.log('request', request, 'noBroadcast', noBroadcast === 'no' ? false : true)
     const res = await this.wallet.inscribe({
@@ -140,9 +129,9 @@ export class BtcConnector {
         'no'
       )
     }
-    if (!!body?.name) {
+    if (!!body?.avatar) {
       const avatarRes = await this.inscribe(
-        [{ operation: 'create', body: body?.avatar, path: '/info/avatar' }],
+        [{ operation: 'create', body: body?.avatar, path: '/info/avatar', encoding: 'base64' }],
 
         'no'
       )

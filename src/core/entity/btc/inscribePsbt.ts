@@ -24,7 +24,7 @@ export type MetaidData = {
   contentType?: string
   encryption?: '0' | '1' | '2'
   version?: string
-  encoding?: string
+  encoding?: BufferEncoding
 
   revealAddr: string
 }
@@ -39,8 +39,7 @@ export type PrevOutput = {
 
 export type InscriptionRequest = {
   // commitTxPrevOutputList: PrevOutput[]
-  commitFeeRate: number
-  revealFeeRate: number
+  feeRate: number
   metaidDataList: MetaidData[]
   revealOutValue: number
   changeAddress: string
