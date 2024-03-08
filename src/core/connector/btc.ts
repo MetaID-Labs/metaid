@@ -58,10 +58,13 @@ export class BtcConnector {
   }
 
   async getUser(currentAddress?: string) {
+    let res: UserInfo
     if (!isNil(currentAddress)) {
-      return await getInfoByAddress({ address: currentAddress })
+      res = await getInfoByAddress({ address: currentAddress })
     }
-    return this.user
+    res = await getInfoByAddress({ address: this.address })
+    console.log('user res', res)
+    return res
   }
 
   public async inscribe<T extends keyof NBD>(inscribeOptions: InscribeOptions[], noBroadcast: T): Promise<NBD[T]> {
@@ -111,10 +114,46 @@ export class BtcConnector {
     return res
   }
 
+  async updatUserInfo(body?: { name?: string; bio?: string; avatar?: string }): Promise<boolean> {
+    let nameRevealId = ''
+    let bioRevealId = ''
+    let avatarRevealId = ''
+    if (!!body?.name && body?.name !== this.user?.name) {
+      const nameRes = await this.inscribe(
+        [{ operation: 'modify', body: body?.name, path: '/info/name' }],
+
+        'no'
+      )
+      nameRevealId = nameRes.revealTxIds[0]
+    }
+    if (!!body?.bio && body?.bio !== this.user?.bio) {
+      const bioRes = await this.inscribe(
+        [{ operation: 'modify', body: body?.bio, path: '/info/bio' }],
+
+        'no'
+      )
+      bioRevealId = bioRes.revealTxIds[0]
+    }
+    if (!!body?.avatar) {
+      const avatarRes = await this.inscribe(
+        [{ operation: 'modify', body: body?.avatar, path: '/info/avatar', encoding: 'base64' }],
+
+        'no'
+      )
+      avatarRevealId = avatarRes.commitTxId[0]
+    }
+    if (nameRevealId !== '' || bioRevealId !== '' || avatarRevealId !== '') {
+      return true
+    } else {
+      return false
+    }
+  }
+
   async createMetaid(body?: { name?: string; bio?: string; avatar?: string }): Promise<string> {
     const initRes = await this.inscribe([{ operation: 'init' }], 'no')
     const metaid = initRes.revealTxIds[0]
     this.metaid = metaid
+
     if (!!body?.name) {
       const nameRes = await this.inscribe(
         [{ operation: 'create', body: body?.name, path: '/info/name' }],
@@ -137,12 +176,6 @@ export class BtcConnector {
       )
     }
     return metaid
-    // const initEntity = await this.use('metaid-root')
-    // const metaid = await initEntity.inscribe('init', this.address, bitcoin.networks.testnet)
-    // const userEntity = await this.use('info')
-    // const userInfo =  await userEntity.create()
-    // this.metaid = metaid
-    // this.user = userInfo
   }
 
   // metaid
