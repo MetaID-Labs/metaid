@@ -61,9 +61,10 @@ export class BtcConnector {
     let res: UserInfo
     if (!isNil(currentAddress)) {
       res = await getInfoByAddress({ address: currentAddress })
+    } else {
+      res = await getInfoByAddress({ address: this.address })
     }
-    res = await getInfoByAddress({ address: this.address })
-    console.log('user res', res)
+
     return res
   }
 
