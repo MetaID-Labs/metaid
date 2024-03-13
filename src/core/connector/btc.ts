@@ -39,13 +39,19 @@ export class BtcConnector {
 
     if (wallet) {
       // ask api for metaid and user
-      const rootPin = await getRootPinByAddress({ address: wallet.address })
-      const metaid = rootPin?.rootTxId
-      if (!!metaid) {
-        connector.metaid = metaid
+      // const rootPin = await getRootPinByAddress({ address: wallet.address })
+      // const metaid = rootPin?.rootTxId
+      // if (!!metaid) {
+      //   connector.metaid = metaid
 
-        const user = await getInfoByAddress({ address: wallet.address })
-        connector.user = user
+      //   const user = await getInfoByAddress({ address: wallet.address })
+      //   connector.user = user
+      // }
+
+      const metaidInfo = await getInfoByAddress({ address: wallet.address })
+      if (!isNil(metaidInfo)) {
+        connector.metaid = metaidInfo.rootTxId + 'i0'
+        connector.user = metaidInfo
       }
     }
 
