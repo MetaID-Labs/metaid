@@ -40,6 +40,7 @@ export type UserInfo = {
   avatar: string | null
   bio: string
   soulbondToken: string
+  unconfirmed: string
 }
 
 const BASE_METALET_TEST_URL = `https://www.metalet.space/wallet-api/v3`
