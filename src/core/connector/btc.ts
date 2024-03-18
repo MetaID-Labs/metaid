@@ -4,22 +4,20 @@ import { sleep } from '@/utils/index.js'
 import type { EntitySchema } from '@/metaid-entities/entity.js'
 import { loadBtc } from '@/factories/load.js'
 import { errors } from '@/data/errors.js'
-import type { Blockchain } from '@/types/index.js'
 import type { MetaIDWalletForBtc } from '@/wallets/metalet/btcWallet.js'
 import { broadcast, fetchUtxos, getInfoByAddress, getRootPinByAddress, UserInfo, type Network } from '@/service/btc'
 import * as bitcoin from '../entity/btc/bitcoinjs-lib'
 import { InscriptionRequest, MetaidData, Operation, PrevOutput } from '../entity/btc/inscribePsbt'
 import { InscribeOptions } from '../entity/btc'
-import { isNil } from 'ramda'
+import { isNil, isEmpty } from 'ramda'
 
 export interface NBD {
-  no: { commitTxId: string; revealTxIds: string[] }
-  yes: { commitTxHex: string; revealTxsHex: string[] }
+  no: { commitTxId: string; revealTxIds: string[]; commitCost: string; revealCost: string; status?: string }
+  yes: { commitTxHex: string; revealTxsHex: string[]; commitCost: string; revealCost: string; status?: string }
 }
 export class BtcConnector {
   private _isConnected: boolean
   private wallet: MetaIDWalletForBtc
-  public blockchain: Blockchain
   public metaid: string | undefined
   private user: UserInfo
   private constructor(wallet?: MetaIDWalletForBtc) {
@@ -117,7 +115,7 @@ export class BtcConnector {
         noBroadcast: noBroadcast === 'no' ? false : true,
       },
     })
-
+    console.log('inscrible res', res)
     return res
   }
 
@@ -158,8 +156,10 @@ export class BtcConnector {
 
   async createMetaid(body?: { name?: string; bio?: string; avatar?: string }): Promise<string> {
     const initRes = await this.inscribe([{ operation: 'init' }], 'no')
-    const metaid = initRes.revealTxIds[0]
-    this.metaid = metaid
+    if (!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds)) {
+      const metaid = initRes.revealTxIds[0]
+      this.metaid = metaid
+    }
 
     if (!!body?.name) {
       const nameRes = await this.inscribe(
@@ -182,12 +182,16 @@ export class BtcConnector {
         'no'
       )
     }
-    return metaid
+    return this.metaid
   }
 
   // metaid
   hasMetaid() {
     return !!this.metaid
+  }
+
+  getMetaid() {
+    return this.metaid
   }
 
   use(entitySymbol: string) {

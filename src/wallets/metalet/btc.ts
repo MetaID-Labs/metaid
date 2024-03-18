@@ -5,6 +5,7 @@ import { errors } from '@/data/errors.js'
 import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/service/mvc.js'
 import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
 
+import { isNil } from 'ramda'
 @staticImplements<WalletStatic>()
 export class MetaletWalletForBtc implements MetaIDWalletForBtc {
   public address: string
@@ -24,9 +25,10 @@ export class MetaletWalletForBtc implements MetaIDWalletForBtc {
 
     const wallet = new MetaletWalletForBtc()
 
-    const { address } = await window.metaidwallet.btc.connect()
-
-    wallet.address = address
+    const connectRes = await window.metaidwallet.btc.connect()
+    if (!isNil(connectRes?.address)) {
+      wallet.address = connectRes.address
+    }
     wallet.pub = pub
     wallet.internal = window.metaidwallet
 
