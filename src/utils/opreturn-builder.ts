@@ -113,7 +113,7 @@ export function buildUserOpreturn({
     '0',
     protocolName === 'Root' ? '1.0.1' : 'NULL',
     protocolName === 'Root' ? 'NULL' : 'text/plain',
-    protocolName === 'Root' ? 'NULL' : 'UTF-8',
+    protocolName === 'Root' ? 'NULL' : 'UTF- 8',
   ]
 
   return opreturn
