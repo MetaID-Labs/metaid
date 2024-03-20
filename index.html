@@ -247,13 +247,11 @@
             console.log('psbt', psbt)
           }
           const createMetaid = async () => {
-            const _wallet = await MetaletWalletForMvc.create()
-            const connector = await connect(_wallet)
+            const _wallet = await MetaletWalletForBtc.create()
+            const connector = await btcConnect(_wallet)
             console.log({ connector })
-            if (!connector.isMetaidValid()) {
-              const res = await connector.createMetaid()
-              console.log({ res })
-            }
+            const res = await connector.createMetaid({ name: 'ttb' }).catch((error) => console.log(error))
+            console.log({ res })
           }
 
           return {

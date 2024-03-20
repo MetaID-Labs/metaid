@@ -124,20 +124,16 @@ export class BtcConnector {
     let bioRevealId = ''
     let avatarRevealId = ''
     if (!!body?.name && body?.name !== this.user?.name) {
-      const nameRes = await this.inscribe(
-        [{ operation: 'modify', body: body?.name, path: '/info/name' }],
-
-        'no'
-      )
-      nameRevealId = nameRes.revealTxIds[0]
+      const nameRes = await this.inscribe([{ operation: 'modify', body: body?.name, path: '/info/name' }], 'no')
+      if (!isNil(nameRes?.revealTxIds[0])) {
+        nameRevealId = nameRes.revealTxIds[0]
+      }
     }
     if (!!body?.bio && body?.bio !== this.user?.bio) {
-      const bioRes = await this.inscribe(
-        [{ operation: 'modify', body: body?.bio, path: '/info/bio' }],
-
-        'no'
-      )
-      bioRevealId = bioRes.revealTxIds[0]
+      const bioRes = await this.inscribe([{ operation: 'modify', body: body?.bio, path: '/info/bio' }], 'no')
+      if (!isNil(bioRes?.revealTxIds[0])) {
+        bioRevealId = bioRes.revealTxIds[0]
+      }
     }
     if (!!body?.avatar) {
       const avatarRes = await this.inscribe(
@@ -145,7 +141,9 @@ export class BtcConnector {
 
         'no'
       )
-      avatarRevealId = avatarRes.commitTxId[0]
+      if (!isNil(avatarRes?.revealTxIds[0])) {
+        avatarRevealId = avatarRes.revealTxIds[0]
+      }
     }
     if (nameRevealId !== '' || bioRevealId !== '' || avatarRevealId !== '') {
       return true
@@ -154,35 +152,48 @@ export class BtcConnector {
     }
   }
 
-  async createMetaid(body?: { name?: string; bio?: string; avatar?: string }): Promise<string> {
-    const initRes = await this.inscribe([{ operation: 'init' }], 'no')
-    if (!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds)) {
-      const metaid = initRes.revealTxIds[0]
-      this.metaid = metaid
-    }
+  async createMetaid(body?: {
+    name?: string
+    bio?: string
+    avatar?: string
+  }): Promise<{ metaid: string; cost: number }> {
+    try {
+      const initRes = await this.inscribe([{ operation: 'init' }], 'no')
+      let cost = 0
+      console.log(!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds))
+      if (!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds)) {
+        const metaid = initRes.revealTxIds[0]
+        this.metaid = metaid
+        cost += Number(initRes?.revealCost ?? 0) + Number(initRes?.commitCost ?? 0)
+        if (!!body?.name) {
+          const nameRes = await this.inscribe(
+            [{ operation: 'create', body: body?.name, path: '/info/name' }],
 
-    if (!!body?.name) {
-      const nameRes = await this.inscribe(
-        [{ operation: 'create', body: body?.name, path: '/info/name' }],
+            'no'
+          )
+          cost += Number(nameRes?.revealCost ?? 0) + Number(nameRes?.commitCost ?? 0)
+        }
+        if (!!body?.bio) {
+          const bioRes = await this.inscribe(
+            [{ operation: 'create', body: body?.bio, path: '/info/bio' }],
 
-        'no'
-      )
-    }
-    if (!!body?.bio) {
-      const bioRes = await this.inscribe(
-        [{ operation: 'create', body: body?.bio, path: '/info/bio' }],
+            'no'
+          )
+          cost += Number(bioRes?.revealCost ?? 0) + Number(bioRes?.commitCost ?? 0)
+        }
+        if (!!body?.avatar) {
+          const avatarRes = await this.inscribe(
+            [{ operation: 'create', body: body?.avatar, path: '/info/avatar', encoding: 'base64' }],
 
-        'no'
-      )
+            'no'
+          )
+          cost += Number(avatarRes?.revealCost ?? 0) + Number(avatarRes?.commitCost ?? 0)
+        }
+      }
+      return { metaid: this.metaid, cost }
+    } catch (error) {
+      console.log('error', error)
     }
-    if (!!body?.avatar) {
-      const avatarRes = await this.inscribe(
-        [{ operation: 'create', body: body?.avatar, path: '/info/avatar', encoding: 'base64' }],
-
-        'no'
-      )
-    }
-    return this.metaid
   }
 
   // metaid
