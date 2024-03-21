@@ -157,43 +157,39 @@ export class BtcConnector {
     bio?: string
     avatar?: string
   }): Promise<{ metaid: string; cost: number }> {
-    try {
-      const initRes = await this.inscribe([{ operation: 'init' }], 'no')
-      let cost = 0
-      console.log(!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds))
-      if (!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds)) {
-        const metaid = initRes.revealTxIds[0]
-        this.metaid = metaid
-        cost += Number(initRes?.revealCost ?? 0) + Number(initRes?.commitCost ?? 0)
-        if (!!body?.name) {
-          const nameRes = await this.inscribe(
-            [{ operation: 'create', body: body?.name, path: '/info/name' }],
+    const initRes = await this.inscribe([{ operation: 'init' }], 'no')
+    let cost = 0
+    console.log(!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds))
+    if (!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds)) {
+      const metaid = initRes.revealTxIds[0]
+      this.metaid = metaid
+      cost += Number(initRes?.revealCost ?? 0) + Number(initRes?.commitCost ?? 0)
+      if (!!body?.name) {
+        const nameRes = await this.inscribe(
+          [{ operation: 'create', body: body?.name, path: '/info/name' }],
 
-            'no'
-          )
-          cost += Number(nameRes?.revealCost ?? 0) + Number(nameRes?.commitCost ?? 0)
-        }
-        if (!!body?.bio) {
-          const bioRes = await this.inscribe(
-            [{ operation: 'create', body: body?.bio, path: '/info/bio' }],
-
-            'no'
-          )
-          cost += Number(bioRes?.revealCost ?? 0) + Number(bioRes?.commitCost ?? 0)
-        }
-        if (!!body?.avatar) {
-          const avatarRes = await this.inscribe(
-            [{ operation: 'create', body: body?.avatar, path: '/info/avatar', encoding: 'base64' }],
-
-            'no'
-          )
-          cost += Number(avatarRes?.revealCost ?? 0) + Number(avatarRes?.commitCost ?? 0)
-        }
+          'no'
+        )
+        cost += Number(nameRes?.revealCost ?? 0) + Number(nameRes?.commitCost ?? 0)
       }
-      return { metaid: this.metaid, cost }
-    } catch (error) {
-      console.log('error', error)
+      if (!!body?.bio) {
+        const bioRes = await this.inscribe(
+          [{ operation: 'create', body: body?.bio, path: '/info/bio' }],
+
+          'no'
+        )
+        cost += Number(bioRes?.revealCost ?? 0) + Number(bioRes?.commitCost ?? 0)
+      }
+      if (!!body?.avatar) {
+        const avatarRes = await this.inscribe(
+          [{ operation: 'create', body: body?.avatar, path: '/info/avatar', encoding: 'base64' }],
+
+          'no'
+        )
+        cost += Number(avatarRes?.revealCost ?? 0) + Number(avatarRes?.commitCost ?? 0)
+      }
     }
+    return { metaid: this.metaid, cost }
   }
 
   // metaid

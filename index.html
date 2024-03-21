@@ -250,8 +250,8 @@
             const _wallet = await MetaletWalletForBtc.create()
             const connector = await btcConnect(_wallet)
             console.log({ connector })
-            const res = await connector.createMetaid({ name: 'ttb' }).catch((error) => console.log('error', error))
-            console.log({ res })
+            const res = await connector.createMetaid({ name: 'ttb' }).catch((error) => console.log('error html', error))
+            console.log(res)
           }
 
           return {
