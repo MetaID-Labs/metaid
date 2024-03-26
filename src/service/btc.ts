@@ -114,7 +114,7 @@ export async function getRootPinByAddress({
   address: string
   network?: 'livenet' | 'testnet'
 }): Promise<Pin | null> {
-  const url = `${BASE_METAID_TEST_URL}/api/btc/address/pin/root/${address}`
+  const url = `${BASE_METAID_TEST_URL}/api/address/pin/root/${address}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)
@@ -135,7 +135,7 @@ export async function getAllPinByPath({
   limit: number
   path: string
 }): Promise<{ total: number; currentPage: Pin[] } | null> {
-  const url = `${BASE_METAID_TEST_URL}/api/btc/getAllPinByPath?page=${page}&limit=${limit}&path=${path}`
+  const url = `${BASE_METAID_TEST_URL}/api/getAllPinByPath?page=${page}&limit=${limit}&path=${path}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)
@@ -152,7 +152,7 @@ export async function getPinListByAddress({
   address: string
   network?: 'livenet' | 'testnet'
 }): Promise<Pin[] | null> {
-  const url = `${BASE_METAID_TEST_URL}/api/btc/address/pin/list/${address}`
+  const url = `${BASE_METAID_TEST_URL}/api/address/pin/list/${address}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)
@@ -170,7 +170,7 @@ export async function getInfoByAddress({
   address: string
   network?: 'livenet' | 'testnet'
 }): Promise<UserInfo | null> {
-  const url = `${BASE_METAID_TEST_URL}/api/btc/info/address/${address}`
+  const url = `${BASE_METAID_TEST_URL}/api/info/address/${address}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)
