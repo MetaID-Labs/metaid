@@ -11,7 +11,7 @@ import {
 import { Psbt } from './bitcoinjs-lib/psbt'
 
 import * as bitcoin from './bitcoinjs-lib'
-import { fetchUtxos, getAllPinByParentPath, getPinListByAddress, Pin } from '@/service/btc.js'
+import { fetchUtxos, getAllPinByPath, getPinListByAddress, Pin } from '@/service/btc.js'
 import { errors } from '@/data/errors.js'
 import type { BtcConnector, NBD } from '@/core/connector/btc.js'
 import { isNil } from 'ramda'
@@ -20,7 +20,6 @@ import BIP32Factory, { type BIP32Interface } from 'bip32'
 import * as bip39 from 'bip39'
 import * as ecc from 'tiny-secp256k1'
 import { taprootFinalInput, taprootSignInput } from './btcUtils.js'
-import { v4 as uuidv4 } from 'uuid'
 
 const bip32 = BIP32Factory(ecc)
 
@@ -62,8 +61,8 @@ export class BtcEntity {
 
   public async getPins({ page, limit }: { page: number; limit: number }): Promise<Pin[]> {
     // const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
-    const parentPath = this.schema.path.endsWith('/') ? this.schema.path.slice(0, -1) : this.schema.path
-    const pins = await getAllPinByParentPath({ parentPath, page, limit })
+    const path = this.schema.path
+    const pins = await getAllPinByPath({ path, page, limit })
     return pins.currentPage.filter((d) => d.path.includes(this.schema.path))
   }
   @connected
@@ -74,7 +73,7 @@ export class BtcEntity {
     options: CreateOptions[]
     noBroadcast: T
   }): Promise<NBD[T]> {
-    const path = this.schema.path + uuidv4()
+    const path = this.schema.path
     // console.log('pin path', path)
     const res = await this.connector.inscribe(
       options.map((d) => ({ ...d, operation: 'create', path })),

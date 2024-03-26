@@ -36,11 +36,15 @@ export type UserInfo = {
   number: number
   rootTxId: string
   name: string
+  nameId: string
   address: string
   avatar: string | null
+  avatarId: string
   bio: string
+  bioId: string
   soulbondToken: string
   unconfirmed: string
+  isInit: boolean
 }
 
 const BASE_METALET_TEST_URL = `https://www.metalet.space/wallet-api/v3`
@@ -122,16 +126,16 @@ export async function getRootPinByAddress({
   }
 }
 
-export async function getAllPinByParentPath({
+export async function getAllPinByPath({
   page,
   limit,
-  parentPath,
+  path,
 }: {
   page: number
   limit: number
-  parentPath: string
+  path: string
 }): Promise<{ total: number; currentPage: Pin[] } | null> {
-  const url = `${BASE_METAID_TEST_URL}/api/btc/getAllPinByParentPath?page=${page}&limit=${limit}&parentPath=${parentPath}`
+  const url = `${BASE_METAID_TEST_URL}/api/btc/getAllPinByPath?page=${page}&limit=${limit}&path=${path}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)

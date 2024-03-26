@@ -3,6 +3,7 @@ import type { EntitySchema } from './entity.js'
 const simpleVoteSchema: EntitySchema = {
   name: 'simple-vote',
   nodeName: 'SimpleVote',
+  path: '/protocols/simple-vote',
   versions: [
     {
       version: 1,

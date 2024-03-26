@@ -5,7 +5,15 @@ import type { EntitySchema } from '@/metaid-entities/entity.js'
 import { loadBtc } from '@/factories/load.js'
 import { errors } from '@/data/errors.js'
 import type { MetaIDWalletForBtc } from '@/wallets/metalet/btcWallet.js'
-import { broadcast, fetchUtxos, getInfoByAddress, getRootPinByAddress, UserInfo, type Network } from '@/service/btc'
+import {
+  broadcast,
+  fetchUtxos,
+  getInfoByAddress,
+  getRootPinByAddress,
+  UserInfo,
+  type Network,
+  getPinListByAddress,
+} from '@/service/btc'
 import * as bitcoin from '../entity/btc/bitcoinjs-lib'
 import { InscriptionRequest, MetaidData, Operation, PrevOutput } from '../entity/btc/inscribePsbt'
 import { InscribeOptions } from '../entity/btc'
@@ -123,21 +131,28 @@ export class BtcConnector {
     let nameRevealId = ''
     let bioRevealId = ''
     let avatarRevealId = ''
+    // path 传@pinId
     if (!!body?.name && body?.name !== this.user?.name) {
-      const nameRes = await this.inscribe([{ operation: 'modify', body: body?.name, path: '/info/name' }], 'no')
+      const nameRes = await this.inscribe(
+        [{ operation: 'modify', body: body?.name, path: `@${this?.user?.nameId ?? ''}` }],
+        'no'
+      )
       if (!isNil(nameRes?.revealTxIds[0])) {
         nameRevealId = nameRes.revealTxIds[0]
       }
     }
     if (!!body?.bio && body?.bio !== this.user?.bio) {
-      const bioRes = await this.inscribe([{ operation: 'modify', body: body?.bio, path: '/info/bio' }], 'no')
+      const bioRes = await this.inscribe(
+        [{ operation: 'modify', body: body?.bio, path: `@${this?.user?.bioId ?? ''}` }],
+        'no'
+      )
       if (!isNil(bioRes?.revealTxIds[0])) {
         bioRevealId = bioRes.revealTxIds[0]
       }
     }
     if (!!body?.avatar) {
       const avatarRes = await this.inscribe(
-        [{ operation: 'modify', body: body?.avatar, path: '/info/avatar', encoding: 'base64' }],
+        [{ operation: 'modify', body: body?.avatar, path: `@${this?.user?.avatarId ?? ''}`, encoding: 'base64' }],
 
         'no'
       )

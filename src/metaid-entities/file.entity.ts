@@ -2,7 +2,7 @@ const fileSchema = {
   name: 'file',
   nodeName: 'MetaFile',
   encoding: 'binary',
-  path: '/file/',
+  path: '/file',
   versions: [
     {
       version: '1.0.1',
