@@ -3001,13 +3001,6 @@ timers-browserify@^2.0.4:
   dependencies:
     setimmediate "^1.0.4"
 
-tiny-secp256k1@^2.2.3:
-  version "2.2.3"
-  resolved "https://registry.npmmirror.com/tiny-secp256k1/-/tiny-secp256k1-2.2.3.tgz#fe1dde11a64fcee2091157d4b78bcb300feb9b65"
-  integrity sha512-SGcL07SxcPN2nGKHTCvRMkQLYPSoeFcvArUSCYtjVARiFAWU44cCIqYS0mYAU6nY7XfvwURuTIGo2Omt3ZQr0Q==
-  dependencies:
-    uint8array-tools "0.0.7"
-
 tinybench@^2.5.0:
   version "2.5.1"
   resolved "https://registry.npmmirror.com/tinybench/-/tinybench-2.5.1.tgz#3408f6552125e53a5a48adee31261686fd71587e"

@@ -132,34 +132,53 @@ export class BtcConnector {
     let bioRevealId = ''
     let avatarRevealId = ''
     // path 传@pinId
-    if (!!body?.name && body?.name !== this.user?.name) {
-      const nameRes = await this.inscribe(
-        [{ operation: 'modify', body: body?.name, path: `@${this?.user?.nameId ?? ''}` }],
-        'no'
-      )
+    if (body?.name !== this.user?.name && !isNil(body?.name) && !isEmpty(body?.name)) {
+      let nameRes
+      if (this.user?.nameId === '') {
+        nameRes = await this.inscribe([{ operation: 'create', body: body?.name, path: `/info/name` }], 'no')
+      } else {
+        nameRes = await this.inscribe(
+          [{ operation: 'modify', body: body?.name, path: `@${this?.user?.nameId ?? ''}` }],
+          'no'
+        )
+      }
       if (!isNil(nameRes?.revealTxIds[0])) {
         nameRevealId = nameRes.revealTxIds[0]
       }
     }
-    if (!!body?.bio && body?.bio !== this.user?.bio) {
-      const bioRes = await this.inscribe(
-        [{ operation: 'modify', body: body?.bio, path: `@${this?.user?.bioId ?? ''}` }],
-        'no'
-      )
+    if (body?.bio !== this.user?.bio && !isNil(body?.bio) && !isEmpty(body?.bio)) {
+      console.log('run in bio')
+      let bioRes
+      if (this.user?.bioId === '') {
+        bioRes = await this.inscribe([{ operation: 'create', body: body?.bio, path: `/info/bio` }], 'no')
+      } else {
+        bioRes = await this.inscribe(
+          [{ operation: 'modify', body: body?.bio, path: `@${this?.user?.bioId ?? ''}` }],
+          'no'
+        )
+      }
       if (!isNil(bioRes?.revealTxIds[0])) {
         bioRevealId = bioRes.revealTxIds[0]
       }
     }
-    if (!!body?.avatar) {
-      const avatarRes = await this.inscribe(
-        [{ operation: 'modify', body: body?.avatar, path: `@${this?.user?.avatarId ?? ''}`, encoding: 'base64' }],
-
-        'no'
-      )
+    if (body?.avatar !== this.user?.avatar && !isNil(body?.avatar) && !isEmpty(body?.avatar)) {
+      let avatarRes
+      if (this.user?.avatarId === '') {
+        avatarRes = await this.inscribe(
+          [{ operation: 'create', body: body?.avatar, path: `/info/avatar`, encoding: 'base64' }],
+          'no'
+        )
+      } else {
+        avatarRes = await this.inscribe(
+          [{ operation: 'modify', body: body?.avatar, path: `@${this?.user?.avatarId ?? ''}`, encoding: 'base64' }],
+          'no'
+        )
+      }
       if (!isNil(avatarRes?.revealTxIds[0])) {
         avatarRevealId = avatarRes.revealTxIds[0]
       }
     }
+
     if (nameRevealId !== '' || bioRevealId !== '' || avatarRevealId !== '') {
       return true
     } else {
