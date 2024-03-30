@@ -37,7 +37,7 @@ export class BtcConnector {
   }
 
   get address() {
-    return this.wallet?.address || ''
+    return this?.wallet?.address || ''
   }
 
   public static async create(wallet?: MetaIDWalletForBtc) {
