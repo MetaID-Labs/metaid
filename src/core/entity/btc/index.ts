@@ -65,6 +65,13 @@ export class BtcEntity {
     const pins = await getAllPinByPath({ path, page, limit })
     return pins.currentPage.filter((d) => d.path.includes(this.schema.path))
   }
+
+  public async calcPins(): Promise<number> {
+    const path = this.schema.path
+    const pins = await getAllPinByPath({ path, page: 1, limit: 2 })
+    return pins.total
+  }
+
   @connected
   public async create<T extends keyof NBD>({
     options,

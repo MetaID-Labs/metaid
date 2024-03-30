@@ -24,11 +24,11 @@ export class MvcConnector {
   }
 
   get address() {
-    return this.wallet.address || ''
+    return this.wallet?.address || ''
   }
 
   get xpub() {
-    return this.wallet.xpub || ''
+    return this.wallet?.xpub || ''
   }
 
   public static async create(wallet?: MetaIDWalletForMvc) {
