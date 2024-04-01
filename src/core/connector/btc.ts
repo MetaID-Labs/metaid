@@ -80,7 +80,11 @@ export class BtcConnector {
     return res
   }
 
-  public async inscribe<T extends keyof NBD>(inscribeOptions: InscribeOptions[], noBroadcast: T): Promise<NBD[T]> {
+  public async inscribe<T extends keyof NBD>(
+    inscribeOptions: InscribeOptions[],
+    noBroadcast: T,
+    feeRate?: number
+  ): Promise<NBD[T]> {
     // const faucetUtxos = await fetchUtxos({
     //   address: address,
     //   network: 'testnet',
@@ -111,7 +115,7 @@ export class BtcConnector {
 
     const request: InscriptionRequest = {
       // commitTxPrevOutputList,
-      feeRate: 2,
+      feeRate: feeRate ?? 1,
       revealOutValue: 546,
       metaidDataList,
       changeAddress: this.address,

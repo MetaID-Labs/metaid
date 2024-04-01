@@ -25,7 +25,6 @@ export type MetaidData = {
   encryption?: '0' | '1' | '2'
   version?: string
   encoding?: BufferEncoding
-
   revealAddr: string
 }
 
