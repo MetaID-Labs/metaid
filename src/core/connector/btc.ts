@@ -131,7 +131,7 @@ export class BtcConnector {
     return res
   }
 
-  async updatUserInfo(body?: { name?: string; bio?: string; avatar?: string }): Promise<boolean> {
+  async updatUserInfo(body?: { name?: string; bio?: string; avatar?: string; feeRate?: number }): Promise<boolean> {
     let nameRevealId = ''
     let bioRevealId = ''
     let avatarRevealId = ''
@@ -139,11 +139,16 @@ export class BtcConnector {
     if (body?.name !== this.user?.name && !isNil(body?.name) && !isEmpty(body?.name)) {
       let nameRes
       if (this.user?.nameId === '') {
-        nameRes = await this.inscribe([{ operation: 'create', body: body?.name, path: `/info/name` }], 'no')
+        nameRes = await this.inscribe(
+          [{ operation: 'create', body: body?.name, path: `/info/name` }],
+          'no',
+          body?.feeRate ?? 1
+        )
       } else {
         nameRes = await this.inscribe(
           [{ operation: 'modify', body: body?.name, path: `@${this?.user?.nameId ?? ''}` }],
-          'no'
+          'no',
+          body?.feeRate ?? 1
         )
       }
       if (!isNil(nameRes?.revealTxIds[0])) {
@@ -154,11 +159,16 @@ export class BtcConnector {
       console.log('run in bio')
       let bioRes
       if (this.user?.bioId === '') {
-        bioRes = await this.inscribe([{ operation: 'create', body: body?.bio, path: `/info/bio` }], 'no')
+        bioRes = await this.inscribe(
+          [{ operation: 'create', body: body?.bio, path: `/info/bio` }],
+          'no',
+          body?.feeRate ?? 1
+        )
       } else {
         bioRes = await this.inscribe(
           [{ operation: 'modify', body: body?.bio, path: `@${this?.user?.bioId ?? ''}` }],
-          'no'
+          'no',
+          body?.feeRate ?? 1
         )
       }
       if (!isNil(bioRes?.revealTxIds[0])) {
@@ -170,12 +180,14 @@ export class BtcConnector {
       if (this.user?.avatarId === '') {
         avatarRes = await this.inscribe(
           [{ operation: 'create', body: body?.avatar, path: `/info/avatar`, encoding: 'base64' }],
-          'no'
+          'no',
+          body?.feeRate ?? 1
         )
       } else {
         avatarRes = await this.inscribe(
           [{ operation: 'modify', body: body?.avatar, path: `@${this?.user?.avatarId ?? ''}`, encoding: 'base64' }],
-          'no'
+          'no',
+          body?.feeRate ?? 1
         )
       }
       if (!isNil(avatarRes?.revealTxIds[0])) {
@@ -194,8 +206,9 @@ export class BtcConnector {
     name?: string
     bio?: string
     avatar?: string
+    feeRate?: number
   }): Promise<{ metaid: string; cost: number }> {
-    const initRes = await this.inscribe([{ operation: 'init' }], 'no')
+    const initRes = await this.inscribe([{ operation: 'init' }], 'no', body?.feeRate ?? 1)
     let cost = 0
     console.log(!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds))
     if (!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds)) {
@@ -206,7 +219,8 @@ export class BtcConnector {
         const nameRes = await this.inscribe(
           [{ operation: 'create', body: body?.name, path: '/info/name' }],
 
-          'no'
+          'no',
+          body?.feeRate ?? 1
         )
         cost += Number(nameRes?.revealCost ?? 0) + Number(nameRes?.commitCost ?? 0)
       }
@@ -214,7 +228,8 @@ export class BtcConnector {
         const bioRes = await this.inscribe(
           [{ operation: 'create', body: body?.bio, path: '/info/bio' }],
 
-          'no'
+          'no',
+          body?.feeRate ?? 1
         )
         cost += Number(bioRes?.revealCost ?? 0) + Number(bioRes?.commitCost ?? 0)
       }
@@ -222,7 +237,8 @@ export class BtcConnector {
         const avatarRes = await this.inscribe(
           [{ operation: 'create', body: body?.avatar, path: '/info/avatar', encoding: 'base64' }],
 
-          'no'
+          'no',
+          body?.feeRate ?? 1
         )
         cost += Number(avatarRes?.revealCost ?? 0) + Number(avatarRes?.commitCost ?? 0)
       }
