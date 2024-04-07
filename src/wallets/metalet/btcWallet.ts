@@ -9,7 +9,7 @@ export type Transaction = {
   message: string
 }
 
-export interface MetaIDWalletForBtc {
+export type MetaIDWalletForBtc = {
   address: string
   pub: string
   // network: Network
