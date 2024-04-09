@@ -1,6 +1,6 @@
 import { useBtc } from '@/factories/use.js'
 import { DEFAULT_USERNAME, LEAST_AMOUNT_TO_CREATE_METAID } from '@/data/constants.js'
-import { sleep } from '@/utils/index.js'
+import { sleep, staticImplements } from '@/utils/index.js'
 import type { EntitySchema } from '@/metaid-entities/entity.js'
 import { loadBtc } from '@/factories/load.js'
 import { errors } from '@/data/errors.js'
@@ -18,12 +18,15 @@ import * as bitcoin from '../entity/btc/bitcoinjs-lib'
 import { InscriptionRequest, MetaidData, Operation, PrevOutput } from '../entity/btc/inscribePsbt'
 import { InscribeOptions } from '../entity/btc'
 import { isNil, isEmpty } from 'ramda'
+import { BtcConnectorStatic, IBtcConnector } from './btcConnector'
 
 export interface NBD {
   no: { commitTxId: string; revealTxIds: string[]; commitCost: string; revealCost: string; status?: string }
   yes: { commitTxHex: string; revealTxsHex: string[]; commitCost: string; revealCost: string; status?: string }
 }
-export class BtcConnector {
+
+@staticImplements<BtcConnectorStatic>()
+export class BtcConnector implements IBtcConnector {
   private _isConnected: boolean
   private wallet: MetaIDWalletForBtc
   public metaid: string | undefined
@@ -276,31 +279,31 @@ export class BtcConnector {
    * wallet delegation
    * signInput / send / broadcast / getPublicKey / getAddress / signMessage / pay
    */
-  async signPsbt(psbtHex: string, options?: any) {
-    if (options) {
-      return await this.wallet.signPsbt(psbtHex, options)
-    }
-    return await this.wallet.signPsbt(psbtHex)
-  }
+  // async signPsbt(psbtHex: string, options?: any) {
+  //   if (options) {
+  //     return await this.wallet.signPsbt(psbtHex, options)
+  //   }
+  //   return await this.wallet.signPsbt(psbtHex)
+  // }
 
-  async broadcast(txHex: string, network: Network, publicKey: string, message: string | undefined = '') {
-    return await broadcast({
-      rawTx: txHex,
-      network,
-      publicKey,
-      message,
-    })
-  }
+  // async broadcast(txHex: string, network: Network, publicKey: string, message: string | undefined = '') {
+  //   return await broadcast({
+  //     rawTx: txHex,
+  //     network,
+  //     publicKey,
+  //     message,
+  //   })
+  // }
 
-  getPublicKey(path?: string) {
-    return this.wallet.getPublicKey(path)
-  }
+  // getPublicKey(path?: string) {
+  //   return this.wallet.getPublicKey(path)
+  // }
 
-  getAddress(path?: string) {
-    return this.wallet.getAddress({ path })
-  }
+  // getAddress(path?: string) {
+  //   return this.wallet.getAddress({ path })
+  // }
 
-  signMessage(message: string, encoding: 'utf-8' | 'base64' | 'hex' | 'utf8' = 'hex') {
-    return this.wallet.signMessage(message, encoding)
-  }
+  // signMessage(message: string, encoding: 'utf-8' | 'base64' | 'hex' | 'utf8' = 'hex') {
+  //   return this.wallet.signMessage(message, encoding)
+  // }
 }
