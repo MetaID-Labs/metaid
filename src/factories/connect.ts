@@ -10,6 +10,7 @@ import type { BtcConnector } from '@/core/connector/btc.js'
 export async function mvcConnect(wallet?: MetaIDWalletForMvc): Promise<MvcConnector> {
   return await _MvcConnector.create(wallet)
 }
+
 export async function btcConnect(wallet?: MetaIDWalletForBtc): Promise<BtcConnector> {
   return await _BtcConnector.create(wallet)
 }

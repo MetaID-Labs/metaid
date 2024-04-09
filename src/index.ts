@@ -8,10 +8,10 @@ import { Psbt } from '@/core/entity/btc/bitcoinjs-lib/psbt'
 import { Transaction } from './core/entity/btc/bitcoinjs-lib/transaction.js'
 
 import type { EntitySchema } from '@/metaid-entities/entity.js'
-import { BtcConnector as IBtcConnector } from './core/connector/btc.js'
 import { BtcEntity as IBtcEntity } from './core/entity/btc/index.js'
 import type { CreateOptions } from '@/core/entity/btc'
 import type { MetaIDWalletForBtc as IMetaletWalletForBtc } from '@/wallets/metalet/btcWallet.js'
+import { IBtcConnector } from './core/connector/Ibtc.js'
 
 export {
   Psbt,
