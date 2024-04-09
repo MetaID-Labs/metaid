@@ -12,6 +12,7 @@ export type IBtcConnector = {
   metaid: string | undefined
   address: string
   hasUser(): boolean
+  getUser(currentAddress?: string): Promise<UserInfo>
   inscribe<T extends keyof NBD>(inscribeOptions: InscribeOptions[], noBroadcast: T, feeRate?: number): Promise<NBD[T]>
   updatUserInfo(body?: { name?: string; bio?: string; avatar?: string; feeRate?: number }): Promise<boolean>
   createMetaid(body?: { name?: string; bio?: string; avatar?: string; feeRate?: number }): Promise<{
