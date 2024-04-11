@@ -30,7 +30,7 @@ export class BtcConnector implements IBtcConnector {
   private _isConnected: boolean
   private wallet: MetaIDWalletForBtc
   public metaid: string | undefined
-  private user: UserInfo
+  public user: UserInfo
   private constructor(wallet?: MetaIDWalletForBtc) {
     this._isConnected = true
 
