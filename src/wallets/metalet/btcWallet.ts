@@ -2,6 +2,7 @@ import { TxComposer } from 'meta-contract'
 
 export interface WalletStatic {
   create: ((mnemonic: string, derivePath?: string) => Promise<MetaIDWalletForBtc>) | (() => Promise<MetaIDWalletForBtc>)
+  restore: ({ address, pub }: { address: string; pub: string }) => MetaIDWalletForBtc
 }
 
 export type Transaction = {
@@ -13,7 +14,6 @@ export type MetaIDWalletForBtc = {
   address: string
   pub: string
   // network: Network
-  restore({ address, pub }: { address: string; pub: string }): MetaIDWalletForBtc
   hasAddress(): boolean
 
   getAddress({ path }: { path?: string }): Promise<string>

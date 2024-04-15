@@ -35,7 +35,7 @@ export class MetaletWalletForBtc implements MetaIDWalletForBtc {
     return wallet
   }
 
-  public restore({ address, pub }: { address: string; pub: string }): MetaIDWalletForBtc {
+  static restore({ address, pub }: { address: string; pub: string }): MetaIDWalletForBtc {
     if (typeof window === 'undefined') {
       throw new Error(errors.NOT_IN_BROWSER)
     }
