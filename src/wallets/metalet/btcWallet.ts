@@ -13,6 +13,7 @@ export type MetaIDWalletForBtc = {
   address: string
   pub: string
   // network: Network
+  restore({ address, pub }: { address: string; pub: string }): MetaIDWalletForBtc
   hasAddress(): boolean
 
   getAddress({ path }: { path?: string }): Promise<string>

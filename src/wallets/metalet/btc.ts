@@ -28,10 +28,21 @@ export class MetaletWalletForBtc implements MetaIDWalletForBtc {
     const connectRes = await window.metaidwallet.btc.connect()
     if (!isNil(connectRes?.address)) {
       wallet.address = connectRes.address
+      wallet.pub = pub
+      wallet.internal = window.metaidwallet
     }
+
+    return wallet
+  }
+
+  public restore({ address, pub }: { address: string; pub: string }): MetaIDWalletForBtc {
+    if (typeof window === 'undefined') {
+      throw new Error(errors.NOT_IN_BROWSER)
+    }
+    const wallet = new MetaletWalletForBtc()
+    wallet.address = address
     wallet.pub = pub
     wallet.internal = window.metaidwallet
-
     return wallet
   }
 
