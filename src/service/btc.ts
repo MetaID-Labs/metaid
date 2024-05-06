@@ -1,3 +1,4 @@
+import { UserInfo } from '@/types'
 import axios from 'axios'
 
 export type Utxo = {
@@ -30,22 +31,28 @@ export type Pin = {
   contentBody: string
   contentLength: number
   contentSummary: string
+  status: number
+  originalId: string
+  isTransfered: boolean
+  preview: string
+  content: string
+  pop: string
 }
 
-export type UserInfo = {
-  number: number
-  rootTxId: string
-  name: string
-  nameId: string
-  address: string
-  avatar: string | null
-  avatarId: string
-  bio: string
-  bioId: string
-  soulbondToken: string
-  unconfirmed: string
-  isInit: boolean
-}
+// export type UserInfo = {
+//   number: number
+//   rootTxId: string
+//   name: string
+//   nameId: string
+//   address: string
+//   avatar: string | null
+//   avatarId: string
+//   bio: string
+//   bioId: string
+//   soulbondToken: string
+//   unconfirmed: string
+//   isInit: boolean
+// }
 
 const BASE_METALET_TEST_URL = `https://www.metalet.space/wallet-api/v3`
 const BASE_METAID_TEST_URL = `https://man-test.metaid.io`
@@ -107,6 +114,24 @@ export async function broadcast({
   }
 }
 
+export async function getPinDetailByPid({
+  pid,
+  network = 'testnet',
+}: {
+  pid: string
+  network?: 'livenet' | 'testnet'
+}): Promise<Pin | null> {
+  const url = `${BASE_METAID_TEST_URL}/api/pin/${pid}`
+
+  try {
+    const data = await axios.get(url).then((res) => res.data)
+
+    return data.data
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
 export async function getRootPinByAddress({
   address,
   network = 'testnet',

@@ -2,6 +2,7 @@ import { TxComposer } from 'meta-contract'
 
 export interface WalletStatic {
   create: ((mnemonic: string, derivePath?: string) => Promise<MetaIDWalletForMvc>) | (() => Promise<MetaIDWalletForMvc>)
+  restore: ({ address, xpub }: { address: string; xpub: string }) => MetaIDWalletForMvc
 }
 
 export type Transaction = {
@@ -20,6 +21,7 @@ export interface MetaIDWalletForMvc {
   getBalance(): Promise<{ address: string; confirmed: number; unconfirmed: number }>
 
   signInput({ txComposer, inputIndex }: { txComposer: TxComposer; inputIndex: number }): Promise<TxComposer>
+  signMessage(message: string, encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8'): Promise<string>
 
   pay({ transactions }: { transactions: Transaction[] }): Promise<TxComposer[]>
 
@@ -34,6 +36,4 @@ export interface MetaIDWalletForMvc {
   batchBroadcast(txComposer: TxComposer[]): Promise<{ txid: string }[]>
 
   // encrypt(message: string, publicKey: string): Promise<string>;
-
-  signMessage(message: string, encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8'): Promise<string>
 }

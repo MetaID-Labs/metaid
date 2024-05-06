@@ -1,4 +1,44 @@
 import { BrfcRootName, ProtocolName } from '@/data/protocols.js'
+import { Encryption, MetaidData, Operation } from '@/types'
+import { isNil } from 'ramda'
+type OpReturnV2 = [
+  'testid', // testid for Testnet, metaid for Mainnet
+  Operation,
+  string | undefined, // path example: /protocols/simplebuzz
+  Encryption | undefined,
+  string | undefined, // version
+  string | undefined, // contentType,
+  string | Buffer | undefined,
+]
+
+export function buildOpReturnV2(metaidData: MetaidData): OpReturnV2 {
+  const res1 = ['testid', metaidData.operation]
+  let res2 = []
+  if (metaidData.operation !== 'init') {
+    res2.push(metaidData.path!)
+    res2.push(metaidData?.encryption ?? '0')
+    res2.push(metaidData?.version ?? '1.0.0')
+    res2.push(metaidData?.contentType ?? 'utf-8')
+
+    const body = isNil(metaidData.body)
+      ? undefined
+      : Buffer.isBuffer(metaidData.body)
+        ? metaidData.body
+        : JSON.stringify(metaidData.body)
+
+    res2.push(body)
+    // const maxChunkSize = 520
+    // const bodySize = (body as Buffer).length
+    // for (let i = 0; i < bodySize; i += maxChunkSize) {
+    //   let end = i + maxChunkSize
+    //   if (end > bodySize) {
+    //     end = bodySize
+    //   }
+    //   res.push((body as Buffer).slice(i, end))
+    // }
+  }
+  return [...res1, ...res2] as OpReturnV2
+}
 
 type MetaidOpreturn = [
   'mvc', // chain flag

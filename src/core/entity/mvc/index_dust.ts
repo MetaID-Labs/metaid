@@ -18,7 +18,7 @@ import { UTXO_DUST } from '@/data/constants.js'
 import { checkBalance, sleep } from '@/utils/index.js'
 import { type Transaction } from '@/wallets/metalet/mvcWallet.js'
 import type { EntitySchema } from '@/metaid-entities/entity.js'
-import type { MvcConnector } from '../connector/mvc.js'
+import type { MvcConnector } from '../../connector/mvc.js'
 
 type Root = {
   id: string

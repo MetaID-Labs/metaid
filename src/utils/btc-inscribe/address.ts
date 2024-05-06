@@ -6,9 +6,9 @@
  */
 import type { Network } from './bitcoinjs-lib/networks.js'
 import * as networks from './bitcoinjs-lib/networks.js'
-import * as payments from './bitcoinjs-lib/payments'
-import * as bscript from './bitcoinjs-lib/script'
-import * as types from './bitcoinjs-lib/types'
+import * as payments from './bitcoinjs-lib/payments/index.js'
+import * as bscript from './bitcoinjs-lib/script.js'
+import * as types from './bitcoinjs-lib/types.js'
 import { base } from '@okxweb3/crypto-lib'
 const { typeforce } = types
 

@@ -10,15 +10,15 @@ import {
   fetchUtxos,
   getInfoByAddress,
   getRootPinByAddress,
-  UserInfo,
   type Network,
   getPinListByAddress,
 } from '@/service/btc'
-import * as bitcoin from '../entity/btc/bitcoinjs-lib'
-import { InscriptionRequest, MetaidData, Operation, PrevOutput } from '../entity/btc/inscribePsbt'
+import * as bitcoin from '../../utils/btc-inscribe/bitcoinjs-lib'
+import { InscriptionRequest, Operation, PrevOutput } from '../../utils/btc-inscribe/inscribePsbt'
 import { InscribeOptions } from '../entity/btc'
 import { isNil, isEmpty } from 'ramda'
 import { BtcConnectorStatic, IBtcConnector } from './btcConnector'
+import { MetaidData, UserInfo } from '@/types'
 
 export interface NBD {
   no: { commitTxId: string; revealTxIds: string[]; commitCost: string; revealCost: string; status?: string }
@@ -73,14 +73,11 @@ export class BtcConnector implements IBtcConnector {
   }
 
   async getUser(currentAddress?: string) {
-    let res: UserInfo
     if (!isNil(currentAddress)) {
-      res = await getInfoByAddress({ address: currentAddress })
+      return await getInfoByAddress({ address: currentAddress })
     } else {
-      res = await getInfoByAddress({ address: this.address })
+      return await getInfoByAddress({ address: this.address })
     }
-
-    return res
   }
 
   public async inscribe<T extends keyof NBD>(
@@ -134,7 +131,7 @@ export class BtcConnector implements IBtcConnector {
     return res
   }
 
-  async updatUserInfo(body?: { name?: string; bio?: string; avatar?: string; feeRate?: number }): Promise<boolean> {
+  async updateUserInfo(body?: { name?: string; bio?: string; avatar?: string; feeRate?: number }): Promise<boolean> {
     let nameRevealId = ''
     let bioRevealId = ''
     let avatarRevealId = ''

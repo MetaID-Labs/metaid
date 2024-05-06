@@ -1,29 +1,27 @@
-import { NBD } from './btc'
-import { BtcEntity, InscribeOptions } from '../entity/btc'
+// import { UserInfo } from '@/service/btc'
 import { EntitySchema } from '@/metaid-entities/entity'
-import { MetaIDWalletForBtc } from '@/wallets/metalet/btcWallet'
+import { MvcEntity } from '../entity/mvc'
 import { UserInfo } from '@/types'
+import { MetaIDWalletForMvc } from '@/wallets/metalet/mvcWallet'
 
-export interface BtcConnectorStatic {
-  create: (wallet?: MetaIDWalletForBtc) => Promise<IBtcConnector>
+export interface MvcConnectorStatic {
+  create: (wallet?: MetaIDWalletForMvc) => Promise<IMvcConnector>
 }
 
-export type IBtcConnector = {
+export type IMvcConnector = {
   metaid: string | undefined
   address: string
   user: UserInfo
   hasUser(): boolean
   getUser(currentAddress?: string): Promise<UserInfo>
-  inscribe<T extends keyof NBD>(inscribeOptions: InscribeOptions[], noBroadcast: T, feeRate?: number): Promise<NBD[T]>
   updateUserInfo(body?: { name?: string; bio?: string; avatar?: string; feeRate?: number }): Promise<boolean>
   createMetaid(body?: { name?: string; bio?: string; avatar?: string; feeRate?: number }): Promise<{
     metaid: string
-    cost: number
   }>
   hasMetaid(): boolean
   getMetaid(): string
-  use(entitySymbol: string): Promise<BtcEntity>
-  load(entitySchema: EntitySchema): Promise<BtcEntity>
+  use(entitySymbol: string): Promise<MvcEntity>
+  load(entitySchema: EntitySchema): Promise<MvcEntity>
   isConnected(): boolean
   disconnect(): void
 }

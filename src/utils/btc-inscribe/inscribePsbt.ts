@@ -11,22 +11,12 @@ import { type BIP32Interface } from 'bip32'
 import { transactionBytes } from './txEstimate'
 import type { PsbtInput, TapLeafScript } from './bitcoinjs-lib/bip174/interfaces'
 import { buildRevelFinalizer } from './btcUtils'
+import { MetaidData } from '@/types'
 
 const schnorr = signUtil.schnorr.secp256k1.schnorr
 
 export type Operation = 'init' | 'create' | 'modify' | 'revoke'
 export type Encryption = '0' | '1' | '2'
-
-export type MetaidData = {
-  operation: Operation
-  body?: string | Buffer
-  path?: string
-  contentType?: string
-  encryption?: '0' | '1' | '2'
-  version?: string
-  encoding?: BufferEncoding
-  revealAddr: string
-}
 
 export type PrevOutput = {
   txId: string

@@ -1,5 +1,5 @@
 import { staticImplements } from '@/utils/index.js'
-import type { MetaIDWalletForBtc, Transaction, WalletStatic } from './btcWallet.js'
+import type { MetaIDWalletForBtc, WalletStatic } from './btcWallet.js'
 import { TxComposer, mvc } from 'meta-contract'
 import { errors } from '@/data/errors.js'
 import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/service/mvc.js'
@@ -68,26 +68,26 @@ export class MetaletWalletForBtc implements MetaIDWalletForBtc {
     return await this.internal.btc.getBalance()
   }
 
-  public async signMessage(message): Promise<string> {
-    const signature = await this.internal.btc.signMessage(message)
-    return signature
-  }
+  // public async signMessage(message): Promise<string> {
+  //   const signature = await this.internal.btc.signMessage(message)
+  //   return signature
+  // }
 
-  public async signPsbt(psbtHex: string, options?: any): Promise<string> {
-    return await this.internal.btc.signPsbt({ psbtHex, options })
-  }
+  // public async signPsbt(psbtHex: string, options?: any): Promise<string> {
+  //   return await this.internal.btc.signPsbt({ psbtHex, options })
+  // }
 
-  public async broadcast(txComposer: TxComposer): Promise<{ txid: string }> {
-    // broadcast locally first
-    const txHex = txComposer.getTx().toString()
-    return await broadcastToApi({ txHex })
-  }
+  // public async broadcast(txComposer: TxComposer): Promise<{ txid: string }> {
+  //   // broadcast locally first
+  //   const txHex = txComposer.getTx().toString()
+  //   return await broadcastToApi({ txHex })
+  // }
 
-  public async batchBroadcast(txComposer: TxComposer[]): Promise<{ txid: string }[]> {
-    // broadcast locally first
-    const hexs = txComposer.map((d) => {
-      return { hex: d.getTx().toString() }
-    })
-    return await batchBroadcastApi(hexs)
-  }
+  // public async batchBroadcast(txComposer: TxComposer[]): Promise<{ txid: string }[]> {
+  //   // broadcast locally first
+  //   const hexs = txComposer.map((d) => {
+  //     return { hex: d.getTx().toString() }
+  //   })
+  //   return await batchBroadcastApi(hexs)
+  // }
 }

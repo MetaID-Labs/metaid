@@ -4,6 +4,7 @@ import { TxComposer, mvc } from 'meta-contract'
 import { errors } from '@/data/errors.js'
 import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from '@/service/mvc.js'
 import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
+import { isNil } from 'ramda'
 
 @staticImplements<WalletStatic>()
 export class MetaletWalletForMvc implements MetaIDWalletForMvc {
@@ -24,14 +25,24 @@ export class MetaletWalletForMvc implements MetaIDWalletForMvc {
 
     const wallet = new MetaletWalletForMvc()
 
-    const { address } = await window.metaidwallet.connect()
+    const connectRes = await window.metaidwallet.connect()
+    if (!isNil(connectRes?.address)) {
+      wallet.address = connectRes.address
+      wallet.xpub = xpub
+      wallet.internal = window.metaidwallet
+    }
+
+    return wallet
+  }
+
+  static restore({ address, xpub }: { address: string; xpub: string }): MetaIDWalletForMvc {
+    if (typeof window === 'undefined') {
+      throw new Error(errors.NOT_IN_BROWSER)
+    }
+    const wallet = new MetaletWalletForMvc()
     wallet.address = address
-    // if (blockchain === 'btc') {
-    //   wallet.address = await window.metaidwallet.btc.getAddress()
-    // }
     wallet.xpub = xpub
     wallet.internal = window.metaidwallet
-
     return wallet
   }
 

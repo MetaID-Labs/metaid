@@ -4,14 +4,13 @@ import {
   inscribePsbt,
   type InscribePsbts,
   type InscriptionRequest,
-  type MetaidData,
   type Operation,
   type PrevOutput,
-} from './inscribePsbt.js'
-import { Psbt } from './bitcoinjs-lib/psbt'
+} from '../../../utils/btc-inscribe/inscribePsbt.js'
+import { Psbt } from '../../../utils/btc-inscribe/bitcoinjs-lib/psbt.js'
 
-import * as bitcoin from './bitcoinjs-lib'
-import { fetchUtxos, getAllPinByPath, getPinListByAddress, Pin } from '@/service/btc.js'
+import * as bitcoin from '../../../utils/btc-inscribe/bitcoinjs-lib/index.js'
+import { fetchUtxos, getAllPinByPath, getPinDetailByPid, getPinListByAddress, Pin } from '@/service/btc.js'
 import { errors } from '@/data/errors.js'
 import type { BtcConnector, NBD } from '@/core/connector/btc.js'
 import { isNil } from 'ramda'
@@ -19,12 +18,12 @@ import { isNil } from 'ramda'
 import BIP32Factory, { type BIP32Interface } from 'bip32'
 import * as bip39 from 'bip39'
 // import * as ecc from 'tiny-secp256k1'
-import { taprootFinalInput, taprootSignInput } from './btcUtils.js'
+import { taprootFinalInput, taprootSignInput } from '../../../utils/btc-inscribe/btcUtils.js'
+import { CreateOptions, MetaidData } from '@/types/index.js'
 
 // const bip32 = BIP32Factory(ecc)
 
 export type InscribeOptions = Omit<MetaidData, 'revealAddr'>
-export type CreateOptions = Omit<InscribeOptions, 'operation' | 'path'>
 
 export class BtcEntity {
   public connector: BtcConnector
@@ -59,6 +58,25 @@ export class BtcEntity {
     return this.connector?.metaid
   }
 
+  public async one(pid: string): Promise<Pin> {
+    // const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
+    const path = this.schema.path
+    return await getPinDetailByPid({ pid })
+  }
+  public async list({ page, limit }: { page: number; limit: number }): Promise<Pin[]> {
+    // const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
+    const path = this.schema.path
+    const pins = await getAllPinByPath({ path, page, limit })
+    return pins.currentPage.filter((d) => d.path.includes(this.schema.path))
+  }
+
+  public async total(): Promise<number> {
+    const path = this.schema.path
+    const pins = await getAllPinByPath({ path, page: 1, limit: 2 })
+    return pins.total
+  }
+
+  //////////////////////////////////////// to be deleted method ///////////////////////////////////
   public async getPins({ page, limit }: { page: number; limit: number }): Promise<Pin[]> {
     // const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
     const path = this.schema.path
@@ -71,6 +89,7 @@ export class BtcEntity {
     const pins = await getAllPinByPath({ path, page: 1, limit: 2 })
     return pins.total
   }
+  ///////////////////////////////////////// to be deleted method ///////////////////////////////////
 
   @connected
   public async create<T extends keyof NBD>({

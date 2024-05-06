@@ -8,22 +8,9 @@ import * as bcrypto from './bitcoinjs-lib/crypto'
 import { vectorSize } from './bitcoinjs-lib/transaction'
 import { getAddressType, sign } from './txBuild'
 import type { BIP32Interface } from 'bip32'
+import { MetaidData } from '@/types'
 
 const schnorr = signUtil.schnorr.secp256k1.schnorr
-
-export type Operation = 'init' | 'create' | 'modify' | 'revoke'
-export type Encryption = '0' | '1' | '2'
-
-export type MetaidData = {
-  body?: string | Buffer
-  operation: Operation
-  path?: string
-  contentType?: string
-  encryption?: '0' | '1' | '2'
-  version?: string
-  encoding?: string
-  revealAddr: string
-}
 
 export type PrevOutput = {
   txId: string
