@@ -71,7 +71,7 @@ export class MvcEntity {
     const path = this.schema.path
     // console.log('pin path', path)
     const res = await this.connector.createPin({ ...options, operation: 'create', path, revealAddr: this.address })
-
+    console.log('res', res)
     return res
   }
 

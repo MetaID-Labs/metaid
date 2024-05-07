@@ -39,13 +39,12 @@ export class MvcConnector implements IMvcConnector {
     const connector = new MvcConnector(wallet)
 
     if (wallet) {
-      // ask api for metaid
-      const metaidInfo = await getInfoByAddress({ address: wallet.address })
-
-      if (!isNil(metaidInfo.rootTxId)) {
-        connector.metaid = metaidInfo.rootTxId + 'i0'
-        connector.user = metaidInfo
-      }
+      // // ask api for metaid (to do : switch api to mvc)
+      // const metaidInfo = await getInfoByAddress({ address: wallet.address })
+      // if (!isNil(metaidInfo.rootTxId)) {
+      //   connector.metaid = metaidInfo.rootTxId + 'i0'
+      //   connector.user = metaidInfo
+      // }
     }
 
     return connector
@@ -76,6 +75,8 @@ export class MvcConnector implements IMvcConnector {
     metaidData: MetaidData,
     options?: { signMessage: string; serialAction?: 'combo' | 'finish'; transactions?: Transaction[] }
   ) {
+    console.log('metaidData', metaidData)
+
     if (!this.isConnected) {
       throw new Error(errors.NOT_CONNECTED)
     }
@@ -91,7 +92,9 @@ export class MvcConnector implements IMvcConnector {
       address: new mvc.Address(this.wallet.address, 'testnet' as any),
       satoshis: 546,
     })
+
     const metaidOpreturn = buildOpReturnV2(metaidData)
+
     pinTxComposer.appendOpReturnOutput(metaidOpreturn)
 
     transactions.push({
@@ -126,6 +129,12 @@ export class MvcConnector implements IMvcConnector {
   }
 
   async createMetaid(body?: { name?: string; avatar?: string }): Promise<{ metaid: string }> {
+    const res = await this.createPin({
+      operation: 'init',
+      body: JSON.stringify(body),
+      revealAddr: this.wallet.address,
+    })
+    return { metaid: res?.txid + 'i0' }
     // let user: any = {}
     // if (this.metaid) {
     //   user = await fetchUser(this.metaid)

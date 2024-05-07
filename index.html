@@ -59,8 +59,8 @@
             placeholder="You buzz content"
             v-model="content"
           />
-          <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createBuzz">Create Buzz</button>
-          <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createBuzzPicture">
+          <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createBuzzForMVC">Create Buzz</button>
+          <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createBuzzPictureForMVC">
             Create Buzz With Image
           </button>
         </div>
@@ -95,6 +95,7 @@
         MetaletWalletForMvc,
         MetaletWalletForBtc,
         btcConnect,
+        mvcConnect,
       } from './dist/metaid.js'
 
       createApp({
@@ -153,7 +154,7 @@
             btcAddress.value = await _wallet.getAddress({})
             console.log(`Your mvc address is ${btcAddress.value}`)
 
-            const baseEntity = await connect('mvc', _wallet)
+            const baseEntity = await mvcConnect('mvc')
             console.log('baseEntity', baseEntity)
 
             const handler = await baseEntity.use('buzz')
@@ -186,11 +187,11 @@
             console.log({ res })
           }
 
-          const createBuzz = async () => {
+          const createBuzzForMVC = async () => {
             console.log('I wanna publish a buzz:', content.value)
             await toRaw(Buzz.value).create({ body: content.value })
           }
-          const createBuzzPicture = async () => {
+          const createBuzzPictureForMVC = async () => {
             let attachMetafileUri = []
             console.log('file', 'start')
             for (const a of attachments) {
@@ -263,8 +264,8 @@
             mnemonic,
             connected,
             content,
-            createBuzz,
-            createBuzzPicture,
+            createBuzzForMVC,
+            createBuzzPictureForMVC,
             getBuzzList,
             buzzes,
             getMvcAddress,

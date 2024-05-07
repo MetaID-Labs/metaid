@@ -29,4 +29,16 @@ export default defineConfig({
     minify: false,
   },
   plugins: [dts(), nodePolyfills(), wasm()],
+  optimizeDeps: {
+    include: ['buffer', 'process'],
+    esbuildOptions: {
+      target: 'esnext',
+      define: {
+        global: 'globalThis',
+      },
+      supported: {
+        bigint: true,
+      },
+    },
+  },
 })
