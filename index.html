@@ -45,7 +45,12 @@
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="getPublicKey">Get Public Key</button>
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="send2k">Send 2k</button>
 
-            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createMetaid">Create MetaID</button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createMetaidForBTC">
+              BTC Create MetaID
+            </button>
+            <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="createMetaidForMVC">
+              MVC Create MetaID
+            </button>
             <button class="px-4 py-2 bg-white rounded-md shadow-md" @click="debug">Debug</button>
           </div>
 
@@ -247,12 +252,19 @@
             })
             console.log('psbt', psbt)
           }
-          const createMetaid = async () => {
+          const createMetaidForBTC = async () => {
             const _wallet = await MetaletWalletForBtc.create()
             const connector = await btcConnect(_wallet)
             console.log({ connector })
             const res = await connector.createMetaid({ name: 'ttb' }).catch((error) => console.log('error html', error))
             console.log(res)
+          }
+          const createMetaidForMVC = async () => {
+            const _wallet = await MetaletWalletForMvc.create()
+            const connector = await mvcConnect(_wallet)
+            console.log({ connector })
+            const res = await connector.createMetaid().catch((error) => console.log('error html', error))
+            console.log('create metaid res', res)
           }
 
           return {
@@ -272,7 +284,8 @@
             getBtcAddress,
             getPublicKey,
             send2k,
-            createMetaid,
+            createMetaidForBTC,
+            createMetaidForMVC,
             likeTheFirst,
             btcAddress,
             debug,

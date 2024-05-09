@@ -88,6 +88,7 @@ export class MvcConnector implements IMvcConnector {
 
     const pinTxComposer = new TxComposer()
 
+    console.log('wallet address', this.wallet.address)
     pinTxComposer.appendP2PKHOutput({
       address: new mvc.Address(this.wallet.address, 'testnet' as any),
       satoshis: 546,
