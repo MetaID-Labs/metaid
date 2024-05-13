@@ -55,14 +55,15 @@ export type Pin = {
 // }
 
 const BASE_METALET_TEST_URL = `https://www.metalet.space/wallet-api/v3`
-const BASE_METAID_TEST_URL = `https://man-test.metaid.io`
+// const BASE_METAID_TEST_URL = `https://man-test.metaid.io`
+const BASE_METAID_TEST_URL = `https://man.somecode.link`
 
 export async function fetchUtxos({
   address,
-  network = 'testnet',
+  network = 'regtest',
 }: {
   address: string
-  network: 'livenet' | 'testnet'
+  network: 'livenet' | 'testnet' | 'regtest'
 }): Promise<Utxo[]> {
   const url = `${BASE_METALET_TEST_URL}/address/btc-utxo?net=${network}&address=${address}
   `
@@ -77,7 +78,7 @@ export async function fetchUtxos({
   }
 }
 
-export type Network = 'livenet' | 'testnet'
+export type Network = 'livenet' | 'testnet' | 'regtest'
 
 export async function broadcast({
   rawTx,
@@ -116,10 +117,10 @@ export async function broadcast({
 
 export async function getPinDetailByPid({
   pid,
-  network = 'testnet',
+  network = 'regtest',
 }: {
   pid: string
-  network?: 'livenet' | 'testnet'
+  network?: 'livenet' | 'testnet' | 'regtest'
 }): Promise<Pin | null> {
   const url = `${BASE_METAID_TEST_URL}/api/pin/${pid}`
 
@@ -134,10 +135,10 @@ export async function getPinDetailByPid({
 }
 export async function getRootPinByAddress({
   address,
-  network = 'testnet',
+  network = 'regtest',
 }: {
   address: string
-  network?: 'livenet' | 'testnet'
+  network?: 'livenet' | 'testnet' | 'regtest'
 }): Promise<Pin | null> {
   const url = `${BASE_METAID_TEST_URL}/api/address/pin/root/${address}`
 
@@ -175,7 +176,7 @@ export async function getPinListByAddress({
   address,
 }: {
   address: string
-  network?: 'livenet' | 'testnet'
+  network?: 'livenet' | 'testnet' | 'regtest'
 }): Promise<Pin[] | null> {
   const url = `${BASE_METAID_TEST_URL}/api/address/pin/list/${address}`
 
@@ -190,10 +191,10 @@ export async function getPinListByAddress({
 
 export async function getInfoByAddress({
   address,
-  network = 'testnet',
+  network = 'regtest',
 }: {
   address: string
-  network?: 'livenet' | 'testnet'
+  network?: 'livenet' | 'testnet' | 'regtest'
 }): Promise<UserInfo | null> {
   const url = `${BASE_METAID_TEST_URL}/api/info/address/${address}`
 

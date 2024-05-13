@@ -5,11 +5,11 @@ import BIP32Factory, { type BIP32Interface } from 'bip32'
 import type { AddressType, Network } from '@/types/index.js'
 import bip39 from '@scure/bip39'
 import { raise } from './helper.js'
-function deriveMvcAddress(mnemonic: string, path: string, network: Network): string {
-  const privateKey = deriveMvcPrivateKey(mnemonic, path, network)
+// function deriveMvcAddress(mnemonic: string, path: string, network: Network): string {
+//   const privateKey = deriveMvcPrivateKey(mnemonic, path, network)
 
-  return privateKey.toAddress(network).toString()
-}
+//   return privateKey.toAddress(network).toString()
+// }
 
 function deriveMvcPrivateKey(mnemonic: string, path: string, network: Network): mvc.PrivateKey {
   const mneObj = mvc.Mnemonic.fromString(mnemonic)
@@ -21,7 +21,7 @@ function deriveMvcPrivateKey(mnemonic: string, path: string, network: Network): 
 function deriveBtcPrivateKey(mnemonic: string, path: string, network: Network): BIP32Interface {
   const bip32 = BIP32Factory(ecc)
   const btcNetwork = network === 'mainnet' ? bitcoinjs.networks.bitcoin : bitcoinjs.networks.testnet
-  const seed = bip39.mnemonicToSeedSync(mnemonic)
+  const seed = bip39.mnemonicToSeedSync(mnemonic) as any
   const master = bip32.fromSeed(seed, btcNetwork)
 
   return master.derivePath(path)
