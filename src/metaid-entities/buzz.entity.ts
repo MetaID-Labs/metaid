@@ -2,7 +2,7 @@ import type { EntitySchema } from './entity.js'
 
 const buzzSchema: EntitySchema = {
   name: 'buzz',
-  nodeName: 'SimpleMicroblog',
+  nodeName: 'simplebuzz',
   path: '/protocols/simplebuzz',
   versions: [
     {

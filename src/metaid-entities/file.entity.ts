@@ -1,6 +1,6 @@
 const fileSchema = {
   name: 'file',
-  nodeName: 'MetaFile',
+  nodeName: 'metafile',
   encoding: 'binary',
   path: '/file',
   versions: [

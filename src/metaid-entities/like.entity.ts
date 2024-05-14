@@ -1,6 +1,6 @@
 const likeSchema = {
   name: 'like',
-  nodeName: 'PayLike',
+  nodeName: 'payLike',
   path: '/protocols/payLike',
   versions: [
     {
