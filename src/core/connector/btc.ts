@@ -10,7 +10,7 @@ import {
   fetchUtxos,
   getInfoByAddress,
   getRootPinByAddress,
-  type Network,
+  type BtcNetwork,
   getPinListByAddress,
 } from '@/service/btc'
 import * as bitcoin from '../../utils/btc-inscribe/bitcoinjs-lib'
@@ -43,6 +43,10 @@ export class BtcConnector implements IBtcConnector {
     return this?.wallet?.address || ''
   }
 
+  get network() {
+    return this?.wallet?.network || 'regtest'
+  }
+
   public static async create(wallet?: MetaIDWalletForBtc) {
     const connector = new BtcConnector(wallet)
 
@@ -57,7 +61,7 @@ export class BtcConnector implements IBtcConnector {
       //   connector.user = user
       // }
 
-      const metaidInfo = await getInfoByAddress({ address: wallet.address })
+      const metaidInfo = await getInfoByAddress({ address: wallet.address, network: wallet.network })
       if (!isNil(metaidInfo)) {
         connector.metaid = metaidInfo.rootTxId + 'i0'
         connector.user = metaidInfo
@@ -74,9 +78,9 @@ export class BtcConnector implements IBtcConnector {
 
   async getUser(currentAddress?: string) {
     if (!isNil(currentAddress)) {
-      return await getInfoByAddress({ address: currentAddress })
+      return await getInfoByAddress({ address: currentAddress, network: this.network })
     } else {
-      return await getInfoByAddress({ address: this.address })
+      return await getInfoByAddress({ address: this.address, network: this.network })
     }
   }
 

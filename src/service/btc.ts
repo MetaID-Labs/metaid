@@ -53,17 +53,26 @@ export type Pin = {
 //   unconfirmed: string
 //   isInit: boolean
 // }
+export type BtcNetwork = 'livenet' | 'testnet' | 'regtest'
 
 const BASE_METALET_TEST_URL = `https://www.metalet.space/wallet-api/v3`
-// const BASE_METAID_TEST_URL = `https://man-test.metaid.io`
-const BASE_METAID_TEST_URL = `https://man.somecode.link`
+
+const BASE_METAID_URL_TESTNET = `https://man-test.metaid.io`
+const BASE_METAID_URL_REGEST = `https://man.somecode.link`
+const BASE_METAID_URL_LIVENET = ``
+
+const MAN_BASE_URL_MAPPING = {
+  testnet: BASE_METAID_URL_TESTNET,
+  regtest: BASE_METAID_URL_REGEST,
+  livenet: BASE_METAID_URL_LIVENET,
+}
 
 export async function fetchUtxos({
   address,
   network = 'regtest',
 }: {
   address: string
-  network: 'livenet' | 'testnet' | 'regtest'
+  network: BtcNetwork
 }): Promise<Utxo[]> {
   const url = `${BASE_METALET_TEST_URL}/address/btc-utxo?net=${network}&address=${address}
   `
@@ -78,8 +87,6 @@ export async function fetchUtxos({
   }
 }
 
-export type Network = 'livenet' | 'testnet' | 'regtest'
-
 export async function broadcast({
   rawTx,
   publicKey,
@@ -88,7 +95,7 @@ export async function broadcast({
 }: {
   rawTx: string
   publicKey: string
-  network: Network
+  network: BtcNetwork
   message: string
 }): Promise<{ data: any; code: number; message: string }> {
   const url = `${BASE_METALET_TEST_URL}/tx/broadcast`
@@ -120,9 +127,9 @@ export async function getPinDetailByPid({
   network = 'regtest',
 }: {
   pid: string
-  network?: 'livenet' | 'testnet' | 'regtest'
+  network: BtcNetwork
 }): Promise<Pin | null> {
-  const url = `${BASE_METAID_TEST_URL}/api/pin/${pid}`
+  const url = `${MAN_BASE_URL_MAPPING[network]}/api/pin/${pid}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)
@@ -138,9 +145,9 @@ export async function getRootPinByAddress({
   network = 'regtest',
 }: {
   address: string
-  network?: 'livenet' | 'testnet' | 'regtest'
+  network: BtcNetwork
 }): Promise<Pin | null> {
-  const url = `${BASE_METAID_TEST_URL}/api/address/pin/root/${address}`
+  const url = `${MAN_BASE_URL_MAPPING[network]}/api/address/pin/root/${address}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)
@@ -156,12 +163,14 @@ export async function getAllPinByPath({
   page,
   limit,
   path,
+  network,
 }: {
   page: number
   limit: number
   path: string
+  network: BtcNetwork
 }): Promise<{ total: number; currentPage: Pin[] } | null> {
-  const url = `${BASE_METAID_TEST_URL}/api/getAllPinByPath?page=${page}&limit=${limit}&path=${path}`
+  const url = `${MAN_BASE_URL_MAPPING[network]}/api/getAllPinByPath?page=${page}&limit=${limit}&path=${path}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)
@@ -174,11 +183,12 @@ export async function getAllPinByPath({
 
 export async function getPinListByAddress({
   address,
+  network,
 }: {
   address: string
-  network?: 'livenet' | 'testnet' | 'regtest'
+  network: BtcNetwork
 }): Promise<Pin[] | null> {
-  const url = `${BASE_METAID_TEST_URL}/api/address/pin/list/${address}`
+  const url = `${MAN_BASE_URL_MAPPING[network]}/api/address/pin/list/${address}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)
@@ -194,9 +204,9 @@ export async function getInfoByAddress({
   network = 'regtest',
 }: {
   address: string
-  network?: 'livenet' | 'testnet' | 'regtest'
+  network: BtcNetwork
 }): Promise<UserInfo | null> {
-  const url = `${BASE_METAID_TEST_URL}/api/info/address/${address}`
+  const url = `${MAN_BASE_URL_MAPPING[network]}/api/info/address/${address}`
 
   try {
     const data = await axios.get(url).then((res) => res.data)

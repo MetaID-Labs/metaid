@@ -6,10 +6,13 @@ import { broadcast as broadcastToApi, batchBroadcast as batchBroadcastApi } from
 import { DERIVE_MAX_DEPTH } from '@/data/constants.js'
 
 import { isNil } from 'ramda'
+import { BtcNetwork } from '@/service/btc.js'
+
 @staticImplements<WalletStatic>()
 export class MetaletWalletForBtc implements MetaIDWalletForBtc {
   public address: string
   public pub: string
+  public network: BtcNetwork
 
   private internal: Window['metaidwallet']
   private constructor() {}
@@ -21,6 +24,7 @@ export class MetaletWalletForBtc implements MetaIDWalletForBtc {
     }
 
     // get xpub from metalet
+
     const pub: string = await window.metaidwallet.btc.getPublicKey()
 
     const wallet = new MetaletWalletForBtc()
@@ -30,6 +34,7 @@ export class MetaletWalletForBtc implements MetaIDWalletForBtc {
       wallet.address = connectRes.address
       wallet.pub = pub
       wallet.internal = window.metaidwallet
+      wallet.network = (await window.metaidwallet.getNetwork()).network
     }
 
     return wallet

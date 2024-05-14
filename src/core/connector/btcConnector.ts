@@ -3,6 +3,7 @@ import { BtcEntity, InscribeOptions } from '../entity/btc'
 import { EntitySchema } from '@/metaid-entities/entity'
 import { MetaIDWalletForBtc } from '@/wallets/metalet/btcWallet'
 import { UserInfo } from '@/types'
+import { BtcNetwork } from '@/service/btc'
 
 export interface BtcConnectorStatic {
   create: (wallet?: MetaIDWalletForBtc) => Promise<IBtcConnector>
@@ -11,6 +12,7 @@ export interface BtcConnectorStatic {
 export type IBtcConnector = {
   metaid: string | undefined
   address: string
+  network: BtcNetwork
   user: UserInfo
   hasUser(): boolean
   getUser(currentAddress?: string): Promise<UserInfo>

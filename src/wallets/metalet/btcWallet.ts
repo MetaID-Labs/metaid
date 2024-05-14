@@ -1,3 +1,5 @@
+import { BtcNetwork } from '@/service/btc'
+
 export interface WalletStatic {
   create: ((mnemonic: string, derivePath?: string) => Promise<MetaIDWalletForBtc>) | (() => Promise<MetaIDWalletForBtc>)
   restore: ({ address, pub }: { address: string; pub: string }) => MetaIDWalletForBtc
@@ -6,7 +8,7 @@ export interface WalletStatic {
 export type MetaIDWalletForBtc = {
   address: string
   pub: string
-  // network: Network
+  network: BtcNetwork
   hasAddress(): boolean
 
   getAddress({ path }: { path?: string }): Promise<string>
