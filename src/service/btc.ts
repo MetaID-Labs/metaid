@@ -142,7 +142,7 @@ export async function getPinDetailByPid({
 }
 export async function getRootPinByAddress({
   address,
-  network = 'regtest',
+  network,
 }: {
   address: string
   network: BtcNetwork
@@ -171,7 +171,7 @@ export async function getAllPinByPath({
   network: BtcNetwork
 }): Promise<{ total: number; currentPage: Pin[] } | null> {
   const url = `${MAN_BASE_URL_MAPPING[network]}/api/getAllPinByPath?page=${page}&limit=${limit}&path=${path}`
-
+  console.log('all pin by path', url)
   try {
     const data = await axios.get(url).then((res) => res.data)
     return { total: data.data.total, currentPage: data.data.list }

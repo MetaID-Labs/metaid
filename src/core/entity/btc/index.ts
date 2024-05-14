@@ -10,7 +10,7 @@ import {
 import { Psbt } from '../../../utils/btc-inscribe/bitcoinjs-lib/psbt.js'
 
 import * as bitcoin from '../../../utils/btc-inscribe/bitcoinjs-lib/index.js'
-import { fetchUtxos, getAllPinByPath, getPinDetailByPid, getPinListByAddress, Pin } from '@/service/btc.js'
+import { BtcNetwork, fetchUtxos, getAllPinByPath, getPinDetailByPid, getPinListByAddress, Pin } from '@/service/btc.js'
 import { errors } from '@/data/errors.js'
 import type { BtcConnector, NBD } from '@/core/connector/btc.js'
 import { isNil } from 'ramda'
@@ -58,37 +58,37 @@ export class BtcEntity {
     return this.connector?.metaid
   }
 
-  public async one(pid: string): Promise<Pin> {
+  public async one({ pid, network }: { pid: string; network: BtcNetwork }): Promise<Pin> {
     // const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
     const path = this.schema.path
-    return await getPinDetailByPid({ pid, network: this.connector.network })
+    return await getPinDetailByPid({ pid, network: network ?? this.connector.network })
   }
-  public async list({ page, limit }: { page: number; limit: number }): Promise<Pin[]> {
+  public async list({ page, limit, network }: { page: number; limit: number; network?: BtcNetwork }): Promise<Pin[]> {
     // const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
     const path = this.schema.path
-    const pins = await getAllPinByPath({ path, page, limit, network: this.connector.network })
+    const pins = await getAllPinByPath({ path, page, limit, network: network ?? this.connector.network })
     return pins.currentPage.filter((d) => d.path.includes(this.schema.path))
   }
 
-  public async total(): Promise<number> {
+  public async total({ network }: { network?: BtcNetwork }): Promise<number> {
     const path = this.schema.path
-    const pins = await getAllPinByPath({ path, page: 1, limit: 2, network: this.connector.network })
+    const pins = await getAllPinByPath({ path, page: 1, limit: 2, network: network ?? this.connector.network })
     return pins.total
   }
 
-  //////////////////////////////////////// to be deleted method ///////////////////////////////////
-  public async getPins({ page, limit }: { page: number; limit: number }): Promise<Pin[]> {
-    // const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
-    const path = this.schema.path
-    const pins = await getAllPinByPath({ path, page, limit, network: this.connector.network })
-    return pins.currentPage.filter((d) => d.path.includes(this.schema.path))
-  }
+  // //////////////////////////////////////// to be deleted method ///////////////////////////////////
+  // public async getPins({ page, limit }: { page: number; limit: number }): Promise<Pin[]> {
+  //   // const pins = await getPinListByAddress({ address: 'tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme' })
+  //   const path = this.schema.path
+  //   const pins = await getAllPinByPath({ path, page, limit, network: this.connector.network })
+  //   return pins.currentPage.filter((d) => d.path.includes(this.schema.path))
+  // }
 
-  public async calcPins(): Promise<number> {
-    const path = this.schema.path
-    const pins = await getAllPinByPath({ path, page: 1, limit: 2, network: this.connector.network })
-    return pins.total
-  }
+  // public async calcPins(): Promise<number> {
+  //   const path = this.schema.path
+  //   const pins = await getAllPinByPath({ path, page: 1, limit: 2, network: this.connector.network })
+  //   return pins.total
+  // }
   ///////////////////////////////////////// to be deleted method ///////////////////////////////////
 
   @connected

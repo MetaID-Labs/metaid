@@ -5,20 +5,14 @@ import type { EntitySchema } from '@/metaid-entities/entity.js'
 import { loadBtc } from '@/factories/load.js'
 import { errors } from '@/data/errors.js'
 import type { MetaIDWalletForBtc } from '@/wallets/metalet/btcWallet.js'
-import {
-  broadcast,
-  fetchUtxos,
-  getInfoByAddress,
-  getRootPinByAddress,
-  type BtcNetwork,
-  getPinListByAddress,
-} from '@/service/btc'
+import { broadcast, fetchUtxos, getInfoByAddress, getRootPinByAddress, getPinListByAddress } from '@/service/btc'
 import * as bitcoin from '../../utils/btc-inscribe/bitcoinjs-lib'
 import { InscriptionRequest, Operation, PrevOutput } from '../../utils/btc-inscribe/inscribePsbt'
 import { InscribeOptions } from '../entity/btc'
 import { isNil, isEmpty } from 'ramda'
 import { BtcConnectorStatic, IBtcConnector } from './btcConnector'
 import { MetaidData, UserInfo } from '@/types'
+import { BtcNetwork } from '@/service/btc.js'
 
 export interface NBD {
   no: { commitTxId: string; revealTxIds: string[]; commitCost: string; revealCost: string; status?: string }
@@ -47,7 +41,7 @@ export class BtcConnector implements IBtcConnector {
     return this?.wallet?.network || 'regtest'
   }
 
-  public static async create(wallet?: MetaIDWalletForBtc) {
+  public static async create({ wallet, network }: { wallet?: MetaIDWalletForBtc; network: BtcNetwork }) {
     const connector = new BtcConnector(wallet)
 
     if (wallet) {
@@ -61,7 +55,7 @@ export class BtcConnector implements IBtcConnector {
       //   connector.user = user
       // }
 
-      const metaidInfo = await getInfoByAddress({ address: wallet.address, network: wallet.network })
+      const metaidInfo = await getInfoByAddress({ address: wallet.address, network: network ?? wallet.network })
       if (!isNil(metaidInfo)) {
         connector.metaid = metaidInfo.rootTxId + 'i0'
         connector.user = metaidInfo
@@ -76,11 +70,11 @@ export class BtcConnector implements IBtcConnector {
     return !!this.user
   }
 
-  async getUser(currentAddress?: string) {
+  async getUser({ network, currentAddress }: { network: BtcNetwork; currentAddress?: string }) {
     if (!isNil(currentAddress)) {
-      return await getInfoByAddress({ address: currentAddress, network: this.network })
+      return await getInfoByAddress({ address: currentAddress, network: network ?? this.network })
     } else {
-      return await getInfoByAddress({ address: this.address, network: this.network })
+      return await getInfoByAddress({ address: this.address, network: network ?? this.network })
     }
   }
 
@@ -135,7 +129,13 @@ export class BtcConnector implements IBtcConnector {
     return res
   }
 
-  async updateUserInfo(body?: { name?: string; bio?: string; avatar?: string; feeRate?: number }): Promise<boolean> {
+  async updateUserInfo(body?: {
+    network?: BtcNetwork
+    name?: string
+    bio?: string
+    avatar?: string
+    feeRate?: number
+  }): Promise<boolean> {
     let nameRevealId = ''
     let bioRevealId = ''
     let avatarRevealId = ''
@@ -207,6 +207,7 @@ export class BtcConnector implements IBtcConnector {
   }
 
   async createMetaid(body?: {
+    network?: BtcNetwork
     name?: string
     bio?: string
     avatar?: string

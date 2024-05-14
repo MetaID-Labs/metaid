@@ -6,11 +6,18 @@ import { BtcConnector as _BtcConnector } from '@/core/connector/btc.js'
 
 import type { MvcConnector } from '@/core/connector/mvc.js'
 import type { BtcConnector } from '@/core/connector/btc.js'
+import { BtcNetwork } from '@/service/btc'
 
 export async function mvcConnect(wallet?: MetaIDWalletForMvc): Promise<MvcConnector> {
   return await _MvcConnector.create(wallet)
 }
 
-export async function btcConnect(wallet?: MetaIDWalletForBtc): Promise<BtcConnector> {
-  return await _BtcConnector.create(wallet)
+export async function btcConnect({
+  wallet,
+  network,
+}: {
+  wallet?: MetaIDWalletForBtc
+  network: BtcNetwork
+}): Promise<BtcConnector> {
+  return await _BtcConnector.create({ wallet, network })
 }
