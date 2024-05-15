@@ -1,4 +1,6 @@
 import { Network } from './types'
+
+// add wallet btc get network
 declare global {
   interface Window {
     removeEventListener: any

@@ -53,30 +53,29 @@ export type Pin = {
 //   unconfirmed: string
 //   isInit: boolean
 // }
-export type BtcNetwork = 'livenet' | 'testnet' | 'regtest'
+export type BtcNetwork = 'mainnet' | 'testnet' | 'regtest'
 
 const BASE_METALET_TEST_URL = `https://www.metalet.space/wallet-api/v3`
 
 const BASE_METAID_URL_TESTNET = `https://man-test.metaid.io`
 const BASE_METAID_URL_REGEST = `https://man.somecode.link`
-const BASE_METAID_URL_LIVENET = ``
+const BASE_METAID_URL_MAINNET = ``
 
 const MAN_BASE_URL_MAPPING = {
   testnet: BASE_METAID_URL_TESTNET,
   regtest: BASE_METAID_URL_REGEST,
-  livenet: BASE_METAID_URL_LIVENET,
+  mainnet: BASE_METAID_URL_MAINNET,
 }
 
 export async function fetchUtxos({
   address,
-  network = 'regtest',
+  network = 'testnet',
 }: {
   address: string
   network: BtcNetwork
 }): Promise<Utxo[]> {
   const url = `${BASE_METALET_TEST_URL}/address/btc-utxo?net=${network}&address=${address}
   `
-
   try {
     const data = await axios.get(url).then((res) => res.data)
 
@@ -124,7 +123,7 @@ export async function broadcast({
 
 export async function getPinDetailByPid({
   pid,
-  network = 'regtest',
+  network = 'testnet',
 }: {
   pid: string
   network: BtcNetwork
@@ -201,7 +200,7 @@ export async function getPinListByAddress({
 
 export async function getInfoByAddress({
   address,
-  network = 'regtest',
+  network = 'testnet',
 }: {
   address: string
   network: BtcNetwork

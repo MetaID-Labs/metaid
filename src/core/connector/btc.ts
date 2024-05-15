@@ -183,13 +183,29 @@ export class BtcConnector implements IBtcConnector {
       let avatarRes
       if (this.user?.avatarId === '') {
         avatarRes = await this.inscribe(
-          [{ operation: 'create', body: body?.avatar, path: `/info/avatar`, encoding: 'base64' }],
+          [
+            {
+              operation: 'create',
+              body: body?.avatar,
+              path: `/info/avatar`,
+              encoding: 'base64',
+              contentType: 'image/jpeg',
+            },
+          ],
           'no',
           body?.feeRate ?? 1
         )
       } else {
         avatarRes = await this.inscribe(
-          [{ operation: 'modify', body: body?.avatar, path: `@${this?.user?.avatarId ?? ''}`, encoding: 'base64' }],
+          [
+            {
+              operation: 'modify',
+              body: body?.avatar,
+              path: `@${this?.user?.avatarId ?? ''}`,
+              encoding: 'base64',
+              contentType: 'image/jpeg',
+            },
+          ],
           'no',
           body?.feeRate ?? 1
         )
@@ -240,7 +256,15 @@ export class BtcConnector implements IBtcConnector {
       }
       if (!!body?.avatar) {
         const avatarRes = await this.inscribe(
-          [{ operation: 'create', body: body?.avatar, path: '/info/avatar', encoding: 'base64' }],
+          [
+            {
+              operation: 'create',
+              body: body?.avatar,
+              path: '/info/avatar',
+              encoding: 'base64',
+              contentType: 'image/jpeg',
+            },
+          ],
 
           'no',
           body?.feeRate ?? 1
