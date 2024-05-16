@@ -61,9 +61,9 @@ export class MvcConnector implements IMvcConnector {
 
   async getUser(currentAddress?: string) {
     if (!!currentAddress) {
-      return await getInfoByAddress({ address: currentAddress, network: 'regtest' })
+      return await getInfoByAddress({ address: currentAddress, network: 'testnet' })
     } else {
-      return await getInfoByAddress({ address: this.address, network: 'regtest' })
+      return await getInfoByAddress({ address: this.address, network: 'testnet' })
     }
   }
 

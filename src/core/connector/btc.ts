@@ -38,7 +38,7 @@ export class BtcConnector implements IBtcConnector {
   }
 
   get network() {
-    return this?.wallet?.network || 'regtest'
+    return this?.wallet?.network || 'testnet'
   }
 
   public static async create({ wallet, network }: { wallet?: MetaIDWalletForBtc; network: BtcNetwork }) {
