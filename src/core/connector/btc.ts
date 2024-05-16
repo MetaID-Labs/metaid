@@ -104,7 +104,7 @@ export class BtcConnector implements IBtcConnector {
     const metaidDataList: MetaidData[] = inscribeOptions.map((inp) => {
       const contentType = inp?.contentType ?? 'text/plain'
       const encoding = inp?.encoding ?? 'utf-8'
-      const finalContentType = `${contentType}${encoding}`
+      const finalContentType = `${contentType};${encoding}`
       return {
         operation: inp.operation,
         revealAddr: this.address,
