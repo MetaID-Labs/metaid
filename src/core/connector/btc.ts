@@ -100,16 +100,22 @@ export class BtcConnector implements IBtcConnector {
     //     pub,
     //   },
     // ]
-    const metaidDataList: MetaidData[] = inscribeOptions.map((inp) => ({
-      operation: inp.operation,
-      revealAddr: this.address,
-      body: inp?.body,
-      path: inp?.path,
-      contentType: inp?.contentType,
-      encryption: inp?.encryption,
-      version: '1.0.0', //this._schema.versions[0].version.toString(),
-      encoding: inp?.encoding,
-    }))
+
+    const metaidDataList: MetaidData[] = inscribeOptions.map((inp) => {
+      const contentType = inp?.contentType ?? 'text/plain'
+      const encoding = inp?.encoding ?? 'utf-8'
+      const finalContentType = `${contentType}${encoding}`
+      return {
+        operation: inp.operation,
+        revealAddr: this.address,
+        body: inp?.body,
+        path: inp?.path,
+        contentType: finalContentType,
+        encryption: inp?.encryption,
+        version: '1.0.0', //this._schema.versions[0].version.toString(),
+        encoding,
+      }
+    })
 
     const request: InscriptionRequest = {
       // commitTxPrevOutputList,
