@@ -37,6 +37,7 @@ export type Pin = {
   preview: string
   content: string
   pop: string
+  metaid: string
 }
 
 // export type UserInfo = {

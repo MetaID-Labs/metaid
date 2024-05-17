@@ -15,6 +15,7 @@ export type UserInfo = {
   soulbondToken: string
   unconfirmed: string
   isInit: boolean
+  metaid: string
 }
 
 export type Operation = 'init' | 'create' | 'modify' | 'revoke'
