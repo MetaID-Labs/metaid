@@ -1,4 +1,4 @@
-import { Network } from './types'
+import { Network, InscriptionRequest } from './types'
 
 // add wallet btc get network
 declare global {
@@ -28,8 +28,8 @@ declare global {
           confirmed: number
           unconfirmed: number
         }>
-        inscribe: ({ data, options }: { data: any; options?: { noBroadcast: boolean } }) => Promise<any>
-        process: ({ data, options }: { data: any; options?: { noBroadcast: boolean } }) => Promise<any>
+        inscribe: ({ data, options }: { data: InscriptionRequest; options?: { noBroadcast: boolean } }) => Promise<any>
+        process: ({ data, options }: { data: InscriptionRequest; options?: { noBroadcast: boolean } }) => Promise<any>
       }
     }
   }

@@ -3,7 +3,6 @@ import type { EntitySchema } from '@/metaid-entities/entity.js'
 import {
   inscribePsbt,
   type InscribePsbts,
-  type InscriptionRequest,
   type Operation,
   type PrevOutput,
 } from '../../../utils/btc-inscribe/inscribePsbt.js'

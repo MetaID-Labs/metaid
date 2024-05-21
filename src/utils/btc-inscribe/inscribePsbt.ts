@@ -11,7 +11,7 @@ import { type BIP32Interface } from 'bip32'
 import { transactionBytes } from './txEstimate'
 import type { PsbtInput, TapLeafScript } from './bitcoinjs-lib/bip174/interfaces'
 import { buildRevelFinalizer } from './btcUtils'
-import { MetaidData } from '@/types'
+import { InscriptionRequest, MetaidData } from '@/types'
 
 const schnorr = signUtil.schnorr.secp256k1.schnorr
 
@@ -26,14 +26,14 @@ export type PrevOutput = {
   pub: string
 }
 
-export type InscriptionRequest = {
-  // commitTxPrevOutputList: PrevOutput[]
-  feeRate: number
-  metaidDataList: MetaidData[]
-  revealOutValue: number
-  changeAddress: string
-  minChangeValue?: number
-}
+// export type InscriptionRequest = {
+//   // commitTxPrevOutputList: PrevOutput[]
+//   feeRate: number
+//   metaidDataList: MetaidData[]
+//   revealOutValue: number
+//   changeAddress: string
+//   minChangeValue?: number
+// }
 
 export type InscribePsbts = {
   commitPsbt: string

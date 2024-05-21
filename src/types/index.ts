@@ -33,4 +33,17 @@ export type MetaidData = {
   flag?: 'metaid' | 'testid'
 }
 
+export type InscriptionRequest = {
+  // commitTxPrevOutputList: PrevOutput[]
+  feeRate: number
+  metaidDataList: MetaidData[]
+  revealOutValue: number
+  changeAddress: string
+  minChangeValue?: number
+  service?: {
+    address: string
+    satoshis: string
+  }
+}
+
 export type CreateOptions = Omit<MetaidData, 'revealAddr' | 'operation' | 'path'>
