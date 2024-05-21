@@ -106,13 +106,12 @@ export class BtcConnector implements IBtcConnector {
     const metaidDataList: MetaidData[] = inscribeOptions.map((inp) => {
       const contentType = inp?.contentType ?? 'text/plain'
       const encoding = inp?.encoding ?? 'utf-8'
-      const finalContentType = `${contentType};${encoding}`
       return {
         operation: inp.operation,
         revealAddr: this.address,
         body: inp?.body,
         path: inp?.path,
-        contentType: finalContentType,
+        contentType: contentType,
         encryption: inp?.encryption,
         version: '1.0.0', //this._schema.versions[0].version.toString(),
         encoding,
@@ -197,7 +196,7 @@ export class BtcConnector implements IBtcConnector {
               body: body?.avatar,
               path: `/info/avatar`,
               encoding: 'base64',
-              contentType: 'image/jpeg',
+              contentType: 'image/jpeg;binary',
             },
           ],
           'no',
@@ -211,7 +210,7 @@ export class BtcConnector implements IBtcConnector {
               body: body?.avatar,
               path: `@${this?.user?.avatarId ?? ''}`,
               encoding: 'base64',
-              contentType: 'image/jpeg',
+              contentType: 'image/jpeg;binary',
             },
           ],
           'no',
@@ -230,58 +229,6 @@ export class BtcConnector implements IBtcConnector {
     }
   }
 
-  // async createMetaid(body?: {
-  //   network?: BtcNetwork
-  //   name?: string
-  //   bio?: string
-  //   avatar?: string
-  //   feeRate?: number
-  // }): Promise<{ metaid: string; cost: number }> {
-  //   const initRes = await this.inscribe([{ operation: 'init' }], 'no', body?.feeRate ?? 1)
-  //   let cost = 0
-  //   console.log(!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds))
-  //   if (!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds)) {
-  //     const metaid = initRes.revealTxIds[0]
-  //     this.metaid = metaid
-  //     cost += Number(initRes?.revealCost ?? 0) + Number(initRes?.commitCost ?? 0)
-  //     if (!!body?.name) {
-  //       const nameRes = await this.inscribe(
-  //         [{ operation: 'create', body: body?.name, path: '/info/name' }],
-
-  //         'no',
-  //         body?.feeRate ?? 1
-  //       )
-  //       cost += Number(nameRes?.revealCost ?? 0) + Number(nameRes?.commitCost ?? 0)
-  //     }
-  //     if (!!body?.bio) {
-  //       const bioRes = await this.inscribe(
-  //         [{ operation: 'create', body: body?.bio, path: '/info/bio' }],
-
-  //         'no',
-  //         body?.feeRate ?? 1
-  //       )
-  //       cost += Number(bioRes?.revealCost ?? 0) + Number(bioRes?.commitCost ?? 0)
-  //     }
-  //     if (!!body?.avatar) {
-  //       const avatarRes = await this.inscribe(
-  //         [
-  //           {
-  //             operation: 'create',
-  //             body: body?.avatar,
-  //             path: '/info/avatar',
-  //             encoding: 'base64',
-  //             contentType: 'image/jpeg',
-  //           },
-  //         ],
-
-  //         'no',
-  //         body?.feeRate ?? 1
-  //       )
-  //       cost += Number(avatarRes?.revealCost ?? 0) + Number(avatarRes?.commitCost ?? 0)
-  //     }
-  //   }
-  //   return { metaid: this.metaid, cost }
-  // }
   async createUserInfo(body: {
     network?: BtcNetwork
     name: string
@@ -316,7 +263,7 @@ export class BtcConnector implements IBtcConnector {
             body: body?.avatar,
             path: '/info/avatar',
             encoding: 'base64',
-            contentType: 'image/jpeg',
+            contentType: 'image/jpeg;binary',
           },
         ],
 

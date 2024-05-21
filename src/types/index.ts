@@ -30,6 +30,7 @@ export type MetaidData = {
   version?: string
   encoding?: BufferEncoding
   revealAddr: string
+  flag?: 'metaid' | 'testid'
 }
 
 export type CreateOptions = Omit<MetaidData, 'revealAddr' | 'operation' | 'path'>

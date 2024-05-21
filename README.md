@@ -33,7 +33,6 @@ const buzzEntitySchema: EntitySchema = {
     // schema versioning
     {
       version: 1,
-      id: 'b17e9e277bd7', // brfc id
       body: [
         // entity-specific data schema
         {
@@ -48,55 +47,53 @@ const buzzEntitySchema: EntitySchema = {
 export default buzzEntitySchema
 ```
 
-
-### Connect to wallet 
+### Connect to wallet
 
 ```ts
-import {  MetaletWallet, connect } from '@metaid/metaid'
+import { MetaletWallet, connect } from '@metaid/metaid'
 const metaletWallet = new MetaletWallet()
 // connect to wallet to have a baseconnector to use specific entities
 const baseConnector = connect(localWallet)
- ```
+```
 
- > Note: you can connect an empty object. At this point, you can only use entity to retrieve data from blockchain but cannot store d ata.
-  
+> Note: you can connect an empty object. At this point, you can only use entity to retrieve data from blockchain but cannot store d ata.
 
 ### Create MetaID
-Once you've built the baseConnector, the possibilities of what you can do become more extensive. First of all, we can utilize the baseconnector to 
+
+Once you've built the baseConnector, the possibilities of what you can do become more extensive. First of all, we can utilize the baseconnector to
 create a MetaID Account, the following code will use a connector which is connected to a Metalet wallet. Then it will check whether the Metalet account has build a MetaID account, if not , it will accept the userName parameter provided by the user to create a brand new MetaID account.
 
 ```ts
 const handleCreateMetaid = async (userName: string) => {
   if (!!baseConnector && !baseConnector.isMetaidValid()) {
     try {
-      await baseConnector.createMetaid({ name: userName });
+      await baseConnector.createMetaid({ name: userName })
     } catch (error) {
-      console.log("error", error);
+      console.log('error', error)
     }
   }
-};
+}
 ```
 
 ### Use entity to interact with blockchain
 
 ```ts
 // create a buzz handler with use method
-const	buzzHandler = await baseConnector.use("buzz");
+const buzzHandler = await baseConnector.use('buzz')
 // get buzz listh data
-const { items } = await buzzHandler.list(page);
- 
+const { items } = await buzzHandler.list(page)
 
 // create
-const body = { content: "Hello World", attachments: [] }
-const { txid } = await Buzz.create(body);
- 
+const body = { content: 'Hello World', attachments: [] }
+const { txid } = await Buzz.create(body)
 ```
 
 ## Some more complex use cases
 
-
 ### Create a buzz with attachments
+
 First, define a new file entity schema.
+
 ```ts
 const fileSchema = {
   name: 'file',
@@ -105,107 +102,158 @@ const fileSchema = {
   versions: [
     {
       version: '1.0.1',
-      id: 'fcac10a5ed83',
       body: '',
     },
   ],
 }
 ```
+
 then we can generate txid based on this schema. It is worth noting that you need to transform binary image data to hex format with Buffer.from method.
 
 ```ts
-let attachMetafileUri = [];
-const fileHandler = await baseConnector.use("file");
+let attachMetafileUri = []
+const fileHandler = await baseConnector.use('file')
 for (const a of attachments) {
-		const data = Buffer.from(a.data, "hex");
-		const { transactions: txs } = await fileHandler.create(data, {
-			dataType: a.fileType,
-			signMessage: "upload file",
-			serialAction: "combo",
-			transactions: fileTransactions,
-		});
-		attachMetafileUri.push(
-			"metafile://" + txs[txs.length - 1].txComposer.getTxId()
-		);
-		fileTransactions = txs;
+  const data = Buffer.from(a.data, 'hex')
+  const { transactions: txs } = await fileHandler.create(data, {
+    dataType: a.fileType,
+    signMessage: 'upload file',
+    serialAction: 'combo',
+    transactions: fileTransactions,
+  })
+  attachMetafileUri.push('metafile://' + txs[txs.length - 1].txComposer.getTxId())
+  fileTransactions = txs
 }
-body.attachments = attachMetafileUri;
+body.attachments = attachMetafileUri
 ```
+
 As you can see, The create method also accepts an optional parameter.
 When you need to send multiple entities data to the blockchain. Until the last create method, you need to set the value of the options.serialAction parameter to combo in the previous create method.The purpose of this action is to bundle multiple transactions, thus avoiding multiple pop-ups when signing the transaction with the Metalet wallet and achieving a better user experience.
+
 ```ts
 public async create(
     body: unknown, /* The data structure type of the 'body' parameter varies depending on the different 'entitySchema' definitions you've made.*/
     options?: {
       invisible: boolean //whether data is encrypted or not
-      signMessage: string // 
+      signMessage: string //
       dataType?: string  // for different on-chain data type
       encoding?: string
       serialAction?: 'combo' | 'finish'
       transactions?: Transaction[]
     }
   ) {
-		...
+  ...
 }
 ```
+
 Finally, we can create a buzz with three image attachments
+
 ```ts
 await Buzz.create(body, {
-				signMessage: "create buzz",
-				serialAction: "finish",
-				transactions: fileTransactions,
-			});
+  signMessage: 'create buzz',
+  serialAction: 'finish',
+  transactions: fileTransactions,
+})
 ```
 
- 
 ### Give a like to a buzz
 
 First we need a new Like entity, base on its metaprocol definition, we have the following like entity schema definition.
+
 ```ts
 const likeSchema = {
-	name: "like",
-	nodeName: "PayLike",
-	versions: [
-		{
-			version: 1,
-			id: "2ae43eeb26d9",
-			body: [
-				{
-					name: "likeTo",
-					type: "string",
-				},
-				{
-					name: "isLike",
-					type: "string",
-				},
-			],
-		},
-	],
-};
+  name: 'like',
+  nodeName: 'PayLike',
+  versions: [
+    {
+      version: 1,
+      body: [
+        {
+          name: 'likeTo',
+          type: 'string',
+        },
+        {
+          name: 'isLike',
+          type: 'string',
+        },
+      ],
+    },
+  ],
+}
 ```
+
 And then, based on a logged-in MetaID account, you can like any buzz by calling this likeHandler.create method.The corresponding code is quite simple.
+
 ```js
-const res = await likeHandler.create(
-  { likeTo: txid, isLike: "1" },
-  { signMessage: "like buzz" }
-);
+const res = await likeHandler.create({ likeTo: txid, isLike: '1' }, { signMessage: 'like buzz' })
 ```
- 
+
 ---
 
 ## API Reference
 
 ### Wallet
 
-Can have multiple wallet implementations as long as it implements the `Wallet` interface.
+Can have multiple wallet implementations as long as it implements the `Wallet` interface.<br>
+
+First, we need to build a wallet object based on the current logged-in wallet account.Then we can access the public properties of the wallet object and a series of methods provided by the wallet object (assuming the wallet is connected, otherwise return `{status: 'not-connected'}`)
+
+- Create a new wallet object
 
 ```ts
-import { LocalWallet, MetaletWallet } from '@metaid/metaid'
-
+import { MetaletWalletForBtc } from '@metaid/metaid'
 // use static method `create` to create a wallet instance
-LocalWallet.create(mnemonic: string): LocalWallet
-MetaletWallet.create(): Promise<MetaletWallet>
-````
+const _wallet = await MetaletWalletForBtc.create()
+```
+
+- get address(public property)
+
+```ts
+const address = _wallet.address
+```
+
+- get public key(public property)
+
+```ts
+const pubicKey = _wallet.pub
+```
+
+- get wallet balance(method)
+
+```ts
+await _wallet.getBalance()
+```
+
+> **params**: none<br> **return**: {total: number, confirmed: number, unconfirmed: number}
+
+- send sign message(method)
+
+```ts
+await _wallet.signMessage(message)
+```
+
+- Sign the input psbtHex(method)
+
+```ts
+await _wallet.signPsbt({
+  psbtHex,
+  options,
+}: {
+  psbtHex: string
+  options?: { toSignInputs?: ToSignInput[]; autoFinalized: boolean }
+})
+
+```
+
+- inscribe(method)
+
+```ts
+
+await _wallet.insrcibe({data, options} : \
+  { data: InscriptionRequest, options: {noBroadcast : boolean })
+```
+
+> This is the underlying engraving API method. It is not recommended to call it directly unless > > you have very customized engraving requirements. The connector layer has abstracted and > encapsulated this method, along with relevant parameter explanations.
 
 ### Connector
 
@@ -231,7 +279,7 @@ An entity is a controller class to operate on a specific resource.
 
 ```ts
 connector.use(entityName: string): Entity
-   
+
 entity.hasRoot(): boolean
 entity.createRoot(): Promise<string>
 
