@@ -13,6 +13,7 @@ import { isNil, isEmpty } from 'ramda'
 import { BtcConnectorStatic, IBtcConnector } from './btcConnector'
 import { MetaidData, UserInfo } from '@/types'
 import { BtcNetwork } from '@/service/btc.js'
+import { sha256 } from 'bitcoinjs-lib/src/crypto'
 
 export interface NBD {
   no: { commitTxId: string; revealTxIds: string[]; commitCost: string; revealCost: string; status?: string }
@@ -54,11 +55,12 @@ export class BtcConnector implements IBtcConnector {
       //   const user = await getInfoByAddress({ address: wallet.address })
       //   connector.user = user
       // }
+      connector.metaid = sha256(Buffer.from(wallet.address)).toString('hex')
 
       const metaidInfo = await getInfoByAddress({ address: wallet.address, network: network ?? wallet.network })
       if (!isNil(metaidInfo)) {
-        connector.metaid = metaidInfo.rootTxId + 'i0'
-        connector.user = metaidInfo
+        // connector.metaid = metaidInfo.rootTxId + 'i0'
+        connector.user = { ...metaidInfo, metaid: connector.metaid }
       }
     }
 
@@ -228,57 +230,103 @@ export class BtcConnector implements IBtcConnector {
     }
   }
 
-  async createMetaid(body?: {
+  // async createMetaid(body?: {
+  //   network?: BtcNetwork
+  //   name?: string
+  //   bio?: string
+  //   avatar?: string
+  //   feeRate?: number
+  // }): Promise<{ metaid: string; cost: number }> {
+  //   const initRes = await this.inscribe([{ operation: 'init' }], 'no', body?.feeRate ?? 1)
+  //   let cost = 0
+  //   console.log(!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds))
+  //   if (!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds)) {
+  //     const metaid = initRes.revealTxIds[0]
+  //     this.metaid = metaid
+  //     cost += Number(initRes?.revealCost ?? 0) + Number(initRes?.commitCost ?? 0)
+  //     if (!!body?.name) {
+  //       const nameRes = await this.inscribe(
+  //         [{ operation: 'create', body: body?.name, path: '/info/name' }],
+
+  //         'no',
+  //         body?.feeRate ?? 1
+  //       )
+  //       cost += Number(nameRes?.revealCost ?? 0) + Number(nameRes?.commitCost ?? 0)
+  //     }
+  //     if (!!body?.bio) {
+  //       const bioRes = await this.inscribe(
+  //         [{ operation: 'create', body: body?.bio, path: '/info/bio' }],
+
+  //         'no',
+  //         body?.feeRate ?? 1
+  //       )
+  //       cost += Number(bioRes?.revealCost ?? 0) + Number(bioRes?.commitCost ?? 0)
+  //     }
+  //     if (!!body?.avatar) {
+  //       const avatarRes = await this.inscribe(
+  //         [
+  //           {
+  //             operation: 'create',
+  //             body: body?.avatar,
+  //             path: '/info/avatar',
+  //             encoding: 'base64',
+  //             contentType: 'image/jpeg',
+  //           },
+  //         ],
+
+  //         'no',
+  //         body?.feeRate ?? 1
+  //       )
+  //       cost += Number(avatarRes?.revealCost ?? 0) + Number(avatarRes?.commitCost ?? 0)
+  //     }
+  //   }
+  //   return { metaid: this.metaid, cost }
+  // }
+  async createUserInfo(body: {
     network?: BtcNetwork
-    name?: string
+    name: string
     bio?: string
     avatar?: string
     feeRate?: number
-  }): Promise<{ metaid: string; cost: number }> {
-    const initRes = await this.inscribe([{ operation: 'init' }], 'no', body?.feeRate ?? 1)
+  }): Promise<boolean> {
     let cost = 0
-    console.log(!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds))
-    if (!isNil(initRes?.revealTxIds) && !isEmpty(initRes?.revealTxIds)) {
-      const metaid = initRes.revealTxIds[0]
-      this.metaid = metaid
-      cost += Number(initRes?.revealCost ?? 0) + Number(initRes?.commitCost ?? 0)
-      if (!!body?.name) {
-        const nameRes = await this.inscribe(
-          [{ operation: 'create', body: body?.name, path: '/info/name' }],
 
-          'no',
-          body?.feeRate ?? 1
-        )
-        cost += Number(nameRes?.revealCost ?? 0) + Number(nameRes?.commitCost ?? 0)
-      }
-      if (!!body?.bio) {
-        const bioRes = await this.inscribe(
-          [{ operation: 'create', body: body?.bio, path: '/info/bio' }],
+    const nameRes = await this.inscribe(
+      [{ operation: 'create', body: body?.name, path: '/info/name' }],
 
-          'no',
-          body?.feeRate ?? 1
-        )
-        cost += Number(bioRes?.revealCost ?? 0) + Number(bioRes?.commitCost ?? 0)
-      }
-      if (!!body?.avatar) {
-        const avatarRes = await this.inscribe(
-          [
-            {
-              operation: 'create',
-              body: body?.avatar,
-              path: '/info/avatar',
-              encoding: 'base64',
-              contentType: 'image/jpeg',
-            },
-          ],
+      'no',
+      body?.feeRate ?? 1
+    )
+    cost += Number(nameRes?.revealCost ?? 0) + Number(nameRes?.commitCost ?? 0)
 
-          'no',
-          body?.feeRate ?? 1
-        )
-        cost += Number(avatarRes?.revealCost ?? 0) + Number(avatarRes?.commitCost ?? 0)
-      }
+    if (!!body?.bio) {
+      const bioRes = await this.inscribe(
+        [{ operation: 'create', body: body?.bio, path: '/info/bio' }],
+
+        'no',
+        body?.feeRate ?? 1
+      )
+      cost += Number(bioRes?.revealCost ?? 0) + Number(bioRes?.commitCost ?? 0)
     }
-    return { metaid: this.metaid, cost }
+    if (!!body?.avatar) {
+      const avatarRes = await this.inscribe(
+        [
+          {
+            operation: 'create',
+            body: body?.avatar,
+            path: '/info/avatar',
+            encoding: 'base64',
+            contentType: 'image/jpeg',
+          },
+        ],
+
+        'no',
+        body?.feeRate ?? 1
+      )
+      cost += Number(avatarRes?.revealCost ?? 0) + Number(avatarRes?.commitCost ?? 0)
+    }
+
+    return !isNil(nameRes?.revealTxIds) && !isEmpty(nameRes?.revealTxIds)
   }
 
   // metaid

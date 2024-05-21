@@ -129,7 +129,8 @@
             btcAddress.value = await _wallet.getAddress({})
             console.log(`Your btc address is ${btcAddress.value}`)
 
-            const btcConnector = await btcConnect(_wallet)
+            const btcConnector = await btcConnect({ wallet: _wallet, network: 'testnet' })
+            console.log('your metaid', btcConnector.metaid)
             // if (!btcConnector.hasMetaid) {
             //   const metaid = await btcConnector.createMetaid()
             // }
@@ -141,14 +142,14 @@
 
             // const buzzEntity = await btcConnector.use('buzz')
             // Buzz.value = buzzEntity
-            const avatarBody =
-              'iVBORw0KGgoAAAANSUhEUgAAAEMAAABKCAYAAADgxem7AAAAAXNSR0IArs4c6QAABjBJREFUeF7tnFtsFFUYx39nZra7Ld3tYqFQqoZGjRRifNAYn0jkoiCIQFsxERSECGJiolHjGxhQY0w0Eh9QjB'
-            const avatarRes = await btcConnector.inscribe(
-              [{ operation: 'modify', body: avatarBody, path: '/info/avatar', encoding: 'base64' }],
+            // const avatarBody =
+            //   'iVBORw0KGgoAAAANSUhEUgAAAEMAAABKCAYAAADgxem7AAAAAXNSR0IArs4c6QAABjBJREFUeF7tnFtsFFUYx39nZra7Ld3tYqFQqoZGjRRifNAYn0jkoiCIQFsxERSECGJiolHjGxhQY0w0Eh9QjB'
+            // const avatarRes = await btcConnector.inscribe(
+            //   [{ operation: 'modify', body: avatarBody, path: '/info/avatar', encoding: 'base64' }],
 
-              'no'
-            )
-            console.log('avatar res', avatarRes)
+            //   'no'
+            // )
+            // console.log('avatar res', avatarRes)
           }
 
           const connectMetaletWithMvc = async () => {

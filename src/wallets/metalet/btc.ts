@@ -14,7 +14,7 @@ export class MetaletWalletForBtc implements MetaIDWalletForBtc {
   public pub: string
   public network: BtcNetwork
 
-  private internal: Window['metaidwallet']
+  public internal: Window['metaidwallet']
   private constructor() {}
 
   static async create(): Promise<MetaIDWalletForBtc> {
@@ -40,14 +40,22 @@ export class MetaletWalletForBtc implements MetaIDWalletForBtc {
     return wallet
   }
 
-  static restore({ address, pub }: { address: string; pub: string }): MetaIDWalletForBtc {
+  static restore({
+    address,
+    pub,
+    internal,
+  }: {
+    address: string
+    pub: string
+    internal?: Window['metaidwallet']
+  }): MetaIDWalletForBtc {
     if (typeof window === 'undefined') {
       throw new Error(errors.NOT_IN_BROWSER)
     }
     const wallet = new MetaletWalletForBtc()
     wallet.address = address
     wallet.pub = pub
-    wallet.internal = window.metaidwallet
+    wallet.internal = internal ?? window.metaidwallet
     return wallet
   }
 
