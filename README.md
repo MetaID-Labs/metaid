@@ -12,7 +12,7 @@ Connectors are used for the authentication and management of identity informatio
 
 ## Installation
 
-Currently, we only recommend installing the SDK using yarn
+Currently, we only recommend installing the SDK using yarn.
 
 `yarn add @metaid/metaid`
 
