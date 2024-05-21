@@ -66,7 +66,7 @@ type CreateRes: {
 
 ### Example A - Create a buzz with attachments
 
-#### Step 1 - define a new file entity schema.
+#### Step 1 - define a new file entity schema
 
 ```ts
 const fileSchema = {
@@ -82,7 +82,7 @@ const fileSchema = {
 }
 ```
 
-#### Step 2 - We can generate PINID based on this schema. It is worth noting that you need to transform binary image data to hex format with Buffer.from method.
+#### Step 2 - We can generate PINID based on this schema. It is worth noting that you need to transform binary image data to hex format with Buffer.from method
 
 ```ts
 type CreateOptions = {
@@ -131,7 +131,7 @@ const createRes = await buzzEntity.create({
 
 ### Example B -Give a like to a buzz
 
-#### Step 1 - We need a new Like entity, base on its metaprocol definition, we have the following like entity schema definition.
+#### Step 1 - We need a new Like entity, base on its metaprocol definition, we have the following like entity schema definition
 
 ```ts
 const likeSchema = {
@@ -155,7 +155,7 @@ const likeSchema = {
 }
 ```
 
-#### Step2 - Based on a logged-in MetaID account, you can like any buzz by calling this likeHandler.create method.The corresponding code is quite simple.
+#### Step2 - Based on a logged-in MetaID account, you can like any buzz by calling this likeHandler.create method.The corresponding code is quite simple
 
 ```js
 const likeEntity = await btcConnector.use('like')
@@ -341,7 +341,7 @@ await _btcConnector.inscribe(inscribeOptions: InscribeOptions[], noBroadcast: 'y
 
 > The return type of this method is the same as the return type of the wallet's inscribe method.
 
-### Create MetaID, the parameter avatar is a native File type in JavaScript, which is processed in chunks as a Buffer and then converted to a base64 string
+### Create userinfo, the parameter avatar is a native File type in JavaScript, which is processed in chunks as a Buffer and then converted to a base64 string
 
 ```typescript
 const isSuccess:boolean = await _btcConnector.createUserInfo(body:
